@@ -1,0 +1,12 @@
+* @geraldmaron
+
+/.github/ @geraldmaron
+/.github/workflows/ @geraldmaron
+/ops/ @geraldmaron
+/vercel.json @geraldmaron
+
+package.json @geraldmaron
+package-lock.json @geraldmaron
+tsconfig.json @geraldmaron
+next.config.* @geraldmaron
+tailwind.config.* @geraldmaron

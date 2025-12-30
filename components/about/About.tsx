@@ -267,11 +267,11 @@ const CLUSTER_META: Record<
 };
 
 const DOMAIN_CLUSTERS: Record<string, { label: string; color: keyof typeof ACCENT_COLORS | 'neutral' }> = {
-  all: { label: 'All', color: 'neutral' },
   reliability: { label: 'Reliability & Ops', color: 'blue' },
   platform: { label: 'Platform & Delivery', color: 'green' },
   leadership: { label: 'Product & Leadership', color: 'purple' },
-  compliance: { label: 'Risk & Compliance', color: 'amber' }
+  compliance: { label: 'Risk & Compliance', color: 'amber' },
+  all: { label: 'All', color: 'neutral' }
 };
 
 const ACCENT_COLORS = {
@@ -1234,7 +1234,7 @@ const AboutSection: React.FC = () => {
                                 <span className="text-sm font-semibold text-gray-900 dark:text-white">Spoken Word Poetry</span>
                               </div>
                               <p className="text-sm text-gray-600 dark:text-gray-400">
-                                Writing and performing since high school—a craft that influences everything I create
+                                Writing and performing since high school. A craft that influences everything I create
                               </p>
                             </div>
                             <div className={cn(
@@ -1247,7 +1247,7 @@ const AboutSection: React.FC = () => {
                                 <span className="text-sm font-semibold text-gray-900 dark:text-white">NYC Sports</span>
                               </div>
                               <p className="text-sm text-gray-600 dark:text-gray-400">
-                                Knicks, Yankees, and Giants—die-hard fan representing NYC wherever I go
+                                Knicks, Yankees, and Giants. Die-hard fan representing NYC wherever I go
                               </p>
                             </div>
                             <div className={cn(
@@ -1268,6 +1268,32 @@ const AboutSection: React.FC = () => {
                               </div>
                               <p className="text-sm text-gray-600 dark:text-gray-400">
                                 Using my platform to amplify voices and create opportunities for underrepresented communities
+                              </p>
+                            </div>
+                            <div className={cn(
+                              'rounded-xl p-4 border',
+                              'bg-white/60 dark:bg-gray-800/60',
+                              'border-gray-200/50 dark:border-gray-700/50'
+                            )}>
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="text-2xl">🧠</span>
+                                <span className="text-sm font-semibold text-gray-900 dark:text-white">Mental Health & Neurodiversity</span>
+                              </div>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                Living as AuDHD and raising two boys, one on the spectrum. Building understanding, breaking stigmas, and learning daily lessons about attention, presence, and what it means to truly see and be seen
+                              </p>
+                            </div>
+                            <div className={cn(
+                              'rounded-xl p-4 border',
+                              'bg-white/60 dark:bg-gray-800/60',
+                              'border-gray-200/50 dark:border-gray-700/50'
+                            )}>
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="text-2xl">🌍</span>
+                                <span className="text-sm font-semibold text-gray-900 dark:text-white">Culture & Community</span>
+                              </div>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                Understanding how culture shapes belonging, exclusion, and collective identity. From organizational systems to social movements, culture drives what communities become
                               </p>
                             </div>
                           </div>

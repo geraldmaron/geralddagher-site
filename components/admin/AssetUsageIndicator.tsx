@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Link2, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { AssetUsageModal } from './AssetUsageModal';
 
 interface AssetUsage {
   type: 'cover_image' | 'content' | 'avatar' | 'category_image' | 'tag_image' | 'milestone_image' | 'work_image';
@@ -30,6 +31,7 @@ export function AssetUsageIndicator({ assetKey, compact = false }: AssetUsageInd
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (compact) {
@@ -70,17 +72,41 @@ export function AssetUsageIndicator({ assetKey, compact = false }: AssetUsageInd
 
     if (usage && usage.isUsed) {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-md">
-          <Link2 className="h-3 w-3" />
-          {usage.usageCount}
-        </span>
+        <>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-md hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors cursor-pointer"
+            title={`Used in ${usage.usageCount} location${usage.usageCount !== 1 ? 's' : ''} - Click to view details`}
+          >
+            <Link2 className="h-3 w-3" />
+            {usage.usageCount}
+          </button>
+          <AssetUsageModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            assetKey={assetKey}
+            usage={usage}
+          />
+        </>
       );
     }
 
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-muted text-muted-foreground rounded-md">
-        Unused
-      </span>
+      <>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-muted text-muted-foreground rounded-md hover:bg-muted/80 transition-colors cursor-pointer"
+          title="This asset is unused - Click for details"
+        >
+          Unused
+        </button>
+        <AssetUsageModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          assetKey={assetKey}
+          usage={usage}
+        />
+      </>
     );
   }
 

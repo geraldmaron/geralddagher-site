@@ -8,11 +8,22 @@ on:
     paths:
       - 'ops/compose/**'
 
+concurrency:
+  group: deploy-cms
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://${{ secrets.CMS_DOMAIN }}
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Copy files via SSH
         uses: appleboy/scp-action@master
@@ -24,6 +35,19 @@ jobs:
           target: "/opt/cms-v2"
           strip_components: 1
 
+      - name: Create backup
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DROPLET_IP }}
+          username: deploy
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/cms-v2/compose
+            if [ -f .env ]; then
+              cp .env .env.backup.$(date +%Y%m%d_%H%M%S)
+              find . -name ".env.backup.*" -mtime +7 -delete
+            fi
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@master
         with:
@@ -32,28 +56,59 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /opt/cms-v2/compose
-            
-            # Create .env from secrets (be careful with logs)
-            cat <<EOF > .env
+
+            cat > .env << 'ENVFILE'
             COMPOSE_PROJECT_NAME=directus-cms
             CMS_DOMAIN=${{ secrets.CMS_DOMAIN }}
-            
             DB_USER=${{ secrets.DB_USER }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             DB_DATABASE=directus
-            
             KEY=${{ secrets.DIRECTUS_KEY }}
             SECRET=${{ secrets.DIRECTUS_SECRET }}
             ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
             ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
-            
             R2_ACCESS_KEY=${{ secrets.R2_ACCESS_KEY }}
             R2_SECRET_KEY=${{ secrets.R2_SECRET_KEY }}
             R2_BUCKET=${{ secrets.R2_BUCKET }}
             R2_ENDPOINT=${{ secrets.R2_ENDPOINT }}
-            
             CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}
-            EOF
-            
+            ENVFILE
+
+            chmod 600 .env
+
             docker compose pull
             docker compose up -d --remove-orphans
+
+            sleep 10
+
+            if ! docker compose ps | grep -q "Up"; then
+              echo "Deployment failed - containers not running"
+              if [ -f .env.backup.* ]; then
+                latest_backup=$(ls -t .env.backup.* | head -1)
+                cp "$latest_backup" .env
+                docker compose up -d --remove-orphans
+              fi
+              exit 1
+            fi
+
+      - name: Health check
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DROPLET_IP }}
+          username: deploy
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            max_attempts=30
+            attempt=0
+
+            while [ $attempt -lt $max_attempts ]; do
+              if curl -f -s -o /dev/null https://${{ secrets.CMS_DOMAIN }}/server/health; then
+                echo "Health check passed"
+                exit 0
+              fi
+              attempt=$((attempt + 1))
+              sleep 2
+            done
+
+            echo "Health check failed after $max_attempts attempts"
+            exit 1

@@ -153,7 +153,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Initialize auth on mount
   useEffect(() => {
     if (isInitialized.current) return;
-    
+
     isInitialized.current = true;
     const hydrateAndRefresh = async () => {
       if (typeof window !== 'undefined') {
@@ -162,18 +162,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           try {
             const parsedUser = JSON.parse(cachedUser) as User;
             setUser(parsedUser);
+            await refreshUser();
           } catch {
             window.sessionStorage.removeItem('auth:user');
+            setLoading(false);
           }
+        } else {
+          setLoading(false);
         }
+      } else {
+        setLoading(false);
       }
-      await refreshUser();
     };
     hydrateAndRefresh();
   }, [refreshUser]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (!window.location.pathname.startsWith('/admin')) return;
 
     const handleVisibility = () => {
       if (!document.hidden) {

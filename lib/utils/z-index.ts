@@ -1,0 +1,27 @@
+export const zIndex = {
+  base: 0,
+  content: 1,
+  navbar: 40,
+  adminSidebar: 40,
+  adminToggle: 45,
+  adminMobileMenu: 45,
+  backdrop: 50,
+  modal: 60,
+  commandPalette: 70,
+  editorSidebar: 100,
+  editorMenu: 1000,
+  inlineToolbar: 1010,
+  slashMenu: 1020,
+  plusMenu: 1030,
+  emojiPicker: 1040,
+  dropdown: 200,
+  filterDropdown: 210,
+  popover: 300,
+  tooltip: 400,
+  notification: 500,
+  toast: 600,
+  sentimentPopup: 10000,
+  emergency: 9999,
+} as const;
+export type ZIndex = typeof zIndex;
+export type ZIndexKey = keyof ZIndex;

@@ -1,0 +1,52 @@
+#cloud-config
+# Simplified cloud-init - minimal setup to get Directus running
+# Hardening can be added later once verified working
+
+packages:
+  - docker.io
+  - docker-compose-plugin
+
+write_files:
+  - path: /opt/cms/compose/docker-compose.yml
+    content: |
+      ${indent(6, docker_compose_content)}
+    permissions: '0644'
+
+  - path: /opt/cms/compose/Caddyfile
+    content: |
+      ${indent(6, caddyfile_content)}
+    permissions: '0644'
+
+  - path: /opt/cms/compose/.env
+    content: |
+      ${indent(6, env_content)}
+    permissions: '0600'
+
+# Create deploy user with proper permissions
+users:
+  - name: deploy
+    groups: sudo, docker
+    shell: /bin/bash
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    ssh_authorized_keys:
+      - ${ssh_public_key}
+
+runcmd:
+  # Enable Swap (4GB for 1GB droplet)
+  - fallocate -l 4G /swapfile
+  - chmod 600 /swapfile
+  - mkswap /swapfile
+  - swapon /swapfile
+  - echo '/swapfile none swap sw 0 0' >> /etc/fstab
+  - sysctl vm.swappiness=10
+  - echo 'vm.swappiness=10' >> /etc/sysctl.conf
+
+  # Setup App Directory
+  - mkdir -p /opt/cms/{data,backups,compose/uploads,compose/extensions}
+  - chown -R deploy:deploy /opt/cms
+
+  # Start the Docker stack
+  - cd /opt/cms/compose
+  - docker compose up -d
+
+final_message: "Directus CMS deployment complete after $UPTIME seconds"

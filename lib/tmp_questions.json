@@ -1,0 +1,106 @@
+{
+  "categories": [
+    {
+      "title": "Background & Experience",
+      "questions": [
+        {
+          "question": "Tell me about your professional journey and how you got to where you are today.",
+          "description": "This helps establish context and gives viewers insight into your background, career progression, and the experiences that shaped your perspective."
+        },
+        {
+          "question": "What's something you wish you had known when you were starting out in your field?",
+          "description": "This question often reveals valuable lessons learned and can provide actionable advice for others in similar situations."
+        },
+        {
+          "question": "How has your industry changed since you first entered it?",
+          "description": "This gives perspective on industry evolution and shows how you've adapted to changes over time."
+        }
+      ]
+    },
+    {
+      "title": "Challenges & Lessons",
+      "questions": [
+        {
+          "question": "What's the biggest challenge you've faced in your career, and how did you overcome it?",
+          "description": "Challenges often make for the most compelling stories and provide valuable insights into problem-solving approaches."
+        },
+        {
+          "question": "Tell me about a time when you failed. What did you learn from it?",
+          "description": "Failure stories are often the most relatable and educational, showing vulnerability and growth."
+        },
+        {
+          "question": "What's something you've changed your mind about over the years?",
+          "description": "This reveals intellectual growth and the ability to adapt one's thinking based on new information or experience."
+        }
+      ]
+    },
+    {
+      "title": "Leadership & Team Building",
+      "questions": [
+        {
+          "question": "How do you approach building and leading teams?",
+          "description": "Leadership philosophy and practical approaches to team management are valuable for viewers in similar roles."
+        },
+        {
+          "question": "What's your approach to mentoring others?",
+          "description": "Mentorship strategies and philosophies can provide actionable advice for those looking to develop others."
+        },
+        {
+          "question": "How do you handle difficult conversations or conflicts?",
+          "description": "Conflict resolution skills are universally valuable and often learned through experience."
+        }
+      ]
+    },
+    {
+      "title": "Industry Insights & Future",
+      "questions": [
+        {
+          "question": "What trends do you see shaping your industry in the next 5-10 years?",
+          "description": "Forward-looking insights help viewers understand industry direction and prepare for future changes."
+        },
+        {
+          "question": "What advice would you give to someone just starting in your field?",
+          "description": "This provides actionable guidance for newcomers and often reveals what the speaker values most."
+        },
+        {
+          "question": "What's something about your industry that most people don't understand?",
+          "description": "This can reveal insider knowledge and help demystify complex industries or roles."
+        }
+      ]
+    },
+    {
+      "title": "Personal Philosophy & Values",
+      "questions": [
+        {
+          "question": "What values guide your decision-making?",
+          "description": "Understanding someone's core values provides insight into their character and decision-making process."
+        },
+        {
+          "question": "How do you maintain work-life balance, and has your approach changed over time?",
+          "description": "This is a common concern for many professionals and can provide practical strategies."
+        },
+        {
+          "question": "What's something you're passionate about outside of work?",
+          "description": "Personal interests often reveal different aspects of someone's personality and can make them more relatable."
+        }
+      ]
+    },
+    {
+      "title": "Innovation & Problem Solving",
+      "questions": [
+        {
+          "question": "Tell me about a time when you had to think creatively to solve a problem.",
+          "description": "Creative problem-solving examples often provide unique insights and demonstrate innovative thinking."
+        },
+        {
+          "question": "What's a project or initiative you're particularly proud of?",
+          "description": "This allows the speaker to highlight their achievements and the impact they've made."
+        },
+        {
+          "question": "How do you stay current with new technologies or methodologies in your field?",
+          "description": "Continuous learning strategies are valuable for professionals looking to stay relevant and competitive."
+        }
+      ]
+    }
+  ]
+}

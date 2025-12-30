@@ -1,0 +1,119 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Run ESLint
+        run: npm run lint
+
+  typecheck:
+    name: Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Run TypeScript type check
+        run: npm run typecheck
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Run tests
+        run: npm run test:ci
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          files: ./coverage/coverage-final.json
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Test build without env vars (simulate Vercel initial phase)
+        run: |
+          echo "Testing that no runtime env vars are required during build analysis..."
+          unset DIRECTUS_URL
+          unset NEXT_PUBLIC_DIRECTUS_URL
+          unset R2_ENDPOINT
+          unset R2_ACCESS_KEY
+          unset R2_SECRET_KEY
+          # This should NOT fail - catches top-level initializations
+          npm run build || {
+            echo "❌ Build failed without env vars - likely top-level initialization issue"
+            echo "Check for module-level client instantiations that run at import time"
+            exit 1
+          }
+        env:
+          # Allow build to proceed with missing vars if code is properly lazy-loaded
+          SKIP_ENV_VALIDATION: false
+
+      - name: Build application with env vars
+        run: npm run build
+        env:
+          SKIP_ENV_VALIDATION: true
+          DIRECTUS_URL: https://placeholder.example.com
+          R2_ENDPOINT: https://placeholder.r2.cloudflarestorage.com
+          R2_ACCESS_KEY: placeholder
+          R2_SECRET_KEY: placeholder
+          R2_BUCKET: placeholder

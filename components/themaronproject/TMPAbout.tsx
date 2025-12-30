@@ -136,7 +136,7 @@ const TMPAbout = () => {
               <span className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blue-700 dark:border-blue-400/30 dark:bg-blue-400/10 dark:text-blue-200 w-fit">
                 A safe place to speak plainly
               </span>
-              <p className="text-lg leading-relaxed text-slate-700 dark:text-slate-200">
+              <p className="text-base leading-relaxed text-slate-700 dark:text-slate-200">
                 We hold the mic with you—not for you—so your lived experience lands with honesty, nuance, and respect.
               </p>
               <div className="flex flex-wrap gap-3">

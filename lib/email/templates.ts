@@ -1280,6 +1280,207 @@ This is an automated notification from your website contact form.
   return { subject, html, text };
 }
 
+interface BugReportEmailParams {
+  name?: string;
+  email?: string;
+  pageUrl: string;
+  description: string;
+  browserInfo: string;
+  timestamp: string;
+}
+
+export function generateBugReportEmailTemplate(params: BugReportEmailParams): { subject: string; html: string; text: string } {
+  const { name, email, pageUrl, description, browserInfo, timestamp } = params;
+
+  const subject = 'Bug Report from Website';
+
+  const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bug Report</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            margin: 0;
+            padding: 0;
+            background-color: #f8fafc;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+        .header {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            padding: 40px 30px;
+            text-align: center;
+            color: white;
+        }
+        .logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+        .header .subtitle {
+            margin: 8px 0 0 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .section {
+            margin-bottom: 32px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0 0 16px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .info-item {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        .info-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+        .info-value {
+            font-size: 14px;
+            color: #1e293b;
+            font-weight: 500;
+            word-break: break-word;
+        }
+        .description-section {
+            background: #fef2f2;
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid #fecaca;
+        }
+        .description-text {
+            color: #374151;
+            font-size: 16px;
+            line-height: 1.7;
+            margin: 0;
+            white-space: pre-wrap;
+        }
+        .footer {
+            background-color: #f8fafc;
+            padding: 40px 30px;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+        }
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+            margin: 32px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <img src="https://geralddagher.com/Dagher_Logo_2024_WH.png" alt="Gerald Dagher" class="logo">
+            <h1>Bug Report</h1>
+            <div class="subtitle">Website Issue Report</div>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2 class="section-title">Reporter Information</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Name</div>
+                        <div class="info-value">${name || 'Anonymous'}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Email</div>
+                        <div class="info-value">${email || 'Not provided'}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Page URL</div>
+                        <div class="info-value">${pageUrl}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Timestamp</div>
+                        <div class="info-value">${timestamp}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Bug Description</h2>
+                <div class="description-section">
+                    <p class="description-text">${description}</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Technical Details</h2>
+                <div class="info-item">
+                    <div class="info-label">Browser & Device Info</div>
+                    <div class="info-value">${browserInfo}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="divider"></div>
+            <p style="color: #64748b; font-size: 13px; margin: 0;">
+                This is an automated bug report from geralddagher.com
+            </p>
+        </div>
+    </div>
+</body>
+</html>`;
+
+  const text = `
+Bug Report from Website
+
+Reporter Information:
+Name: ${name || 'Anonymous'}
+Email: ${email || 'Not provided'}
+Page URL: ${pageUrl}
+Timestamp: ${timestamp}
+
+Bug Description:
+${description}
+
+Technical Details:
+Browser & Device Info: ${browserInfo}
+
+This is an automated bug report from geralddagher.com
+`;
+
+  return { subject, html, text };
+}
+
 export function generateCampaignEmailTemplate(params: { subject: string; htmlContent: string; senderName: string }): { subject: string; html: string; text: string } {
   const { subject, htmlContent, senderName } = params;
   const html = `

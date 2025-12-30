@@ -14,7 +14,6 @@ export async function GET() {
 
     const client = await createDirectusServerClient();
 
-    // Fetch Directus data
     const [postsCount, usersCount, categoriesCount, tagsCount, directusHealth] = await Promise.all([
       client.request(aggregate('posts', { aggregate: { count: '*' } })).then(r => r[0]?.count || 0).catch(() => 0),
       client.request(aggregate('directus_users', { aggregate: { count: '*' } })).then(r => r[0]?.count || 0).catch(() => 0),
@@ -23,13 +22,14 @@ export async function GET() {
       fetch(`${process.env.DIRECTUS_URL}/server/ping`).then(r => r.text()).then(t => t === 'pong' ? 'ok' : 'error').catch(() => 'error')
     ]);
 
-    // Fetch CloudFlare Analytics data (gracefully handle errors)
     let cloudflareData = null;
     try {
       const cloudflareAnalyticsClient = getCloudflareAnalyticsClient();
       cloudflareData = await cloudflareAnalyticsClient.getAllAnalyticsData(30);
+      console.log('Dashboard API - Cloudflare timeSeries count:', cloudflareData?.timeSeries?.length || 0);
+      console.log('Dashboard API - Cloudflare visitors total:', cloudflareData?.visitors?.total || 0);
     } catch (error: any) {
-      console.error('Failed to fetch CloudFlare analytics:', error);
+      console.error('Failed to fetch Cloudflare analytics:', error);
     }
 
     let vercelData = null;
@@ -37,7 +37,7 @@ export async function GET() {
       const vercelClient = getVercelClient();
       vercelData = await vercelClient.getDashboardData();
     } catch (error: any) {
-      console.error('Failed to fetch Vercel data:', error);
+      console.error('Failed to fetch Vercel deployment data:', error);
     }
 
     return NextResponse.json({

@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, Eye, EyeOff, Shield, Sparkles, ArrowLeft, AlertCircle } from "lucide-react";
+import { Loader2, Eye, EyeOff, Sparkles, ArrowLeft, AlertCircle } from "lucide-react";
 import { AuthErrorBoundary } from "@/components/auth/AuthErrorBoundary";
 import { useAuth } from '@/lib/auth/provider';
 import { AuthRedirect } from '@/lib/auth/redirect';
@@ -160,9 +161,16 @@ export default function LoginPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="flex items-center justify-center w-16 h-16 mx-auto bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl mb-6 shadow-lg"
+              className="flex items-center justify-center w-16 h-16 mx-auto mb-6"
             >
-              <Shield className="h-8 w-8 text-white" />
+              <Image
+                src="/Dagher_Logo_2024_Mark.png"
+                alt="Logo"
+                width={64}
+                height={64}
+                className="w-full h-full object-contain"
+                priority
+              />
             </motion.div>
 
             {/* Header */}

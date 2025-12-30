@@ -69,4 +69,44 @@ export interface VercelDashboardData {
   };
 }
 
+export interface VercelAnalyticsTimeSeriesDataPoint {
+  date: string;
+  value: number;
+}
+
+export interface VercelAnalyticsTopPage {
+  pathname: string;
+  views: number;
+}
+
+export interface VercelAnalyticsLocation {
+  country: string;
+  city?: string;
+  views: number;
+}
+
+export interface VercelAnalyticsData {
+  visitors: {
+    total: number;
+    trend?: number;
+  };
+  pageviews: {
+    total: number;
+    trend?: number;
+  };
+  timeSeries: Array<{
+    date: string;
+    visitors: number;
+    pageviews: number;
+  }>;
+  topPages: Array<{
+    path: string;
+    views: number;
+  }>;
+  requestsByCountry: Array<{
+    country: string;
+    requests: number;
+  }>;
+}
+
 

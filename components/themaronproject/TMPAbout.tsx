@@ -76,8 +76,17 @@ const TMPAbout = () => {
       className="relative isolate overflow-hidden px-4 py-16 sm:px-6 sm:py-20 lg:px-10 lg:py-24"
     >
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,rgba(59,130,246,0.16),transparent_35%),radial-gradient(circle_at_90%_10%,rgba(236,72,153,0.12),transparent_32%),radial-gradient(circle_at_50%_90%,rgba(52,211,153,0.12),transparent_30%)]" />
-        <div className={`absolute inset-0 opacity-70 ${isDarkMode ? 'bg-slate-950/50' : 'bg-slate-50/70'}`} />
+        <Image
+          src="/api/assets/site-assets/230e167.png"
+          alt="The Maron Project background"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover opacity-70"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/80 via-slate-900/75 to-black/85" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.25),transparent_25%),radial-gradient(circle_at_80%_0%,rgba(236,72,153,0.25),transparent_20%),radial-gradient(circle_at_50%_80%,rgba(34,197,94,0.2),transparent_25%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_40%,rgba(255,255,255,0.08),transparent_35%)]" />
       </div>
 
       <motion.div
@@ -87,17 +96,17 @@ const TMPAbout = () => {
         className="mx-auto flex max-w-6xl flex-col gap-12"
       >
         <motion.div variants={titleVariants} className="max-w-3xl space-y-4">
-          <span className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blue-700 dark:border-blue-400/30 dark:bg-blue-400/10 dark:text-blue-200">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white/90 shadow-sm backdrop-blur">
             The Maron Project
           </span>
-          <h1 className="text-balance text-3xl leading-tight text-slate-900 dark:text-white sm:text-4xl lg:text-5xl">
+          <h1 className="text-balance text-3xl leading-tight text-white sm:text-4xl lg:text-5xl">
             What is{' '}
-            <span className="bg-gradient-to-r from-blue-600 via-purple-500 to-emerald-400 bg-clip-text font-semibold text-transparent">
+            <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-300 bg-clip-text font-semibold text-transparent">
               The Maron Project
             </span>
             ?
           </h1>
-          <p className="max-w-2xl text-base leading-relaxed text-slate-600 dark:text-slate-300">
+          <p className="max-w-2xl text-base leading-relaxed text-slate-100/90">
             Real people. Real stories. Crafted with care and shared with intention.
           </p>
         </motion.div>

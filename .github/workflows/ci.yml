@@ -8,9 +8,16 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
-  lint:
-    name: Lint
+  setup:
+    name: Setup & Install
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -22,8 +29,38 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        id: cache-deps
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Install dependencies
+        if: steps.cache-deps.outputs.cache-hit != 'true'
         run: npm ci --legacy-peer-deps
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Restore dependencies
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
 
       - name: Run ESLint
         run: npm run lint
@@ -31,6 +68,7 @@ jobs:
   typecheck:
     name: Type Check
     runs-on: ubuntu-latest
+    needs: lint
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -41,8 +79,11 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci --legacy-peer-deps
+      - name: Restore dependencies
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
 
       - name: Run TypeScript type check
         run: npm run typecheck
@@ -50,6 +91,10 @@ jobs:
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
+    needs: typecheck
+    permissions:
+      contents: read
+      checks: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -60,15 +105,18 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci --legacy-peer-deps
+      - name: Restore dependencies
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
 
       - name: Run tests
         run: npm run test:ci
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
-        if: always()
+        if: success()
         with:
           files: ./coverage/coverage-final.json
           fail_ci_if_error: false
@@ -77,6 +125,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    needs: test
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -87,25 +136,21 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci --legacy-peer-deps
+      - name: Restore dependencies
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
 
-      - name: Test build without env vars (simulate Vercel initial phase)
+      - name: Test build without env vars
         run: |
-          echo "Testing that no runtime env vars are required during build analysis..."
           unset DIRECTUS_URL
           unset NEXT_PUBLIC_DIRECTUS_URL
           unset R2_ENDPOINT
           unset R2_ACCESS_KEY
           unset R2_SECRET_KEY
-          # This should NOT fail - catches top-level initializations
-          npm run build || {
-            echo "❌ Build failed without env vars - likely top-level initialization issue"
-            echo "Check for module-level client instantiations that run at import time"
-            exit 1
-          }
+          npm run build || exit 1
         env:
-          # Allow build to proceed with missing vars if code is properly lazy-loaded
           SKIP_ENV_VALIDATION: false
 
       - name: Build application with env vars
@@ -117,3 +162,11 @@ jobs:
           R2_ACCESS_KEY: placeholder
           R2_SECRET_KEY: placeholder
           R2_BUCKET: placeholder
+
+      - name: Cache build output
+        uses: actions/cache@v4
+        with:
+          path: .next
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-

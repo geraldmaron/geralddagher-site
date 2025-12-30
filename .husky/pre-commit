@@ -1,1 +1,1 @@
-npm run precommit
+npm run lint && npm run typecheck

@@ -23,8 +23,8 @@ const Footer: React.FC = () => {
             <SocialMediaBar className="justify-center px-0" />
           </div>
 
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 mb-10">
-            <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 mb-10 text-center">
+            <div className="flex flex-col gap-3 items-center">
               <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-900 dark:text-white">
                 Quick Links
               </h3>
@@ -48,7 +48,7 @@ const Footer: React.FC = () => {
               </Link>
             </div>
 
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 items-center">
               <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-900 dark:text-white">
                 Connect
               </h3>
@@ -66,13 +66,13 @@ const Footer: React.FC = () => {
               </Link>
               <button
                 onClick={() => setIsBugReportOpen(true)}
-                className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors text-left"
+                className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors"
               >
                 Report a Bug
               </button>
             </div>
 
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 items-center">
               <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-900 dark:text-white">
                 Legal
               </h3>

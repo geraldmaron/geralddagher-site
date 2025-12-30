@@ -65,7 +65,8 @@ export default function AdminDashboard() {
     return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
   };
 
-  const timeSeriesData = data?.analytics?.timeSeries?.map((point: any) => {
+  const rawTimeSeries = data?.cloudflare?.timeSeries || [];
+  const timeSeriesData = rawTimeSeries.map((point: any) => {
     const dateStr = point.date || '';
     let formattedDate = dateStr;
     try {
@@ -84,14 +85,20 @@ export default function AdminDashboard() {
       visitors: point.visitors || 0,
       pageviews: point.pageviews || 0,
     };
-  }) || [];
+  });
 
-  const countryData = data?.analytics?.requestsByCountry?.slice(0, 10).map((item: any) => ({
+  if (typeof window !== 'undefined' && data?.cloudflare?.timeSeries) {
+    console.log('Analytics Debug - Raw time series count:', rawTimeSeries.length);
+    console.log('Analytics Debug - Processed time series count:', timeSeriesData.length);
+    console.log('Analytics Debug - Sample data:', timeSeriesData.slice(0, 3));
+  }
+
+  const countryData = data?.cloudflare?.requestsByCountry?.slice(0, 10).map((item: any) => ({
     name: item.country || 'Unknown',
     value: item.requests || 0,
   })) || [];
 
-  const topPagesData = data?.analytics?.topPages?.slice(0, 8).map((page: any) => ({
+  const topPagesData = data?.cloudflare?.topPages?.slice(0, 8).map((page: any) => ({
     name: page.path?.length > 30 ? page.path.substring(0, 30) + '...' : page.path || '/',
     views: page.views || 0,
   })) || [];
@@ -135,20 +142,20 @@ export default function AdminDashboard() {
       textColor: 'text-amber-600',
       bgColor: 'bg-amber-500/10'
     },
-    ...(data?.analytics?.visitors ? [{
+    ...(data?.cloudflare?.visitors ? [{
       name: 'Visitors (30d)',
-      value: formatNumber(data.analytics.visitors.total),
-      trend: data.analytics.visitors.trend,
+      value: formatNumber(data.cloudflare.visitors.total),
+      trend: data.cloudflare.visitors.trend,
       icon: Globe,
       href: null,
       color: 'from-cyan-500 to-cyan-600',
       textColor: 'text-cyan-600',
       bgColor: 'bg-cyan-500/10'
     }] : []),
-    ...(data?.analytics?.pageviews ? [{
+    ...(data?.cloudflare?.pageviews ? [{
       name: 'Pageviews (30d)',
-      value: formatNumber(data.analytics.pageviews.total),
-      trend: data.analytics.pageviews.trend,
+      value: formatNumber(data.cloudflare.pageviews.total),
+      trend: data.cloudflare.pageviews.trend,
       icon: Eye,
       href: null,
       color: 'from-indigo-500 to-indigo-600',
@@ -258,7 +265,7 @@ export default function AdminDashboard() {
         })}
       </motion.div>
 
-      {data?.analytics?.timeSeries && timeSeriesData.length > 0 && (
+      {data?.cloudflare?.timeSeries && timeSeriesData.length > 0 && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -288,10 +295,12 @@ export default function AdminDashboard() {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-              <XAxis 
-                dataKey="date" 
-                tick={{ fill: 'currentColor', fontSize: 12 }}
+              <XAxis
+                dataKey="date"
+                tick={{ fill: 'currentColor', fontSize: 10 }}
                 className="text-gray-600 dark:text-gray-400"
+                interval="preserveStartEnd"
+                minTickGap={20}
               />
               <YAxis 
                 yAxisId="left"
@@ -343,7 +352,7 @@ export default function AdminDashboard() {
         transition={{ delay: 0.5 }}
         className="grid gap-6 lg:grid-cols-2"
       >
-        {data?.analytics?.requestsByCountry && countryData.length > 0 && (
+        {data?.cloudflare?.requestsByCountry && countryData.length > 0 && (
           <div className={cn(
             'p-6 rounded-2xl border',
             'bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm',
@@ -480,14 +489,14 @@ export default function AdminDashboard() {
                 </span>
               </div>
             )}
-            {data?.analytics && (
+            {data?.cloudflare && (
               <div className={cn(
                 'flex items-center justify-between p-4 rounded-xl transition-all',
                 'bg-gray-50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50'
               )}>
                 <div className="flex items-center gap-3">
                   <Activity className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Vercel Analytics</span>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Cloudflare Analytics</span>
                 </div>
                 <span className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400 font-medium">
                   <CheckCircle2 className="h-4 w-4" />

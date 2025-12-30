@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createDirectusServerClient } from '@/lib/directus/server-client';
 import { getCurrentUser } from '@/lib/directus/auth';
 import { aggregate } from '@directus/sdk';
-import { getVercelAnalyticsClient } from '@/lib/vercel/analytics-client';
+import { getCloudflareAnalyticsClient } from '@/lib/cloudflare/client';
 import { getVercelClient } from '@/lib/vercel/client';
 
 export async function GET() {
@@ -14,7 +14,6 @@ export async function GET() {
 
     const client = await createDirectusServerClient();
 
-    // Fetch Directus data
     const [postsCount, usersCount, categoriesCount, tagsCount, directusHealth] = await Promise.all([
       client.request(aggregate('posts', { aggregate: { count: '*' } })).then(r => r[0]?.count || 0).catch(() => 0),
       client.request(aggregate('directus_users', { aggregate: { count: '*' } })).then(r => r[0]?.count || 0).catch(() => 0),
@@ -23,12 +22,14 @@ export async function GET() {
       fetch(`${process.env.DIRECTUS_URL}/server/ping`).then(r => r.text()).then(t => t === 'pong' ? 'ok' : 'error').catch(() => 'error')
     ]);
 
-    let analyticsData = null;
+    let cloudflareData = null;
     try {
-      const vercelAnalyticsClient = getVercelAnalyticsClient();
-      analyticsData = await vercelAnalyticsClient.getAllAnalyticsData(30);
+      const cloudflareAnalyticsClient = getCloudflareAnalyticsClient();
+      cloudflareData = await cloudflareAnalyticsClient.getAllAnalyticsData(30);
+      console.log('Dashboard API - Cloudflare timeSeries count:', cloudflareData?.timeSeries?.length || 0);
+      console.log('Dashboard API - Cloudflare visitors total:', cloudflareData?.visitors?.total || 0);
     } catch (error: any) {
-      console.error('Failed to fetch Vercel analytics:', error);
+      console.error('Failed to fetch Cloudflare analytics:', error);
     }
 
     let vercelData = null;
@@ -50,7 +51,7 @@ export async function GET() {
         status: directusHealth === 'ok' ? 'healthy' : 'error',
         url: process.env.DIRECTUS_URL
       },
-      analytics: analyticsData,
+      cloudflare: cloudflareData,
       vercel: vercelData,
     });
   } catch (error: any) {
@@ -58,7 +59,7 @@ export async function GET() {
       error: 'Failed to load dashboard data',
       stats: { posts: 0, users: 0, categories: 0, tags: 0 },
       directus: { status: 'error', url: process.env.DIRECTUS_URL },
-      analytics: null,
+      cloudflare: null,
       vercel: null,
     }, { status: 500 });
   }

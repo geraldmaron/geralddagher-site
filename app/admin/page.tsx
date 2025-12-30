@@ -2,22 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  LayoutDashboard, 
-  FileText, 
-  Users, 
-  Tag, 
-  FolderTree, 
-  Activity, 
-  CheckCircle2, 
+import {
+  FileText,
+  Users,
+  Tag,
+  FolderTree,
+  Activity,
+  CheckCircle2,
   XCircle,
   TrendingUp,
-  TrendingDown,
   Eye,
-  Calendar,
-  Clock,
   Globe,
-  Download,
   GitBranch,
   ArrowUpRight,
   ArrowDownRight,
@@ -70,7 +65,7 @@ export default function AdminDashboard() {
     return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
   };
 
-  const timeSeriesData = data?.cloudflare?.timeSeries?.map((point: any) => {
+  const timeSeriesData = data?.analytics?.timeSeries?.map((point: any) => {
     const dateStr = point.date || '';
     let formattedDate = dateStr;
     try {
@@ -88,16 +83,15 @@ export default function AdminDashboard() {
       date: formattedDate,
       visitors: point.visitors || 0,
       pageviews: point.pageviews || 0,
-      bandwidth: Math.round((point.bandwidth || 0) / 1024 / 1024),
     };
   }) || [];
 
-  const countryData = data?.cloudflare?.requestsByCountry?.slice(0, 10).map((item: any) => ({
+  const countryData = data?.analytics?.requestsByCountry?.slice(0, 10).map((item: any) => ({
     name: item.country || 'Unknown',
     value: item.requests || 0,
   })) || [];
 
-  const topPagesData = data?.cloudflare?.topPages?.slice(0, 8).map((page: any) => ({
+  const topPagesData = data?.analytics?.topPages?.slice(0, 8).map((page: any) => ({
     name: page.path?.length > 30 ? page.path.substring(0, 30) + '...' : page.path || '/',
     views: page.views || 0,
   })) || [];
@@ -141,34 +135,25 @@ export default function AdminDashboard() {
       textColor: 'text-amber-600',
       bgColor: 'bg-amber-500/10'
     },
-    ...(data?.cloudflare?.visitors ? [{
+    ...(data?.analytics?.visitors ? [{
       name: 'Visitors (30d)',
-      value: formatNumber(data.cloudflare.visitors.total),
-      trend: data.cloudflare.visitors.trend,
+      value: formatNumber(data.analytics.visitors.total),
+      trend: data.analytics.visitors.trend,
       icon: Globe,
       href: null,
       color: 'from-cyan-500 to-cyan-600',
       textColor: 'text-cyan-600',
       bgColor: 'bg-cyan-500/10'
     }] : []),
-    ...(data?.cloudflare?.pageviews ? [{
+    ...(data?.analytics?.pageviews ? [{
       name: 'Pageviews (30d)',
-      value: formatNumber(data.cloudflare.pageviews.total),
-      trend: data.cloudflare.pageviews.trend,
+      value: formatNumber(data.analytics.pageviews.total),
+      trend: data.analytics.pageviews.trend,
       icon: Eye,
       href: null,
       color: 'from-indigo-500 to-indigo-600',
       textColor: 'text-indigo-600',
       bgColor: 'bg-indigo-500/10'
-    }] : []),
-    ...(data?.cloudflare?.bandwidth ? [{
-      name: 'Bandwidth (30d)',
-      value: data.cloudflare.bandwidth.formatted,
-      icon: Download,
-      href: null,
-      color: 'from-pink-500 to-pink-600',
-      textColor: 'text-pink-600',
-      bgColor: 'bg-pink-500/10'
     }] : []),
   ];
 
@@ -273,7 +258,7 @@ export default function AdminDashboard() {
         })}
       </motion.div>
 
-      {data?.cloudflare?.timeSeries && timeSeriesData.length > 0 && (
+      {data?.analytics?.timeSeries && timeSeriesData.length > 0 && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -351,63 +336,6 @@ export default function AdminDashboard() {
         </motion.div>
       )}
 
-      {data?.cloudflare?.bandwidth && timeSeriesData.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className={cn(
-            'p-6 rounded-2xl border',
-            'bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm',
-            'border-gray-200/50 dark:border-gray-700/50'
-          )}
-        >
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2.5 bg-pink-500/10 rounded-xl">
-              <Download className="h-5 w-5 text-pink-600" />
-            </div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Bandwidth Usage (30 Days)</h2>
-          </div>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={timeSeriesData}>
-              <defs>
-                <linearGradient id="colorBandwidth" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#ec4899" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#ec4899" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-              <XAxis 
-                dataKey="date" 
-                tick={{ fill: 'currentColor', fontSize: 12 }}
-                className="text-gray-600 dark:text-gray-400"
-              />
-              <YAxis 
-                tick={{ fill: 'currentColor', fontSize: 12 }}
-                className="text-gray-600 dark:text-gray-400"
-                label={{ value: 'MB', angle: -90, position: 'insideLeft' }}
-              />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                  border: '1px solid rgba(0, 0, 0, 0.1)',
-                  borderRadius: '8px',
-                  color: '#1f2937'
-                }}
-                formatter={(value: number) => [`${value} MB`, 'Bandwidth']}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="bandwidth" 
-                stroke="#ec4899" 
-                strokeWidth={2}
-                dot={{ fill: '#ec4899', r: 3 }}
-                name="Bandwidth (MB)"
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </motion.div>
-      )}
 
       <motion.div 
         initial={{ opacity: 0 }}
@@ -415,7 +343,7 @@ export default function AdminDashboard() {
         transition={{ delay: 0.5 }}
         className="grid gap-6 lg:grid-cols-2"
       >
-        {data?.cloudflare?.requestsByCountry && countryData.length > 0 && (
+        {data?.analytics?.requestsByCountry && countryData.length > 0 && (
           <div className={cn(
             'p-6 rounded-2xl border',
             'bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm',
@@ -552,14 +480,14 @@ export default function AdminDashboard() {
                 </span>
               </div>
             )}
-            {data?.cloudflare && (
+            {data?.analytics && (
               <div className={cn(
                 'flex items-center justify-between p-4 rounded-xl transition-all',
                 'bg-gray-50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50'
               )}>
                 <div className="flex items-center gap-3">
-                  <Globe className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Cloudflare Analytics</span>
+                  <Activity className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Vercel Analytics</span>
                 </div>
                 <span className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400 font-medium">
                   <CheckCircle2 className="h-4 w-4" />

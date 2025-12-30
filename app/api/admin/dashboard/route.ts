@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createDirectusServerClient } from '@/lib/directus/server-client';
 import { getCurrentUser } from '@/lib/directus/auth';
 import { aggregate } from '@directus/sdk';
-import { getCloudflareAnalyticsClient } from '@/lib/cloudflare/client';
+import { getVercelAnalyticsClient } from '@/lib/vercel/analytics-client';
 import { getVercelClient } from '@/lib/vercel/client';
 
 export async function GET() {
@@ -23,13 +23,12 @@ export async function GET() {
       fetch(`${process.env.DIRECTUS_URL}/server/ping`).then(r => r.text()).then(t => t === 'pong' ? 'ok' : 'error').catch(() => 'error')
     ]);
 
-    // Fetch CloudFlare Analytics data (gracefully handle errors)
-    let cloudflareData = null;
+    let analyticsData = null;
     try {
-      const cloudflareAnalyticsClient = getCloudflareAnalyticsClient();
-      cloudflareData = await cloudflareAnalyticsClient.getAllAnalyticsData(30);
+      const vercelAnalyticsClient = getVercelAnalyticsClient();
+      analyticsData = await vercelAnalyticsClient.getAllAnalyticsData(30);
     } catch (error: any) {
-      console.error('Failed to fetch CloudFlare analytics:', error);
+      console.error('Failed to fetch Vercel analytics:', error);
     }
 
     let vercelData = null;
@@ -37,7 +36,7 @@ export async function GET() {
       const vercelClient = getVercelClient();
       vercelData = await vercelClient.getDashboardData();
     } catch (error: any) {
-      console.error('Failed to fetch Vercel data:', error);
+      console.error('Failed to fetch Vercel deployment data:', error);
     }
 
     return NextResponse.json({
@@ -51,7 +50,7 @@ export async function GET() {
         status: directusHealth === 'ok' ? 'healthy' : 'error',
         url: process.env.DIRECTUS_URL
       },
-      cloudflare: cloudflareData,
+      analytics: analyticsData,
       vercel: vercelData,
     });
   } catch (error: any) {
@@ -59,7 +58,7 @@ export async function GET() {
       error: 'Failed to load dashboard data',
       stats: { posts: 0, users: 0, categories: 0, tags: 0 },
       directus: { status: 'error', url: process.env.DIRECTUS_URL },
-      cloudflare: null,
+      analytics: null,
       vercel: null,
     }, { status: 500 });
   }

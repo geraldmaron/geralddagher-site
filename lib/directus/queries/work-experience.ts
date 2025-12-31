@@ -16,7 +16,7 @@ export interface WorkExperience {
 
 export async function getWorkExperience(): Promise<WorkExperience[]> {
   try {
-    const directus = await getDirectusClient();
+    const directus = await getDirectusClient({ requireAuth: false });
     const experience = await directus.request(
       readItems('work_experience', {
         sort: ['-start_date'],

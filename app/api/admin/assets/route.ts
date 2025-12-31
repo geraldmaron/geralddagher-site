@@ -47,7 +47,8 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer());
     const timestamp = Date.now();
     const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-    const key = `${timestamp}-${sanitizedName}`;
+    const filename = `${timestamp}-${sanitizedName}`;
+    const key = `blog/covers/${filename}`;
     const url = await uploadAsset(buffer, key, file.type);
 
     return NextResponse.json({ data: { key, url } }, { status: 201 });

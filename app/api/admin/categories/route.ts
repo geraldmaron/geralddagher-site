@@ -14,7 +14,7 @@ const categorySchema = z.object({
 
 export async function GET() {
   try {
-    const client = await createDirectusServerClient();
+    const client = await createDirectusServerClient({ requireAuth: false });
     const data = await client.request(readItems('categories', { limit: 100, sort: ['name'] }));
     return NextResponse.json({ data });
   } catch (error: any) {

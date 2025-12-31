@@ -16,9 +16,16 @@ type UserType = {
   email: string;
   status?: string;
   is_author?: boolean;
+  has_argus_access?: boolean;
   author_slug?: string | null;
   avatar?: string | null;
-  role?: string | null;
+  role?: { id: string; name: string } | string | null;
+};
+
+type Role = {
+  id: string;
+  name: string;
+  description?: string | null;
 };
 
 type FormState = {
@@ -30,6 +37,7 @@ type FormState = {
   status: string;
   role: string;
   is_author: boolean;
+  has_argus_access: boolean;
   author_slug: string;
   avatar: string | null;
   avatar_url: string | null;
@@ -44,6 +52,7 @@ const emptyForm: FormState = {
   status: 'active',
   role: '',
   is_author: false,
+  has_argus_access: false,
   author_slug: '',
   avatar: null,
   avatar_url: null
@@ -51,22 +60,63 @@ const emptyForm: FormState = {
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserType[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [currentUserRole, setCurrentUserRole] = useState<'admin' | 'argus_admin' | 'argus_user' | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [regeneratingPassword, setRegeneratingPassword] = useState(false);
 
   const load = async () => {
     setLoading(true);
-    const res = await fetch('/api/admin/users');
-    const json = await res.json();
-    setUsers(json.data || []);
+    const [usersRes, rolesRes, meRes] = await Promise.all([
+      fetch('/api/admin/users'),
+      fetch('/api/admin/roles'),
+      fetch('/api/auth/me')
+    ]);
+    const usersJson = await usersRes.json();
+    const rolesJson = await rolesRes.json();
+    const meJson = await meRes.json();
+
+    setUsers(usersJson.data || []);
+    setRoles(rolesJson.data || []);
+
+    // Determine current user's role and ID
+    if (meJson.user) {
+      setCurrentUserId(meJson.user.id);
+      const roleName = typeof meJson.user.role === 'object' ? meJson.user.role.name : meJson.user.role;
+      const lowerRoleName = roleName?.toLowerCase();
+      if (lowerRoleName === 'administrator' || lowerRoleName === 'admin') {
+        setCurrentUserRole('admin');
+      } else if (lowerRoleName === 'argus admin') {
+        setCurrentUserRole('argus_admin');
+      } else if (lowerRoleName === 'argus user') {
+        setCurrentUserRole('argus_user');
+      }
+    }
+
     setLoading(false);
   };
 
   useEffect(() => { load(); }, []);
+
+  useEffect(() => {
+    if (form.role) {
+      const selectedRole = roles.find(r => r.id === form.role);
+      const roleName = selectedRole?.name?.toLowerCase();
+
+      if (roleName === 'administrator' || roleName === 'admin' ||
+          roleName === 'argus admin' || roleName === 'argus user') {
+        if (!form.has_argus_access) {
+          setForm(prev => ({ ...prev, has_argus_access: true }));
+        }
+      }
+    }
+  }, [form.role, roles, form.has_argus_access]);
 
   const filteredUsers = useMemo(() => {
     if (!searchQuery.trim()) return users;
@@ -77,12 +127,54 @@ export default function AdminUsersPage() {
     });
   }, [users, searchQuery]);
 
+  const canCreateUsers = useMemo(() => {
+    return currentUserRole === 'admin';
+  }, [currentUserRole]);
+
+  const canDeleteUsers = useMemo(() => {
+    return currentUserRole === 'admin';
+  }, [currentUserRole]);
+
+  const canEditUser = (userId: string) => {
+    if (currentUserRole === 'admin') return true;
+
+    const targetUser = users.find(u => u.id === userId);
+    if (!targetUser) return false;
+
+    const targetRoleName = typeof targetUser.role === 'object' ? targetUser.role?.name?.toLowerCase() : '';
+    const isSelf = userId === currentUserId;
+
+    if (currentUserRole === 'argus_admin') {
+      return isSelf || targetRoleName === 'argus user';
+    }
+
+    if (currentUserRole === 'argus_user') {
+      return isSelf;
+    }
+
+    return false;
+  };
+
+  const canChangeRole = useMemo(() => {
+    return currentUserRole === 'admin';
+  }, [currentUserRole]);
+
   const startCreate = () => {
+    if (!canCreateUsers) {
+      toast.error('You do not have permission to create users');
+      return;
+    }
     setForm(emptyForm);
     setShowForm(true);
   };
 
   const startEdit = (user: UserType) => {
+    if (!canEditUser(user.id)) {
+      toast.error('You do not have permission to edit this user');
+      return;
+    }
+
+    const roleId = typeof user.role === 'object' ? user.role?.id : user.role;
     setForm({
       id: user.id,
       first_name: user.first_name || '',
@@ -90,8 +182,9 @@ export default function AdminUsersPage() {
       email: user.email,
       password: '',
       status: user.status || 'active',
-      role: user.role || '',
+      role: roleId || '',
       is_author: !!user.is_author,
+      has_argus_access: !!user.has_argus_access,
       author_slug: user.author_slug || '',
       avatar: user.avatar || null,
       avatar_url: user.avatar ? getAvatarUrl(user.avatar) : null
@@ -108,19 +201,29 @@ export default function AdminUsersPage() {
     e.preventDefault();
     setSaving(true);
     try {
+      if (form.id && !canEditUser(form.id)) {
+        toast.error('You do not have permission to edit this user');
+        return;
+      }
+
       const payload: Record<string, unknown> = {
         first_name: form.first_name,
         last_name: form.last_name,
         email: form.email,
         status: form.status,
-        role: form.role || undefined,
         is_author: form.is_author,
+        has_argus_access: form.has_argus_access,
         author_slug: form.author_slug || undefined,
         avatar: form.avatar || undefined
       };
-      if (!form.id) {
+
+      if (canChangeRole) {
+        payload.role = form.role || undefined;
+      }
+
+      if (!form.id && form.password) {
         payload.password = form.password;
-      } else if (form.password) {
+      } else if (form.id && form.password) {
         payload.password = form.password;
       }
 
@@ -141,6 +244,10 @@ export default function AdminUsersPage() {
   };
 
   const handleDelete = async (id: string) => {
+    if (!canDeleteUsers) {
+      toast.error('You do not have permission to delete users');
+      return;
+    }
     if (!confirm('Delete this user?')) return;
     try {
       const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
@@ -167,6 +274,21 @@ export default function AdminUsersPage() {
     }
   };
 
+  const handleToggleArgusAccess = async (id: string, current: boolean) => {
+    try {
+      const res = await fetch(`/api/admin/users/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ has_argus_access: !current })
+      });
+      if (!res.ok) throw new Error();
+      toast.success('Argus access updated');
+      await load();
+    } catch {
+      toast.error('Failed to update argus access');
+    }
+  };
+
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -186,6 +308,30 @@ export default function AdminUsersPage() {
       toast.error('Avatar upload failed');
     } finally {
       setAvatarUploading(false);
+    }
+  };
+
+  const handleRegeneratePassword = async (userId: string) => {
+    if (!confirm('This will generate a new password and send it to the user via email. Continue?')) {
+      return;
+    }
+
+    setRegeneratingPassword(true);
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/regenerate-password`, {
+        method: 'POST'
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to regenerate password');
+      }
+
+      toast.success('Password regenerated and sent to user via email');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to regenerate password');
+    } finally {
+      setRegeneratingPassword(false);
     }
   };
 
@@ -239,15 +385,17 @@ export default function AdminUsersPage() {
             <RefreshCw className={cn('h-4 w-4', loading && 'animate-spin')} />
             <span className="hidden sm:inline">Refresh</span>
           </motion.button>
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button
-              onClick={startCreate}
-              className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 dark:hover:bg-gray-200 dark:text-gray-900 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all"
-            >
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">New User</span>
-            </Button>
-          </motion.div>
+          {canCreateUsers && (
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                onClick={startCreate}
+                className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 dark:hover:bg-gray-200 dark:text-gray-900 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all"
+              >
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">New User</span>
+              </Button>
+            </motion.div>
+          )}
         </div>
       </motion.div>
 
@@ -316,6 +464,7 @@ export default function AdminUsersPage() {
             {filteredUsers.map((user, index) => {
               const name = [user.first_name, user.last_name].filter(Boolean).join(' ') || 'No Name';
               const avatarUrl = user.avatar ? getAvatarUrl(user.avatar, { width: 80, height: 80, fit: 'cover' }) : null;
+              const roleName = typeof user.role === 'object' ? user.role?.name : roles.find(r => r.id === user.role)?.name;
               return (
                 <motion.div
                   key={user.id}
@@ -346,12 +495,24 @@ export default function AdminUsersPage() {
                         <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate text-sm sm:text-base">
                           {name}
                         </h3>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <StatusBadge status={user.status} />
+                          {roleName && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                              <Shield className="h-3 w-3" />
+                              {roleName}
+                            </span>
+                          )}
                           {user.is_author && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
                               <Shield className="h-3 w-3" />
                               Author
+                            </span>
+                          )}
+                          {user.has_argus_access && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                              <Shield className="h-3 w-3" />
+                              Argus
                             </span>
                           )}
                         </div>
@@ -368,24 +529,37 @@ export default function AdminUsersPage() {
                           type="checkbox"
                           checked={!!user.is_author}
                           onChange={() => handleToggleAuthor(user.id, !!user.is_author)}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
+                          className="rounded border-gray-300 text-purple-600 focus:ring-purple-500 h-4 w-4"
                         />
                         Author
                       </label>
-                      <button
-                        onClick={() => startEdit(user)}
-                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                        title="Edit"
-                      >
-                        <Edit3 className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(user.id)}
-                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                        title="Delete"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      <label className="hidden sm:flex items-center gap-2 cursor-pointer text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={!!user.has_argus_access}
+                          onChange={() => handleToggleArgusAccess(user.id, !!user.has_argus_access)}
+                          className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 h-4 w-4"
+                        />
+                        Argus
+                      </label>
+                      {canEditUser(user.id) && (
+                        <button
+                          onClick={() => startEdit(user)}
+                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                          title="Edit"
+                        >
+                          <Edit3 className="h-4 w-4" />
+                        </button>
+                      )}
+                      {canDeleteUsers && (
+                        <button
+                          onClick={() => handleDelete(user.id)}
+                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 </motion.div>
@@ -525,30 +699,99 @@ export default function AdminUsersPage() {
                   />
                 </div>
 
-                {/* Password */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    Password
-                    {isEditing && <span className="text-xs text-gray-400 ml-1">(leave blank to keep)</span>}
-                  </label>
-                  <input
-                    type="password"
-                    className={cn(
-                      'w-full px-3 py-2 rounded-xl text-sm',
-                      'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700',
-                      'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                      'transition-all'
-                    )}
-                    value={form.password}
-                    onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    placeholder={isEditing ? '••••••••' : ''}
-                    autoComplete={isEditing ? 'new-password' : 'new-password'}
-                    {...(isEditing ? {} : { required: true })}
-                  />
-                </div>
+                {(() => {
+                  const isSelf = form.id === currentUserId;
+                  let isTargetArgusUser = false;
+                  let isTargetArgusAdmin = false;
+                  let isTargetAdmin = false;
+                  let isTargetStandardUser = false;
 
-                {/* Status & Role */}
-                <div className="grid grid-cols-2 gap-3">
+                  if (isEditing && form.id) {
+                    const targetUser = users.find(u => u.id === form.id);
+                    if (targetUser) {
+                      const targetRoleName = typeof targetUser.role === 'object' ? targetUser.role?.name : targetUser.role;
+                      const lowerTargetRoleName = targetRoleName?.toLowerCase() || '';
+                      isTargetArgusUser = lowerTargetRoleName === 'argus user';
+                      isTargetArgusAdmin = lowerTargetRoleName === 'argus admin';
+                      isTargetAdmin = lowerTargetRoleName === 'administrator' || lowerTargetRoleName === 'admin';
+                      isTargetStandardUser = lowerTargetRoleName === 'standard user';
+                    }
+                  }
+
+                  const canViewPassword = !isEditing || (
+                    currentUserRole === 'admin' && (
+                      isSelf ||
+                      isTargetArgusUser ||
+                      isTargetArgusAdmin
+                    )
+                  );
+
+                  const canRegeneratePassword = isEditing && currentUserRole && form.id && (
+                    (currentUserRole === 'admin' && (isSelf || !isTargetAdmin)) ||
+                    (currentUserRole === 'argus_admin' && (isSelf || isTargetArgusUser)) ||
+                    (currentUserRole === 'argus_user' && isSelf)
+                  );
+
+                  return (
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Password
+                          {isEditing && canViewPassword && <span className="text-xs text-gray-400 ml-1">(leave blank to keep)</span>}
+                          {!isEditing && currentUserRole === 'admin' && <span className="text-xs text-gray-400 ml-1">(optional, user must set on first login)</span>}
+                        </label>
+                        {canRegeneratePassword && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRegeneratePassword(form.id!)}
+                            disabled={regeneratingPassword}
+                            className="text-xs"
+                          >
+                            {regeneratingPassword ? (
+                              <>
+                                <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                                Regenerating...
+                              </>
+                            ) : (
+                              <>
+                                <RefreshCw className="h-3 w-3 mr-1" />
+                                Regenerate & Email
+                              </>
+                            )}
+                          </Button>
+                        )}
+                      </div>
+                      {canViewPassword && (
+                        <input
+                          type="password"
+                          className={cn(
+                            'w-full px-3 py-2 rounded-xl text-sm',
+                            'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700',
+                            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                            'transition-all'
+                          )}
+                          value={form.password}
+                          onChange={(e) => setForm({ ...form, password: e.target.value })}
+                          placeholder={isEditing ? '••••••••' : (!isEditing && currentUserRole === 'admin' ? 'Leave empty for user to set' : '')}
+                          autoComplete={isEditing ? 'new-password' : 'new-password'}
+                          {...(!isEditing && currentUserRole !== 'admin' ? { required: true } : {})}
+                        />
+                      )}
+                      {!canViewPassword && isEditing && (
+                        <div className={cn(
+                          'w-full px-3 py-2 rounded-xl text-sm text-gray-500 dark:text-gray-400 italic',
+                          'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
+                        )}>
+                          Password management not available for this user
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+
+                <div className={cn("grid gap-3", canChangeRole ? "grid-cols-2" : "grid-cols-1")}>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Status</label>
                     <select
@@ -566,20 +809,28 @@ export default function AdminUsersPage() {
                       <option value="suspended">Suspended</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Role ID</label>
-                    <input
-                      className={cn(
-                        'w-full px-3 py-2 rounded-xl text-sm',
-                        'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700',
-                        'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                        'transition-all'
-                      )}
-                      value={form.role}
-                      onChange={(e) => setForm({ ...form, role: e.target.value })}
-                      placeholder="UUID"
-                    />
-                  </div>
+                  {canChangeRole && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Role</label>
+                      <select
+                        className={cn(
+                          'w-full px-3 py-2 rounded-xl text-sm',
+                          'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700',
+                          'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                          'transition-all'
+                        )}
+                        value={form.role}
+                        onChange={(e) => setForm({ ...form, role: e.target.value })}
+                      >
+                        <option value="">No role</option>
+                        {roles.map((role) => (
+                          <option key={role.id} value={role.id}>
+                            {role.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </div>
 
                 {/* Author Settings */}
@@ -616,6 +867,29 @@ export default function AdminUsersPage() {
                       />
                     </div>
                   )}
+                </div>
+
+                {/* Argus Access */}
+                <div className={cn(
+                  'p-4 rounded-xl',
+                  'bg-emerald-50/50 dark:bg-emerald-900/10',
+                  'border border-emerald-100 dark:border-emerald-900/30'
+                )}>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 h-4 w-4"
+                      checked={form.has_argus_access}
+                      onChange={(e) => setForm({ ...form, has_argus_access: e.target.checked })}
+                    />
+                    <div className="flex items-center gap-2">
+                      <Shield className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Grant Argus Access</span>
+                    </div>
+                  </label>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    Access to Argus-specific posts and assets
+                  </p>
                 </div>
 
                 {/* Actions */}

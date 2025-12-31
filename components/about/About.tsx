@@ -365,7 +365,6 @@ const AboutSection: React.FC = () => {
         }
       } catch (error) {
         console.error('Error fetching skills:', error);
-        // Fallback to hardcoded DOMAIN_SECTIONS (already set in initial state)
       } finally {
         setIsLoadingSkills(false);
       }
@@ -569,8 +568,8 @@ const AboutSection: React.FC = () => {
                   <Clock className={cn('w-6 h-6', ACCENT_COLORS.purple.icon)} />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">16+ Years</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Product & reliability leadership</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">8+ Years</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Product & Leadership Experience</div>
                 </div>
               </div>
             </motion.div>

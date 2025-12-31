@@ -26,8 +26,6 @@ export async function GET() {
     try {
       const cloudflareAnalyticsClient = getCloudflareAnalyticsClient();
       cloudflareData = await cloudflareAnalyticsClient.getAllAnalyticsData(30);
-      console.log('Dashboard API - Cloudflare timeSeries count:', cloudflareData?.timeSeries?.length || 0);
-      console.log('Dashboard API - Cloudflare visitors total:', cloudflareData?.visitors?.total || 0);
     } catch (error: any) {
       console.error('Failed to fetch Cloudflare analytics:', error);
     }

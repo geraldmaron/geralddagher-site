@@ -17,7 +17,10 @@ const postSchema = z.object({
   published_at: z.string().optional().nullable(),
   seo_title: z.string().optional().nullable(),
   seo_description: z.string().optional().nullable(),
-  seo_keywords: z.string().optional().nullable()
+  seo_keywords: z.string().optional().nullable(),
+  is_argus_content: z.boolean().optional(),
+  argus_users: z.array(z.string()).optional(),
+  document_type: z.string().optional().nullable()
 });
 
 export async function POST(req: NextRequest) {
@@ -49,7 +52,10 @@ export async function POST(req: NextRequest) {
       published_at: data.published_at,
       seo_title: data.seo_title,
       seo_description: data.seo_description,
-      seo_keywords: data.seo_keywords
+      seo_keywords: data.seo_keywords,
+      is_argus_content: data.is_argus_content ?? false,
+      argus_users: data.argus_users?.map((userId) => ({ directus_users_id: userId })) ?? [],
+      document_type: data.document_type ?? 'article'
     } as any);
 
     return NextResponse.json({ data: post }, { status: 201 });

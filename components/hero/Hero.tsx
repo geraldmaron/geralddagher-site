@@ -175,7 +175,7 @@ const Hero: React.FC = () => {
 
             <motion.p
               variants={itemVariants}
-              className="max-w-2xl text-lg leading-relaxed text-slate-100/90"
+              className="max-w-2xl text-base leading-relaxed text-slate-100/90"
             >
               Product and platform leader translating reliability, risk, and delivery discipline into durable business outcomes. I help teams ship fast without breaking trust.
             </motion.p>

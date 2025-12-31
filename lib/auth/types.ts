@@ -8,6 +8,7 @@ export interface User {
   avatar_url: string | null;
   created_at: string;
   updated_at: string;
+  has_argus_access?: boolean;
 }
 
 export interface AuthState {

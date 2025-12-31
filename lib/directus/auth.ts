@@ -38,6 +38,7 @@ export async function getCurrentUser() {
           'first_name',
           'last_name',
           'avatar',
+          'has_argus_access',
           { role: ['id', 'name'] }
         ]
       })

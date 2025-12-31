@@ -65,7 +65,8 @@ export async function getServerUser(): Promise<User | null> {
       teams: [],
       avatar_url: directusUser.avatar || null,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      has_argus_access: (directusUser as any).has_argus_access || false
     };
 
     return user;

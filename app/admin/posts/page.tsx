@@ -50,6 +50,7 @@ export default function AdminPostsPage() {
         const usersData = await usersRes.json();
 
         if (!postsRes.ok || postsData.error) {
+          console.error('Posts API error:', postsData);
           setPosts([]);
         } else {
           setPosts(postsData.data || []);
@@ -61,7 +62,8 @@ export default function AdminPostsPage() {
 
         setLoading(false);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error('Fetch error:', err);
         setLoading(false);
       });
   }, []);

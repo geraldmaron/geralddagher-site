@@ -94,7 +94,6 @@ export default function EditPostPage() {
             if (!Array.isArray(parsedContent)) {
               parsedContent = [];
             }
-            // Normalize image URLs to handle both absolute and relative URLs
             parsedContent = normalizeImageUrls(parsedContent) as Descendant[];
           } catch {
             parsedContent = [];
@@ -259,8 +258,8 @@ export default function EditPostPage() {
   }
 
   return (
-    <div className="fixed inset-0 bg-neutral-50 dark:bg-neutral-950 overflow-y-auto">
-      <div className="sticky top-0 z-20 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 shadow-sm">
+    <div className="fixed inset-0 bg-neutral-50 dark:bg-neutral-950 flex flex-col">
+      <div className="flex-shrink-0 z-20 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 shadow-sm">
         <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <Button
@@ -297,35 +296,36 @@ export default function EditPostPage() {
         </div>
       </div>
 
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex flex-col xl:flex-row gap-6 items-start">
-          <div className="xl:hidden w-full">
-            <PostMetadataForm
-              data={metadata}
-              onChange={(updates) => setMetadata((prev) => ({ ...prev, ...updates }))}
-              onSave={handleSave}
-              isSaving={saving}
-              categories={categories}
-              tags={tags}
-            />
-          </div>
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 h-full">
+          <div className="flex flex-col xl:flex-row gap-6 h-full xl:items-stretch">
+            <div className="xl:hidden w-full">
+              <PostMetadataForm
+                data={metadata}
+                onChange={(updates) => setMetadata((prev) => ({ ...prev, ...updates }))}
+                onSave={handleSave}
+                isSaving={saving}
+                categories={categories}
+                tags={tags}
+              />
+            </div>
 
-          <div className="flex-1 w-full min-w-0">
-            <Editor
-              initialContent={content}
-              onChange={setContent}
-              metadata={metadata as any}
-              onMetadataChange={(meta) =>
-                setMetadata((prev) => ({
-                  ...prev,
-                  ...meta
-                } as typeof metadata))
-              }
-            />
-          </div>
+            <div className="flex-1 w-full min-w-0 flex flex-col">
+              <Editor
+                initialContent={content}
+                onChange={setContent}
+                metadata={metadata as any}
+                onMetadataChange={(meta) =>
+                  setMetadata((prev) => ({
+                    ...prev,
+                    ...meta
+                  } as typeof metadata))
+                }
+                className="flex-1"
+              />
+            </div>
 
-          <div className="hidden xl:block xl:w-96 flex-shrink-0">
-            <div className="sticky top-24">
+            <div className="hidden xl:flex xl:w-96 flex-shrink-0">
               <PostMetadataForm
                 data={metadata}
                 onChange={(updates) => setMetadata((prev) => ({ ...prev, ...updates }))}

@@ -81,12 +81,6 @@ export const Editor: React.FC<EditorProps> = ({
   const editorRef = useRef<HTMLDivElement>(null);
   const [editor] = useState(() => {
     const baseEditor = withHistory(withReact(createEditor()));
-    // Plugin ordering matters: apply from innermost to outermost
-    // 1. Void elements handling (must be first to mark dividers/images as void)
-    // 2. Media handling (base functionality)
-    // 3. Markdown shortcuts (must come before slash/emoji to intercept space key)
-    // 4. Emoji commands
-    // 5. Slash commands (outermost for menu)
     const withVoidEditor = withVoidElements(baseEditor);
     const withMediaEditor = withMediaHandling(withVoidEditor);
     const withMarkdownEditor = withMarkdownShortcuts(withMediaEditor);
@@ -100,10 +94,8 @@ export const Editor: React.FC<EditorProps> = ({
   const floatingToolbar = useFloatingToolbar(editor);
   const emojiPicker = useEmojiPicker(editor);
 
-  // Store the stable initial value for Slate (should never change after mount)
   const [stableInitialValue] = useState<Descendant[]>(() => initialContent);
 
-  // Track the last initialized content to prevent infinite loops
   const lastInitializedContentRef = useRef<string>('');
   const isUpdatingFromPropsRef = useRef(false);
   const hasInitializedRef = useRef(false);
@@ -111,7 +103,6 @@ export const Editor: React.FC<EditorProps> = ({
   useEffect(() => {
     const contentKey = JSON.stringify(initialContent);
 
-    // Run on first mount OR when content actually changes
     const shouldUpdate = !hasInitializedRef.current ||
       (contentKey !== lastInitializedContentRef.current && !isUpdatingFromPropsRef.current);
 
@@ -120,21 +111,16 @@ export const Editor: React.FC<EditorProps> = ({
       lastInitializedContentRef.current = contentKey;
       isUpdatingFromPropsRef.current = true;
 
-      // Initialize the editor state (doesn't trigger re-render)
       editorState.initializeContent(initialContent);
 
-      // Update Slate's content using proper Slate operations
-      // Only update Slate if content is actually different from current
       const currentContentKey = JSON.stringify(editor.children);
       if (currentContentKey !== contentKey) {
         SlateEditor.withoutNormalizing(editor, () => {
-          // Remove all existing content
           const length = editor.children.length;
           for (let i = length - 1; i >= 0; i--) {
             Transforms.removeNodes(editor, { at: [i] });
           }
 
-          // Insert new content
           Transforms.insertNodes(editor, initialContent, { at: [0] });
         });
       }
@@ -166,7 +152,6 @@ export const Editor: React.FC<EditorProps> = ({
         initial = text;
       }
     } catch {
-      /* ignored */
     }
     setLinkValue(initial);
     setShowLinkInput(true);
@@ -183,7 +168,6 @@ export const Editor: React.FC<EditorProps> = ({
         Transforms.select(editor, savedSelectionRef.current);
       }
     } catch {
-      /* ignored */
     }
     const link: CustomElement = {
       type: 'link',
@@ -202,7 +186,6 @@ export const Editor: React.FC<EditorProps> = ({
 
 
   const handleContentChange = useCallback((value: Descendant[]) => {
-    // Don't trigger updates when we're programmatically setting content from props
     if (isUpdatingFromPropsRef.current) {
       return;
     }
@@ -213,7 +196,6 @@ export const Editor: React.FC<EditorProps> = ({
   const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
     if (readOnly) return;
 
-    // Handle slash command menu navigation
     if (slashCommands.isVisible) {
       switch (event.key) {
         case 'ArrowDown':
@@ -238,7 +220,6 @@ export const Editor: React.FC<EditorProps> = ({
       return;
     }
 
-    // Handle emoji picker
     if (emojiPicker.isVisible) {
       switch (event.key) {
         case 'Escape':
@@ -252,9 +233,7 @@ export const Editor: React.FC<EditorProps> = ({
     const { selection } = editor;
     const isCmd = event.metaKey || event.ctrlKey;
 
-    // Standard keyboard shortcuts (Cmd/Ctrl+)
     if (isCmd) {
-      // Helper to toggle marks
       const toggleMark = (mark: string) => {
         const marks = SlateEditor.marks(editor);
         const isActive = marks ? marks[mark as keyof typeof marks] === true : false;
@@ -318,7 +297,6 @@ export const Editor: React.FC<EditorProps> = ({
       }
     }
 
-    // Tab/Shift+Tab for list indentation (prevent losing focus)
     if (event.key === 'Tab' && selection) {
       try {
         const [match] = SlateEditor.nodes(editor, {
@@ -327,16 +305,12 @@ export const Editor: React.FC<EditorProps> = ({
 
         if (match) {
           event.preventDefault();
-          // We're in a list item - prevent tab from losing focus
-          // Future: implement proper indent/outdent logic
           return;
         }
       } catch (error) {
-        // Not in a list
       }
     }
 
-    // Enter key handling for lists
     if (event.key === 'Enter' && selection) {
       try {
         const [listItemMatch] = SlateEditor.nodes(editor, {
@@ -350,25 +324,21 @@ export const Editor: React.FC<EditorProps> = ({
           if (!itemText.trim()) {
             event.preventDefault();
 
-            // Unwrap from list
             Transforms.unwrapNodes(editor, {
               match: n => !SlateEditor.isEditor(n) && SlateElement.isElement(n) &&
                 ['bulleted-list', 'numbered-list'].includes((n as CustomElement).type),
               split: true,
             });
 
-            // Convert to paragraph
             Transforms.setNodes(editor, { type: 'paragraph' } as Partial<CustomElement>);
 
             return;
           }
         }
       } catch (error) {
-        // Not in a list
       }
     }
 
-    // Escape key handling
     if (event.key === 'Escape') {
       floatingToolbar.close();
       slashCommands.closeMenu();
@@ -393,11 +363,9 @@ export const Editor: React.FC<EditorProps> = ({
   const handleEditorClick = useCallback((event: React.MouseEvent) => {
     if (readOnly) return;
 
-    // Focus the editor when clicking anywhere in the editor container
     try {
       ReactEditor.focus(editor);
     } catch (error) {
-      // Swallow focus errors silently in production
     }
   }, [readOnly, editor]);
 
@@ -440,10 +408,8 @@ export const Editor: React.FC<EditorProps> = ({
   }, [onPublish, editor, editorState]);
 
   return (
-    <div className={cn('relative w-full bg-neutral-50 dark:bg-neutral-900', className)} onClick={handleClick}>
-      {/* Main Editor Area */}
-      <div className="w-full flex flex-col">
-        <Card className="w-full flex flex-col min-h-[72vh] shadow-lg border border-neutral-200 dark:border-neutral-800 rounded-lg overflow-hidden">
+    <div className={cn('relative w-full h-full flex flex-col bg-neutral-50 dark:bg-neutral-900', className)} onClick={handleClick}>
+      <Card className="w-full flex-1 flex flex-col shadow-lg border border-neutral-200 dark:border-neutral-800 rounded-lg overflow-hidden">
           <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
             <div className="flex items-center gap-3 flex-1 min-w-0">
               {showTitle ? (
@@ -497,12 +463,10 @@ export const Editor: React.FC<EditorProps> = ({
             </div>
           </div>
 
-          <div className="flex-1 relative flex flex-col overflow-hidden min-h-[60vh]">
-            {/* Formatting Ribbon */}
+          <div className="flex-1 relative flex flex-col overflow-hidden">
             <FormattingRibbon editor={editor} className="border-b border-neutral-200 dark:border-neutral-800" />
 
-            {/* Editor Content */}
-            <div className="flex-1 relative overflow-y-auto min-h-[50vh]">
+            <div className="flex-1 relative overflow-y-auto">
               <Slate
                 editor={editor}
                 initialValue={stableInitialValue}
@@ -510,7 +474,7 @@ export const Editor: React.FC<EditorProps> = ({
               >
                 <div
                   ref={editorRef}
-                  className="min-h-[48vh] py-6 sm:py-8 px-4 sm:px-8 md:px-12 focus-within:outline-none cursor-text"
+                  className="min-h-full py-6 sm:py-8 px-4 sm:px-8 md:px-12 focus-within:outline-none cursor-text"
                   onClick={handleEditorClick}
                 >
                   <Editable
@@ -579,7 +543,6 @@ export const Editor: React.FC<EditorProps> = ({
             </div>
           </div>
 
-          {/* Floating UI Components */}
           <FloatingToolbar
             isVisible={floatingToolbar.isVisible}
             position={floatingToolbar.position}
@@ -624,8 +587,7 @@ export const Editor: React.FC<EditorProps> = ({
             </div>
           </div>
 
-        </Card>
-      </div>
+      </Card>
 
       <AnimatePresence>
         {editorState.isLoading && (

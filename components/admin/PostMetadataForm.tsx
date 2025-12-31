@@ -131,9 +131,9 @@ export function PostMetadataForm({ data, onChange, onSave, isSaving, categories:
   }
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col w-full xl:h-full">
       {/* Mobile: Collapsible Metadata Header */}
-      <div className="lg:hidden">
+      <div className="xl:hidden mb-4">
         <button
           onClick={() => setMetadataExpanded(!metadataExpanded)}
           className="w-full bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow duration-200"
@@ -152,7 +152,7 @@ export function PostMetadataForm({ data, onChange, onSave, isSaving, categories:
         </button>
       </div>
 
-      <div className={cn("space-y-4 transition-all duration-300", !metadataExpanded && "hidden lg:block")}>
+      <div className={cn("space-y-4 transition-all duration-300 xl:flex-1 xl:overflow-y-auto xl:pr-2", !metadataExpanded && "hidden xl:block")}>
         {/* Cover Image */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}

@@ -32,6 +32,7 @@ export interface UserProfile {
   is_author: boolean;
   author_slug: string | null;
   has_argus_access: boolean;
+  argus_message: string | null;
   role: {
     id: string;
     name: string;
@@ -60,6 +61,7 @@ export async function getMyProfile(): Promise<UserProfile | null> {
           'is_author',
           'author_slug',
           'has_argus_access',
+          'argus_message',
           'role.id',
           'role.name',
         ],
@@ -75,7 +77,7 @@ export async function getMyProfile(): Promise<UserProfile | null> {
 
 export async function getAuthorProfile(authorId: string): Promise<UserProfile | null> {
   try {
-    const directus = await getDirectusClient();
+    const directus = await getDirectusClient({ requireAuth: false });
     const users = await directus.request(
       readUsers({
         filter: { id: { _eq: authorId } },

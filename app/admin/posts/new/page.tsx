@@ -36,7 +36,10 @@ export default function NewPostPage() {
     published_at: null as string | null,
     seo_title: null as string | null,
     seo_description: null as string | null,
-    seo_keywords: null as string | null
+    seo_keywords: null as string | null,
+    is_argus_content: false,
+    argus_users: [] as string[],
+    document_type: 1 as number | null
   });
 
   const handleSave = async () => {

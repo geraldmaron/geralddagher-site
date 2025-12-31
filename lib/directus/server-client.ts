@@ -21,12 +21,15 @@ export async function createDirectusServerClient(options?: { requireAuth?: boole
 
   const base = createDirectus(directusUrl).with(rest());
 
-  if (sessionToken) {
-    return base.with(staticToken(sessionToken));
+  if (options?.requireAuth === false) {
+    if (apiToken) {
+      return base.with(staticToken(apiToken));
+    }
+    return base;
   }
 
-  if (options?.requireAuth) {
-    return base;
+  if (sessionToken) {
+    return base.with(staticToken(sessionToken));
   }
 
   if (apiToken) {

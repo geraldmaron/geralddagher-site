@@ -22,6 +22,9 @@ type Post = {
   cover_image?: string | null;
   excerpt?: string | null;
   tags?: { tags_id?: { id: number; name: string } }[];
+  is_argus_content?: boolean;
+  document_type?: { id: number; name: string; slug: string } | number | null;
+  argus_users?: any[];
 };
 
 export default function AdminPostsPage() {
@@ -30,23 +33,37 @@ export default function AdminPostsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [contentTypeFilter, setContentTypeFilter] = useState<'all' | 'regular' | 'argus'>('all');
+  const [authorFilter, setAuthorFilter] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [authors, setAuthors] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch('/api/admin/posts/list')
-      .then(async r => {
-        const d = await r.json();
-        if (!r.ok || d.error) {
+    Promise.all([
+      fetch('/api/admin/posts/list'),
+      fetch('/api/admin/users')
+    ])
+      .then(async ([postsRes, usersRes]) => {
+        const postsData = await postsRes.json();
+        const usersData = await usersRes.json();
+
+        if (!postsRes.ok || postsData.error) {
+          console.error('Posts API error:', postsData);
           setPosts([]);
-          setLoading(false);
-          return;
+        } else {
+          setPosts(postsData.data || []);
         }
-        setPosts(d.data || []);
+
+        if (usersRes.ok && usersData.data) {
+          setAuthors(usersData.data.filter((u: any) => u.is_author));
+        }
+
         setLoading(false);
       })
       .catch((err) => {
+        console.error('Fetch error:', err);
         setLoading(false);
       });
   }, []);
@@ -67,9 +84,18 @@ export default function AdminPostsPage() {
 
       const matchesSearch = q ? haystack.includes(q) : true;
       const matchesStatus = statusFilter === 'all' || post.status === statusFilter;
-      return matchesSearch && matchesStatus;
+
+      const matchesContentType =
+        contentTypeFilter === 'all' ||
+        (contentTypeFilter === 'argus' && post.is_argus_content === true) ||
+        (contentTypeFilter === 'regular' && (post.is_argus_content === false || post.is_argus_content === undefined || post.is_argus_content === null));
+
+      const authorId = typeof post.author === 'object' ? post.author?.id : post.author;
+      const matchesAuthor = authorFilter === 'all' || authorId === authorFilter;
+
+      return matchesSearch && matchesStatus && matchesContentType && matchesAuthor;
     });
-  }, [posts, searchQuery, statusFilter]);
+  }, [posts, searchQuery, statusFilter, contentTypeFilter, authorFilter]);
 
   const StatusBadge = ({ status }: { status?: string }) => {
     const isPublished = status === 'published';
@@ -174,6 +200,37 @@ export default function AdminPostsPage() {
           <option value="published">Published</option>
           <option value="draft">Draft</option>
         </select>
+        <select
+          value={contentTypeFilter}
+          onChange={(e) => setContentTypeFilter(e.target.value as 'all' | 'regular' | 'argus')}
+          className={cn(
+            'px-4 py-2.5 rounded-xl text-sm font-medium',
+            'bg-gray-50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
+            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            'transition-all duration-200'
+          )}
+        >
+          <option value="all">All Types</option>
+          <option value="regular">Regular</option>
+          <option value="argus">Argus</option>
+        </select>
+        <select
+          value={authorFilter}
+          onChange={(e) => setAuthorFilter(e.target.value)}
+          className={cn(
+            'px-4 py-2.5 rounded-xl text-sm font-medium',
+            'bg-gray-50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
+            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            'transition-all duration-200'
+          )}
+        >
+          <option value="all">All Authors</option>
+          {authors.map((author) => (
+            <option key={author.id} value={author.id}>
+              {author.first_name} {author.last_name}
+            </option>
+          ))}
+        </select>
         <div className="flex gap-2">
           <button
             onClick={() => setViewMode('list')}
@@ -218,15 +275,15 @@ export default function AdminPostsPage() {
           <div className="text-center py-12">
             <FileText className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              {searchQuery || statusFilter !== 'all' ? 'No posts match your filters' : 'No posts yet'}
+              {searchQuery || statusFilter !== 'all' || contentTypeFilter !== 'all' || authorFilter !== 'all' ? 'No posts match your filters' : 'No posts yet'}
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              {searchQuery || statusFilter !== 'all' 
-                ? 'Try adjusting your search or filters' 
+              {searchQuery || statusFilter !== 'all' || contentTypeFilter !== 'all' || authorFilter !== 'all'
+                ? 'Try adjusting your search or filters'
                 : 'Get started by creating your first post'
               }
             </p>
-            {!searchQuery && statusFilter === 'all' && (
+            {!searchQuery && statusFilter === 'all' && contentTypeFilter === 'all' && authorFilter === 'all' && (
               <Link href="/admin/posts/new">
                 <Button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-xl font-medium">
                   Create Your First Post
@@ -273,12 +330,22 @@ export default function AdminPostsPage() {
                             {formatDistanceToNow(new Date(post.published_at), { addSuffix: true })}
                           </span>
                         )}
-                        {post.category && (
+                        {post.is_argus_content && (
+                          <span className="px-2.5 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium border border-blue-200 dark:border-blue-800">
+                            🛡️ Argus
+                          </span>
+                        )}
+                        {post.document_type && (
+                          <span className="px-2.5 py-1 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full text-xs font-medium border border-gray-200 dark:border-gray-700">
+                            {typeof post.document_type === 'object' ? post.document_type.name : post.document_type}
+                          </span>
+                        )}
+                        {post.category && !post.is_argus_content && (
                           <span className="px-2.5 py-1 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 rounded-full text-xs font-medium border border-purple-200 dark:border-purple-800">
                             {post.category.name}
                           </span>
                         )}
-                        {post.featured && (
+                        {post.featured && !post.is_argus_content && (
                           <span className="px-2.5 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 rounded-full text-xs font-medium border border-amber-200 dark:border-amber-800">
                             ⭐ Featured
                           </span>
@@ -366,7 +433,15 @@ export default function AdminPostsPage() {
                         <StatusBadge status={post.status} />
                       </div>
                       <div className="absolute bottom-3 left-3 right-3 flex items-center gap-2 text-xs text-white/80">
-                        {post.category && (
+                        {post.is_argus_content && (
+                          <span className="px-2 py-1 rounded-full bg-blue-500/30 border border-blue-400/50">🛡️ Argus</span>
+                        )}
+                        {post.document_type && (
+                          <span className="px-2 py-1 rounded-full bg-white/15 border border-white/20">
+                            {typeof post.document_type === 'object' ? post.document_type.name : post.document_type}
+                          </span>
+                        )}
+                        {post.category && !post.is_argus_content && (
                           <span className="px-2 py-1 rounded-full bg-white/15 border border-white/20">{post.category.name}</span>
                         )}
                         {post.published_at && (
@@ -394,7 +469,7 @@ export default function AdminPostsPage() {
                           {post.view_count}
                         </span>
                       )}
-                      {post.featured && (
+                      {post.featured && !post.is_argus_content && (
                         <span className="px-2 py-1 rounded-full bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">Featured</span>
                       )}
                     </div>

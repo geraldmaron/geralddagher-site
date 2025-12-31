@@ -198,3 +198,39 @@ export async function updatePost(id: number, data: Partial<Post>) {
 export async function deletePost(id: number) {
   return await getClient().request(deleteItem('posts', id));
 }
+
+export async function getArgusPosts(userId: string, isAdmin: boolean = false) {
+  const filter: any = {
+    is_argus_content: { _eq: true }
+  };
+
+  if (!isAdmin) {
+    filter._or = [
+      { 'argus_users.directus_users_id': { _eq: userId } },
+      { argus_users: { _null: true } }
+    ];
+  }
+
+  const posts = await getClient().request(
+    readItems('posts', {
+      filter,
+      sort: ['-published_at'],
+      fields: [
+        'id',
+        'title',
+        'slug',
+        'excerpt',
+        'content',
+        'cover_image',
+        'status',
+        'published_at',
+        'reading_time',
+        { document_type: ['id', 'name', 'slug'] },
+        { author: ['id', 'first_name', 'last_name', 'avatar', 'author_slug'] },
+        { argus_users: [{ directus_users_id: ['id', 'first_name', 'last_name'] }] }
+      ]
+    })
+  );
+
+  return posts.map(normalizePost);
+}

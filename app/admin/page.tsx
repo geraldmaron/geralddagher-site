@@ -87,12 +87,6 @@ export default function AdminDashboard() {
     };
   });
 
-  if (typeof window !== 'undefined' && data?.cloudflare?.timeSeries) {
-    console.log('Analytics Debug - Raw time series count:', rawTimeSeries.length);
-    console.log('Analytics Debug - Processed time series count:', timeSeriesData.length);
-    console.log('Analytics Debug - Sample data:', timeSeriesData.slice(0, 3));
-  }
-
   const countryData = data?.cloudflare?.requestsByCountry?.slice(0, 10).map((item: any) => ({
     name: item.country || 'Unknown',
     value: item.requests || 0,

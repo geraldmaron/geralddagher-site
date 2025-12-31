@@ -34,6 +34,20 @@ export interface Tag {
   sort_order: number;
 }
 
+export interface ArgusUserPost {
+  id: number;
+  posts_id: Post | number;
+  directus_users_id: DirectusUser | string;
+}
+
+export interface DocumentType {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  sort: number | null;
+}
+
 export interface Post {
   id: number;
   title: string;
@@ -54,6 +68,9 @@ export interface Post {
   seo_title: string | null;
   seo_description: string | null;
   seo_keywords: string | null;
+  is_argus_content: boolean;
+  document_type: DocumentType | number | null;
+  argus_users: ArgusUserPost[];
 }
 
 export interface PostTag {

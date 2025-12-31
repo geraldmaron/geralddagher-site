@@ -39,7 +39,7 @@ export default function NewPostPage() {
     seo_keywords: null as string | null,
     is_argus_content: false,
     argus_users: [] as string[],
-    document_type: 'article' as string | null
+    document_type: 1 as number | null
   });
 
   const handleSave = async () => {

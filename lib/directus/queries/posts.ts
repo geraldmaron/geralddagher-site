@@ -225,7 +225,7 @@ export async function getArgusPosts(userId: string, isAdmin: boolean = false) {
         'status',
         'published_at',
         'reading_time',
-        'document_type',
+        { document_type: ['id', 'name', 'slug'] },
         { author: ['id', 'first_name', 'last_name', 'avatar', 'author_slug'] },
         { argus_users: [{ directus_users_id: ['id', 'first_name', 'last_name'] }] }
       ]

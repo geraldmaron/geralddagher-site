@@ -9,20 +9,34 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const isAuthorFilter = searchParams.get('filter[is_author][_eq]');
+    const hasArgusAccessFilter = searchParams.get('filter[has_argus_access][_eq]');
 
-    const filter = isAuthorFilter === 'true' ? { is_author: { _eq: true } } : {};
+    const filter: any = {};
+
+    if (isAuthorFilter === 'true') {
+      filter.is_author = { _eq: true };
+    }
+
+    if (hasArgusAccessFilter === 'true') {
+      filter.has_argus_access = { _eq: true };
+    }
 
     const client = await createDirectusServerClient({ requireAuth: false });
-    const data = await client.request(
-      readUsers({
-        filter,
-        fields: ['id', 'first_name', 'last_name', 'email', 'status', 'role.id', 'role.name', 'is_author', 'has_argus_access', 'author_slug', 'avatar', 'bio', 'job_title', 'company', 'social_links']
-      })
-    );
+
+    const queryOptions: any = {
+      fields: ['id', 'first_name', 'last_name', 'email', 'status', 'role.id', 'role.name', 'is_author', 'has_argus_access', 'author_slug', 'avatar', 'bio', 'job_title', 'company', 'social_links']
+    };
+
+    if (Object.keys(filter).length > 0) {
+      queryOptions.filter = filter;
+    }
+
+    const data = await client.request(readUsers(queryOptions));
 
     return NextResponse.json({ data });
   } catch (error: any) {
-    return NextResponse.json({ error: 'Failed to load users' }, { status: 500 });
+    console.error('Error loading users:', error);
+    return NextResponse.json({ error: 'Failed to load users', details: error.message }, { status: 500 });
   }
 }
 

@@ -23,7 +23,7 @@ type Post = {
   excerpt?: string | null;
   tags?: { tags_id?: { id: number; name: string } }[];
   is_argus_content?: boolean;
-  document_type?: string | null;
+  document_type?: { id: number; name: string; slug: string } | number | null;
   argus_users?: any[];
 };
 
@@ -337,7 +337,7 @@ export default function AdminPostsPage() {
                         )}
                         {post.document_type && (
                           <span className="px-2.5 py-1 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full text-xs font-medium border border-gray-200 dark:border-gray-700">
-                            {post.document_type}
+                            {typeof post.document_type === 'object' ? post.document_type.name : post.document_type}
                           </span>
                         )}
                         {post.category && !post.is_argus_content && (
@@ -437,7 +437,9 @@ export default function AdminPostsPage() {
                           <span className="px-2 py-1 rounded-full bg-blue-500/30 border border-blue-400/50">🛡️ Argus</span>
                         )}
                         {post.document_type && (
-                          <span className="px-2 py-1 rounded-full bg-white/15 border border-white/20">{post.document_type}</span>
+                          <span className="px-2 py-1 rounded-full bg-white/15 border border-white/20">
+                            {typeof post.document_type === 'object' ? post.document_type.name : post.document_type}
+                          </span>
                         )}
                         {post.category && !post.is_argus_content && (
                           <span className="px-2 py-1 rounded-full bg-white/15 border border-white/20">{post.category.name}</span>

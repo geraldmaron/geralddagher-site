@@ -29,6 +29,7 @@ import {
   Monitor,
   LogOut,
   Shield,
+  FileType,
 } from 'lucide-react';
 import { useTheme } from '@/components/core/ThemeProvider';
 import { useAuth } from '@/lib/auth/provider';
@@ -44,6 +45,7 @@ type NavItem = {
   icon: React.ComponentType<{ className?: string }>;
   adminOnly?: boolean;
   publicOnly?: boolean;
+  children?: NavItem[];
 };
 
 const publicNavigation: NavItem[] = [
@@ -55,22 +57,93 @@ const publicNavigation: NavItem[] = [
 const adminNavigation: NavItem[] = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Posts', href: '/admin/posts', icon: FileText },
-  { name: 'Categories', href: '/admin/categories', icon: FolderTree },
-  { name: 'Tags', href: '/admin/tags', icon: Tag },
+  {
+    name: 'Classifications',
+    href: '#',
+    icon: FolderTree,
+    children: [
+      { name: 'Categories', href: '/admin/categories', icon: FolderTree },
+      { name: 'Tags', href: '/admin/tags', icon: Tag },
+      { name: 'Doc Types', href: '/admin/document-types', icon: FileType },
+    ]
+  },
   { name: 'Assets', href: '/admin/assets', icon: ImageIcon },
   { name: 'Users', href: '/admin/users', icon: Users },
   { name: 'TMP', href: '/admin/tmp-submissions', icon: Inbox },
 ];
 
-const NavLink: React.FC<{ 
+const NavItemComponent: React.FC<{
   item: NavItem;
   isActive: boolean;
   onClick?: () => void;
   variant?: 'desktop' | 'mobile';
-}> = ({ item, isActive, onClick, variant = 'desktop' }) => {
+  pathname: string;
+}> = ({ item, isActive, onClick, variant = 'desktop', pathname }) => {
   const Icon = item.icon;
-  
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const hasChildren = item.children && item.children.length > 0;
+
+  const isChildActive = hasChildren && item.children?.some(child =>
+    child.href === pathname || (child.href !== '/' && pathname.startsWith(child.href))
+  );
+
   if (variant === 'mobile') {
+    if (hasChildren) {
+      return (
+        <div>
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className={cn(
+              'w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200',
+              isChildActive
+                ? 'bg-blue-500 text-white shadow-lg'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+            )}
+          >
+            <div className="flex items-center space-x-3">
+              <Icon className="w-5 h-5" />
+              <span className="font-medium">{item.name}</span>
+            </div>
+            <ChevronDown className={cn(
+              "w-4 h-4 transition-transform duration-200",
+              isDropdownOpen && "rotate-180"
+            )} />
+          </button>
+          <AnimatePresence>
+            {isDropdownOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="ml-4 mt-1 space-y-1 overflow-hidden"
+              >
+                {item.children?.map((child) => {
+                  const ChildIcon = child.icon;
+                  const childActive = child.href === pathname || (child.href !== '/' && pathname.startsWith(child.href));
+                  return (
+                    <Link
+                      key={child.name}
+                      href={child.href}
+                      onClick={onClick}
+                      className={cn(
+                        'flex items-center space-x-3 px-4 py-2 rounded-lg transition-all duration-200',
+                        childActive
+                          ? 'bg-blue-400 text-white'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                      )}
+                    >
+                      <ChildIcon className="w-4 h-4" />
+                      <span className="text-sm font-medium">{child.name}</span>
+                    </Link>
+                  );
+                })}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      );
+    }
+
     return (
       <Link
         href={item.href}
@@ -88,6 +161,70 @@ const NavLink: React.FC<{
     );
   }
 
+  if (hasChildren) {
+    return (
+      <div
+        className="relative"
+        onMouseEnter={() => setIsDropdownOpen(true)}
+        onMouseLeave={() => setIsDropdownOpen(false)}
+      >
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className={cn(
+            'relative flex items-center space-x-2 px-3 py-2 rounded-xl transition-all duration-200',
+            'group focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+            isChildActive
+              ? 'bg-white/80 dark:bg-gray-800/80 shadow-lg border border-gray-200/50 dark:border-gray-700/50 text-gray-900 dark:text-gray-100'
+              : 'hover:bg-white/50 dark:hover:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+          )}
+        >
+          <Icon className="w-4 h-4" />
+          <span className="text-sm font-medium whitespace-nowrap">{item.name}</span>
+          <ChevronDown className="w-3 h-3" />
+        </motion.button>
+
+        <AnimatePresence>
+          {isDropdownOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.15 }}
+              className={cn(
+                'absolute top-full left-0 mt-1 min-w-[180px] rounded-xl shadow-xl',
+                'bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl',
+                'border border-gray-200/50 dark:border-gray-700/50',
+                'py-2 z-50'
+              )}
+            >
+              {item.children?.map((child) => {
+                const ChildIcon = child.icon;
+                const childActive = child.href === pathname || (child.href !== '/' && pathname.startsWith(child.href));
+                return (
+                  <Link
+                    key={child.name}
+                    href={child.href}
+                    onClick={onClick}
+                    className={cn(
+                      'flex items-center space-x-2 px-4 py-2 text-sm transition-colors',
+                      childActive
+                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                    )}
+                  >
+                    <ChildIcon className="w-4 h-4" />
+                    <span className="font-medium whitespace-nowrap">{child.name}</span>
+                  </Link>
+                );
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  }
+
   return (
     <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
       <Link
@@ -102,7 +239,7 @@ const NavLink: React.FC<{
         )}
       >
         <Icon className="w-4 h-4" />
-        <span className="text-sm font-medium">{item.name}</span>
+        <span className="text-sm font-medium whitespace-nowrap">{item.name}</span>
         {isActive && (
           <motion.div
             layoutId="nav-indicator"
@@ -121,30 +258,30 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  
+
   const { isDarkMode, themeMode, setThemeMode } = useTheme();
   const { user, signOut, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  
+
   // Determine if we're in admin area
   const isAdminArea = pathname.startsWith('/admin');
   const isAuthenticated = !!user;
   const hasAdmin = user && hasAdminAccess(user);
-  
+
   // Logo source based on theme
   const [logoSrc, setLogoSrc] = useState('/Dagher_Logo_2024.png');
-  
+
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-  
+
   useEffect(() => {
     setLogoSrc(isDarkMode ? '/Dagher_Logo_2024_WH.png' : '/Dagher_Logo_2024.png');
   }, [isDarkMode]);
-  
+
   const navigationItems = useMemo(() => {
     if (isAdminArea && hasAdmin) {
       return adminNavigation;
@@ -160,14 +297,14 @@ export default function Navbar() {
     }
     return items;
   }, [isAdminArea, hasAdmin, user]);
-  
+
   const isActivePath = (href: string) => {
     if (href === '/admin') return pathname === href;
     if (href === '/argus') return pathname === href || pathname.startsWith('/argus/');
     if (href === '/') return pathname === href;
     return pathname.startsWith(href);
   };
-  
+
   const handleLogout = async () => {
     try {
       await signOut();
@@ -179,7 +316,7 @@ export default function Navbar() {
       console.error('Logout failed:', error);
     }
   };
-  
+
   const themeOptions = [
     { value: 'light', label: 'Light', icon: Sun },
     { value: 'dark', label: 'Dark', icon: Moon },
@@ -190,7 +327,7 @@ export default function Navbar() {
     <>
       {/* Main Navigation Header */}
       <motion.header
-        role="banner" 
+        role="banner"
         className={cn(
           'fixed top-0 w-full transition-all duration-500 ease-out z-50',
           'border-b border-gray-200/50 dark:border-gray-800/50'
@@ -203,8 +340,8 @@ export default function Navbar() {
         <motion.div
           className={cn(
             'w-full transition-all duration-500 ease-out',
-            isScrolled 
-              ? 'bg-white/95 dark:bg-black/95 shadow-lg shadow-gray-900/5 dark:shadow-gray-900/20' 
+            isScrolled
+              ? 'bg-white/95 dark:bg-black/95 shadow-lg shadow-gray-900/5 dark:shadow-gray-900/20'
               : 'bg-white/90 dark:bg-black/90'
           )}
           style={{
@@ -214,16 +351,16 @@ export default function Navbar() {
         >
           <nav className="h-16 lg:h-20 w-full px-2 sm:px-4 lg:px-6">
             <div className="h-full max-w-7xl mx-auto flex items-center justify-between">
-              
+
               {/* Logo */}
-              <motion.div 
+              <motion.div
                 className="flex items-center"
                 whileHover={{ scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 400, damping: 25 }}
               >
-                <Link 
+                <Link
                   href="/"
-                  aria-label="Home" 
+                  aria-label="Home"
                   className={cn(
                     'flex items-center space-x-3 group focus:outline-none focus:ring-2',
                     'focus:ring-blue-500 rounded-lg p-1 transition-all duration-200'
@@ -247,12 +384,13 @@ export default function Navbar() {
               {/* Desktop Navigation */}
               <div className="hidden lg:flex items-center space-x-1">
                 {navigationItems.map((item) => (
-                  <NavLink
+                  <NavItemComponent
                     key={item.name}
                     item={item}
                     isActive={isActivePath(item.href)}
+                    pathname={pathname}
                   />
-                ))}                
+                ))}
               </div>
 
               {/* Right Side Actions */}
@@ -297,7 +435,7 @@ export default function Navbar() {
                   {themeMode === 'dark' && <Moon className="w-5 h-5 text-blue-400" />}
                   {themeMode === 'system' && <Monitor className="w-5 h-5 text-gray-500 dark:text-gray-400" />}
                 </motion.button>
-                
+
                 {/* Quick Actions - Desktop only */}
                 {isAdminArea && (
                   <motion.button
@@ -437,7 +575,7 @@ export default function Navbar() {
                     </div>
                   ) : !loading && (
                     <div className="flex items-center space-x-2">
-                      <motion.button 
+                      <motion.button
                         onClick={() => router.push('/login')}
                         className={cn(
                           'flex items-center px-4 py-2 rounded-xl transition-all duration-200',
@@ -536,12 +674,13 @@ export default function Navbar() {
                 {/* Navigation Links */}
                 <div className="space-y-2">
                   {navigationItems.map((item) => (
-                    <NavLink
+                    <NavItemComponent
                       key={item.name}
                       item={item}
                       isActive={isActivePath(item.href)}
                       variant="mobile"
                       onClick={() => setIsMenuOpen(false)}
+                      pathname={pathname}
                     />
                   ))}
                 </div>
@@ -622,7 +761,7 @@ export default function Navbar() {
                       </p>
                     </div>
                   </div>
-                  
+
                   {/* Admin/Site toggle for mobile */}
                   {hasAdmin && (
                     <Link
@@ -634,7 +773,7 @@ export default function Navbar() {
                       <span className="font-medium">{isAdminArea ? 'Visit Site' : 'Admin Dashboard'}</span>
                     </Link>
                   )}
-                  
+
                   <button
                     onClick={() => {
                       handleLogout();
@@ -662,7 +801,7 @@ export default function Navbar() {
                     <LogIn className="w-5 h-5" />
                     <span>Sign in</span>
                   </button>
-                  
+
                   {!isAdminArea && (
                     <button
                       onClick={() => {

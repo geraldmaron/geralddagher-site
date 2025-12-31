@@ -48,6 +48,13 @@ interface ArgusUser {
   email: string;
 }
 
+interface DocumentType {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string | null;
+}
+
 interface PostFormData {
   title: string;
   slug: string;
@@ -61,7 +68,7 @@ interface PostFormData {
   published_at: string | null;
   is_argus_content: boolean;
   argus_users: string[];
-  document_type: string | null;
+  document_type: number | null;
 }
 
 interface PostMetadataFormProps {
@@ -78,41 +85,60 @@ export function PostMetadataForm({ data, onChange, onSave, isSaving, categories:
   const [tags, setTags] = useState<Tag[]>(providedTags || []);
   const [authors, setAuthors] = useState<Author[]>([]);
   const [argusUsers, setArgusUsers] = useState<ArgusUser[]>([]);
+  const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([]);
   const [loading, setLoading] = useState(!providedCategories || !providedTags);
   const [metadataExpanded, setMetadataExpanded] = useState(false);
 
   const GERALD_USER_ID = '9b1b7df2-b252-4a55-978a-f550465d6470';
+  const LETTER_TYPE_ID = 2;
 
   useEffect(() => {
     if (providedCategories && providedTags) {
       setCategories(providedCategories);
       setTags(providedTags);
-      setLoading(false);
+      loadMetadata(true); // Still need to load authors, argus users, and document types
       return;
     }
-    loadMetadata();
+    loadMetadata(false);
   }, [providedCategories, providedTags]);
 
-  const loadMetadata = async () => {
+  const loadMetadata = async (skipCategoriesAndTags = false) => {
     try {
-      const [categoriesRes, tagsRes, authorsRes, argusUsersRes] = await Promise.all([
-        fetch('/api/admin/categories'),
-        fetch('/api/admin/tags'),
-        fetch('/api/admin/users?filter[is_author][_eq]=true'),
-        fetch('/api/admin/users?filter[has_argus_access][_eq]=true'),
-      ]);
+      const requests = [];
 
-      const categoriesData = await categoriesRes.json();
-      const tagsData = await tagsRes.json();
-      const authorsData = await authorsRes.json();
-      const argusUsersData = await argusUsersRes.json();
+      if (!skipCategoriesAndTags) {
+        requests.push(fetch('/api/admin/categories'));
+        requests.push(fetch('/api/admin/tags'));
+      }
 
-      setCategories(categoriesData.data || []);
-      setTags(tagsData.data || []);
+      requests.push(fetch('/api/admin/users?filter[is_author][_eq]=true'));
+      requests.push(fetch('/api/admin/users?filter[has_argus_access][_eq]=true'));
+      requests.push(fetch('/api/admin/document-types'));
+
+      const responses = await Promise.all(requests);
+
+      let categoriesData, tagsData, authorsData, argusUsersData, documentTypesData;
+
+      if (!skipCategoriesAndTags) {
+        categoriesData = await responses[0].json();
+        tagsData = await responses[1].json();
+        authorsData = await responses[2].json();
+        argusUsersData = await responses[3].json();
+        documentTypesData = await responses[4].json();
+
+        setCategories(categoriesData.data || []);
+        setTags(tagsData.data || []);
+      } else {
+        authorsData = await responses[0].json();
+        argusUsersData = await responses[1].json();
+        documentTypesData = await responses[2].json();
+      }
+
       setAuthors(authorsData.data || []);
       setArgusUsers(argusUsersData.data || []);
+      setDocumentTypes(documentTypesData.data || []);
     } catch (error) {
-      toast.error('Failed to load categories and tags');
+      toast.error('Failed to load metadata');
     } finally {
       setLoading(false);
     }
@@ -127,15 +153,19 @@ export function PostMetadataForm({ data, onChange, onSave, isSaving, categories:
         updates.author = GERALD_USER_ID;
       }
 
-      if (data.document_type !== 'letter') {
-        updates.document_type = 'letter';
+      if (data.document_type !== LETTER_TYPE_ID) {
+        updates.document_type = LETTER_TYPE_ID;
       }
 
       if (Object.keys(updates).length > 0) {
         onChange(updates);
       }
+    } else {
+      if (data.document_type !== null) {
+        onChange({ document_type: null });
+      }
     }
-  }, [data.is_argus_content, data.author, data.document_type, GERALD_USER_ID, onChange]);
+  }, [data.is_argus_content, data.author, data.document_type, GERALD_USER_ID, LETTER_TYPE_ID, onChange]);
 
   const generateSlug = useCallback((title: string) => {
     return title
@@ -214,6 +244,35 @@ export function PostMetadataForm({ data, onChange, onSave, isSaving, categories:
           />
         </motion.div>
 
+        {/* Argus Content Toggle */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.025 }}
+          className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-5 shadow-sm hover:shadow-md transition-shadow duration-200"
+        >
+          <div className="flex items-center justify-between">
+            <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+              <Shield className="h-4 w-4 text-blue-600" />
+              Argus Content
+            </label>
+            <button
+              onClick={() => onChange({ is_argus_content: !data.is_argus_content })}
+              className={cn(
+                'relative w-12 h-6 rounded-full transition-colors',
+                data.is_argus_content ? 'bg-blue-600' : 'bg-neutral-300 dark:bg-neutral-700'
+              )}
+            >
+              <span
+                className={cn(
+                  'absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform',
+                  data.is_argus_content ? 'left-6' : 'left-0.5'
+                )}
+              />
+            </button>
+          </div>
+        </motion.div>
+
         {/* Basic Info */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -276,67 +335,54 @@ export function PostMetadataForm({ data, onChange, onSave, isSaving, categories:
             </label>
             <select
               value={data.author || ''}
-              onChange={(e) => onChange({ author: e.target.value || null })}
+              onChange={(e) => {
+                console.log('Author selected:', e.target.value);
+                onChange({ author: e.target.value || null });
+              }}
               className="w-full px-4 py-2.5 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm cursor-pointer"
               disabled={data.is_argus_content}
             >
               <option value="">No author</option>
-              {authors.map((author) => (
-                <option key={author.id} value={author.id}>
-                  {author.first_name} {author.last_name}
-                </option>
-              ))}
+              {authors.length === 0 && <option disabled>Loading authors...</option>}
+              {authors.map((author) => {
+                console.log('Rendering author option:', author);
+                return (
+                  <option key={author.id} value={author.id}>
+                    {author.first_name} {author.last_name}
+                  </option>
+                );
+              })}
             </select>
           </div>
         </motion.div>
 
-        {/* Argus Controls */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.125 }}
-          className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-4 shadow-sm hover:shadow-md transition-shadow duration-200"
-        >
-          <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-              <Shield className="h-4 w-4 text-blue-600" />
-              Argus Content
-            </label>
-            <button
-              onClick={() => onChange({ is_argus_content: !data.is_argus_content })}
-              className={cn(
-                'relative w-12 h-6 rounded-full transition-colors',
-                data.is_argus_content ? 'bg-blue-600' : 'bg-neutral-300 dark:bg-neutral-700'
-              )}
-            >
-              <span
-                className={cn(
-                  'absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform',
-                  data.is_argus_content ? 'left-6' : 'left-0.5'
-                )}
-              />
-            </button>
-          </div>
+        {/* Argus Settings */}
+        {data.is_argus_content && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.125 }}
+            className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-4 shadow-sm hover:shadow-md transition-shadow duration-200"
+          >
+            <div>
+              <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
+                <FileType className="h-4 w-4 text-blue-600" />
+                Document Type
+              </label>
+              <select
+                value={data.document_type || LETTER_TYPE_ID}
+                onChange={(e) => onChange({ document_type: Number(e.target.value) })}
+                className="w-full px-4 py-2.5 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm cursor-pointer"
+                disabled={data.is_argus_content}
+              >
+                {documentTypes.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {type.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
-              <FileType className="h-4 w-4 text-blue-600" />
-              Document Type
-            </label>
-            <select
-              value={data.document_type || 'article'}
-              onChange={(e) => onChange({ document_type: e.target.value })}
-              className="w-full px-4 py-2.5 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm cursor-pointer"
-              disabled={data.is_argus_content}
-            >
-              <option value="article">Article</option>
-              <option value="letter">Letter</option>
-              <option value="note">Note</option>
-              <option value="guide">Guide</option>
-            </select>
-          </div>
-
-          {data.is_argus_content && (
             <div>
               <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-3">
                 <User className="h-4 w-4 text-blue-600" />
@@ -365,8 +411,8 @@ export function PostMetadataForm({ data, onChange, onSave, isSaving, categories:
                 })}
               </div>
             </div>
-          )}
-        </motion.div>
+          </motion.div>
+        )}
 
         {/* Category & Tags */}
         <motion.div

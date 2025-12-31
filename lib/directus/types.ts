@@ -40,6 +40,14 @@ export interface ArgusUserPost {
   directus_users_id: DirectusUser | string;
 }
 
+export interface DocumentType {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  sort: number | null;
+}
+
 export interface Post {
   id: number;
   title: string;
@@ -61,7 +69,7 @@ export interface Post {
   seo_description: string | null;
   seo_keywords: string | null;
   is_argus_content: boolean;
-  document_type: 'Article' | 'Letter' | 'Note' | 'Guide' | null;
+  document_type: DocumentType | number | null;
   argus_users: ArgusUserPost[];
 }
 

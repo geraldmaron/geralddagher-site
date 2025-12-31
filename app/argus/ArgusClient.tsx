@@ -4,6 +4,7 @@ import { UserProfile } from '@/lib/directus/queries/users';
 import { Post } from '@/lib/directus/types';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import { Avatar } from '@/components/core/Avatar';
 
 interface ArgusClientProps {
   user: UserProfile;
@@ -31,13 +32,13 @@ export default function ArgusClient({ user, posts }: ArgusClientProps) {
               >
                 Home
               </Link>
-              {user.avatar && (
-                <img
-                  src={user.avatar}
-                  alt={`${user.first_name} ${user.last_name}`}
-                  className="w-10 h-10 rounded-full"
-                />
-              )}
+              <Avatar
+                avatarId={user.avatar}
+                firstName={user.first_name}
+                lastName={user.last_name}
+                email={user.email}
+                size="md"
+              />
             </div>
           </div>
         </div>
@@ -59,7 +60,7 @@ export default function ArgusClient({ user, posts }: ArgusClientProps) {
 
         <div className="border-t border-gray-200 dark:border-gray-800 pt-12">
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-            Your Letters
+            Your Messages
           </h3>
 
           {posts.length === 0 ? (
@@ -70,7 +71,7 @@ export default function ArgusClient({ user, posts }: ArgusClientProps) {
                 </svg>
               </div>
               <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                No letters yet
+                No messages yet
               </h4>
               <p className="text-gray-600 dark:text-gray-400">
                 Check back later for new content
@@ -97,7 +98,7 @@ export default function ArgusClient({ user, posts }: ArgusClientProps) {
                     </div>
                     {post.document_type && (
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300">
-                        {post.document_type}
+                        {typeof post.document_type === 'object' ? post.document_type.name : post.document_type}
                       </span>
                     )}
                   </div>

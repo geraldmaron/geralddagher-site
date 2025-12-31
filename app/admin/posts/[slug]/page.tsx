@@ -27,7 +27,7 @@ type PostRecord = {
   published_at?: string | null;
   is_argus_content?: boolean;
   argus_users?: any[];
-  document_type?: string | null;
+  document_type?: number | null;
 };
 
 export default function EditPostPage() {
@@ -52,7 +52,7 @@ export default function EditPostPage() {
     published_at: null as string | null,
     is_argus_content: false,
     argus_users: [] as string[],
-    document_type: null as string | null
+    document_type: null as number | null
   });
 
   useEffect(() => {
@@ -129,7 +129,7 @@ export default function EditPostPage() {
           published_at: data.published_at || null,
           is_argus_content: data.is_argus_content || false,
           argus_users: (data.argus_users || []).map((u: any) => u.directus_users_id || u),
-          document_type: data.document_type || null
+          document_type: typeof data.document_type === 'object' ? (data.document_type as any)?.id || null : (data.document_type || null)
         });
       } catch (error: any) {
         toast.error(error?.message || 'Failed to load post');

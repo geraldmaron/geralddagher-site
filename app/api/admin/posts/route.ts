@@ -20,7 +20,7 @@ const postSchema = z.object({
   seo_keywords: z.string().optional().nullable(),
   is_argus_content: z.boolean().optional(),
   argus_users: z.array(z.string()).optional(),
-  document_type: z.string().optional().nullable()
+  document_type: z.number().optional().nullable()
 });
 
 export async function POST(req: NextRequest) {
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       seo_keywords: data.seo_keywords,
       is_argus_content: data.is_argus_content ?? false,
       argus_users: data.argus_users?.map((userId) => ({ directus_users_id: userId })) ?? [],
-      document_type: data.document_type ?? 'article'
+      document_type: data.document_type ?? null
     } as any);
 
     return NextResponse.json({ data: post }, { status: 201 });

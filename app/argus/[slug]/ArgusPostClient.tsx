@@ -5,6 +5,7 @@ import { UserProfile } from '@/lib/directus/queries/users';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { ArrowLeft } from 'lucide-react';
+import { Avatar } from '@/components/core/Avatar';
 
 interface ArgusPostClientProps {
   post: Post;
@@ -26,13 +27,13 @@ export default function ArgusPostClient({ post, user }: ArgusPostClientProps) {
               <ArrowLeft className="w-5 h-5" />
               <span>Back to Argus</span>
             </Link>
-            {user.avatar && (
-              <img
-                src={user.avatar}
-                alt={`${user.first_name} ${user.last_name}`}
-                className="w-10 h-10 rounded-full"
-              />
-            )}
+            <Avatar
+              avatarId={user.avatar}
+              firstName={user.first_name}
+              lastName={user.last_name}
+              email={user.email}
+              size="md"
+            />
           </div>
         </div>
       </header>
@@ -43,7 +44,7 @@ export default function ArgusPostClient({ post, user }: ArgusPostClientProps) {
             {post.document_type && (
               <div className="mb-4">
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300">
-                  {post.document_type}
+                  {typeof post.document_type === 'object' ? post.document_type.name : post.document_type}
                 </span>
               </div>
             )}
@@ -68,13 +69,13 @@ export default function ArgusPostClient({ post, user }: ArgusPostClientProps) {
 
             {author && (
               <div className="mt-6 flex items-center gap-3 pt-6 border-t border-gray-200 dark:border-gray-800">
-                {author.avatar && (
-                  <img
-                    src={author.avatar}
-                    alt={`${author.first_name} ${author.last_name}`}
-                    className="w-12 h-12 rounded-full"
-                  />
-                )}
+                <Avatar
+                  avatarId={author.avatar || null}
+                  firstName={author.first_name}
+                  lastName={author.last_name}
+                  email={author.email || null}
+                  size="lg"
+                />
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white">
                     {author.first_name} {author.last_name}
@@ -111,7 +112,7 @@ export default function ArgusPostClient({ post, user }: ArgusPostClientProps) {
             className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Back to all letters</span>
+            <span>Back to all messages</span>
           </Link>
         </div>
       </main>

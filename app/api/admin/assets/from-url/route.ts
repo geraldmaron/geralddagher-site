@@ -36,7 +36,8 @@ export async function POST(req: NextRequest) {
     const sanitizedFilename = filename
       ? filename.replace(/[^a-zA-Z0-9.-]/g, '_')
       : 'unsplash-image';
-    const key = `${timestamp}-${sanitizedFilename}.${extension}`;
+    const filename_with_timestamp = `${timestamp}-${sanitizedFilename}.${extension}`;
+    const key = `blog/covers/${filename_with_timestamp}`;
 
     await uploadAsset(buffer, key, contentType);
     const assetUrl = `/api/assets/${key}`;

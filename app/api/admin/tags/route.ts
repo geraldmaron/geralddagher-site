@@ -23,7 +23,7 @@ async function ensureAdmin() {
 
 export async function GET() {
   try {
-    const client = await createDirectusServerClient();
+    const client = await createDirectusServerClient({ requireAuth: false });
     const data = await client.request(
       readItems('tags', {
         limit: 100,

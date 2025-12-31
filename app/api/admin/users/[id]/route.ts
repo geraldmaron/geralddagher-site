@@ -7,6 +7,7 @@ import { getCurrentUser } from '@/lib/directus/auth';
 const updateSchema = z.object({
   role: z.string().optional(),
   is_author: z.boolean().optional(),
+  has_argus_access: z.boolean().optional(),
   author_slug: z.string().optional(),
   status: z.string().optional(),
   first_name: z.string().optional(),

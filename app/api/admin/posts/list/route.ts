@@ -28,8 +28,8 @@ export async function GET() {
     console.error('Failed to load posts in admin list route:', error);
     const errorMessage = error?.errors?.[0]?.message || error?.message || 'Unknown error';
     const errorDetails = error?.errors || error;
-    return NextResponse.json({ 
-      error: 'Failed to load posts', 
+    return NextResponse.json({
+      error: 'Failed to load posts',
       details: errorMessage,
       fullError: process.env.NODE_ENV === 'development' ? errorDetails : undefined
     }, { status: 500 });

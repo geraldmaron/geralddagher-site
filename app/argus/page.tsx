@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { getMyProfile } from '@/lib/directus/queries/users';
+import { getArgusPosts } from '@/lib/directus/queries/posts';
+import { getAdminRole } from '@/lib/auth/server-utils';
 import ArgusClient from './ArgusClient';
 
 export const metadata = {
@@ -54,8 +56,12 @@ export default async function ArgusPage() {
       );
     }
 
-    // User has access, render the Argus dashboard
-    return <ArgusClient user={user} />;
+    const adminRole = await getAdminRole();
+    const isAdmin = adminRole === 'admin';
+
+    const argusPosts = await getArgusPosts(user.id, isAdmin);
+
+    return <ArgusClient user={user} posts={argusPosts as any} />;
   } catch (error) {
     console.error('Error checking Argus access:', error);
     redirect('/login?redirect=/argus');

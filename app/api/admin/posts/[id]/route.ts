@@ -15,7 +15,10 @@ const updateSchema = z.object({
   featured: z.boolean().optional(),
   category: z.number().optional().nullable(),
   tags: z.array(z.number()).optional(),
-  published_at: z.string().optional().nullable()
+  published_at: z.string().optional().nullable(),
+  is_argus_content: z.boolean().optional(),
+  argus_users: z.array(z.string()).optional(),
+  document_type: z.string().optional().nullable()
 });
 
 async function ensureAdmin() {
@@ -52,7 +55,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       'cover_image',
       'tags.tags_id.id',
       'category.id',
-      'author'
+      'author',
+      'is_argus_content',
+      'argus_users.directus_users_id',
+      'document_type'
     ];
 
     const filter = isNumeric
@@ -106,6 +112,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     if (data.tags) {
       updateData.tags = data.tags.map((t) => ({ tags_id: t }));
+    }
+
+    if (data.argus_users) {
+      updateData.argus_users = data.argus_users.map((userId) => ({ directus_users_id: userId }));
     }
 
     const updated = await client.request(

@@ -1,4 +1,3 @@
-import { createDirectusClient } from '../client';
 import { createDirectusServerClient } from '../server-client';
 import { readItems, createItem, updateItem, readUsers, updateUser } from '@directus/sdk';
 import type { Subscription } from '../types';
@@ -11,7 +10,7 @@ export async function getSubscriptions(params: { status?: string; limit?: number
     filter.status = { _eq: status };
   }
 
-  const client = createDirectusClient();
+  const client = await createDirectusServerClient({ requireAuth: false });
   return await client.request(
     readItems('subscriptions', {
       filter,
@@ -32,7 +31,7 @@ export async function createSubscription(
 ) {
   const { firstName, lastName, type = 'blog' } = options || {};
 
-  const client = createDirectusClient();
+  const client = await createDirectusServerClient({ requireAuth: false });
   const subscription = await client.request(
     createItem('subscriptions', {
       email,
@@ -50,7 +49,7 @@ export async function createSubscription(
 }
 
 export async function updateSubscription(id: number, data: Partial<Subscription>) {
-  const client = createDirectusClient();
+  const client = await createDirectusServerClient({ requireAuth: false });
   return await client.request(updateItem('subscriptions', id, data));
 }
 
@@ -60,7 +59,7 @@ export async function findSubscriptionByEmail(email: string, type?: string) {
     filter.type = { _eq: type };
   }
 
-  const client = createDirectusClient();
+  const client = await createDirectusServerClient({ requireAuth: false });
   const subscriptions = await client.request(
     readItems('subscriptions', {
       filter,

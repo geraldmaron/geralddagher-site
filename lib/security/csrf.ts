@@ -24,8 +24,11 @@ export function validateCSRFToken(request: NextRequest): boolean {
 }
 
 export function createCSRFHeaders(token: string) {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const secureCookie = isProduction ? 'Secure; ' : '';
+
   return {
-    'Set-Cookie': `${CSRF_COOKIE}=${token}; HttpOnly; Secure; SameSite=Strict; Path=/`,
+    'Set-Cookie': `${CSRF_COOKIE}=${token}; HttpOnly; ${secureCookie}SameSite=Strict; Path=/`,
     [CSRF_HEADER]: token
   };
 }

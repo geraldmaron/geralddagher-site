@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
+import Link from 'next/link';
 import { getMyProfile } from '@/lib/directus/queries/users';
 import { getArgusPosts } from '@/lib/directus/queries/posts';
 import { getAdminRole } from '@/lib/auth/server-utils';
@@ -45,12 +46,12 @@ export default async function ArgusPage() {
                 You don't have permission to access Argus. Please contact the administrator if you believe this is an error.
               </p>
             </div>
-            <a
+            <Link
               href="/"
               className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               Return Home
-            </a>
+            </Link>
           </div>
         </div>
       );

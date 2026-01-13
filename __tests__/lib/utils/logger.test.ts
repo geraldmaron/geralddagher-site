@@ -76,6 +76,7 @@ describe('Logger', () => {
     });
 
     it('should include error stack in development', () => {
+      vi.stubEnv('NODE_ENV', 'development');
       const error = new Error('Test error');
       Logger.error('Error occurred', { error });
 
@@ -87,6 +88,7 @@ describe('Logger', () => {
           }),
         })
       );
+      vi.unstubAllEnvs();
     });
   });
 

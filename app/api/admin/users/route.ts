@@ -4,6 +4,7 @@ import { readUsers, createUser, updateUser } from '@directus/sdk';
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { getCurrentUser } from '@/lib/directus/auth';
+import { generateRandomPassword, sendPasswordEmail } from '@/lib/auth/password-utils';
 
 export async function GET(req: NextRequest) {
   try {
@@ -44,7 +45,6 @@ const createSchema = z.object({
   first_name: z.string().min(1),
   last_name: z.string().min(1),
   email: z.string().email(),
-  password: z.string().min(8).optional(),
   status: z.string().optional(),
   role: z.string().optional(),
   is_author: z.boolean().optional(),
@@ -63,17 +63,22 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const payload = createSchema.parse(body);
 
+    const isArgusUser = payload.has_argus_access === true;
+    const shouldGeneratePassword = !isArgusUser;
+
+    const generatedPassword = shouldGeneratePassword ? generateRandomPassword(16) : undefined;
+
     const userPayload: any = {
       first_name: payload.first_name,
       last_name: payload.last_name,
       email: payload.email,
-      status: payload.status || 'active',
+      status: isArgusUser ? 'suspended' : (payload.status || 'active'),
       role: payload.role,
       avatar: payload.avatar
     };
 
-    if (payload.password) {
-      userPayload.password = payload.password;
+    if (generatedPassword) {
+      userPayload.password = generatedPassword;
     }
 
     const client = await createDirectusServerClient({ requireAuth: false });
@@ -90,8 +95,26 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ data: created });
+    if (shouldGeneratePassword && generatedPassword) {
+      await sendPasswordEmail(
+        payload.email,
+        payload.first_name,
+        payload.last_name,
+        generatedPassword,
+        true
+      );
+    }
+
+    const message = isArgusUser
+      ? 'Argus user created successfully and set to suspended. Use "Initiate Argus" to activate and send credentials.'
+      : 'User created successfully. Login credentials have been sent to their email.';
+
+    return NextResponse.json({
+      data: created,
+      message
+    });
   } catch (error: any) {
+    console.error('User creation error:', error);
     return NextResponse.json({ error: error?.message || 'Failed to create user' }, { status: 400 });
   }
 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPosts } from '@/lib/directus/queries';
+import { getPosts, getPostsCount } from '@/lib/directus/queries';
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,21 +12,29 @@ export async function GET(request: NextRequest) {
     const featured = searchParams.get('featured') === 'true' ? true : undefined;
     const status = searchParams.get('status') || 'published';
 
-    const posts = await getPosts({
-      limit,
-      offset,
-      status,
-      category,
-      featured,
-      search
-    });
+    const [posts, total] = await Promise.all([
+      getPosts({
+        limit,
+        offset,
+        status,
+        category,
+        featured,
+        search
+      }),
+      getPostsCount({
+        status,
+        category,
+        featured,
+        search
+      })
+    ]);
 
     const isPublicContent = status === 'published';
     const headers = isPublicContent
       ? { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=900' }
       : { 'Cache-Control': 'no-store' };
 
-    return NextResponse.json({ data: posts, total: posts.length }, { headers });
+    return NextResponse.json({ data: posts, total }, { headers });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch posts' }, { status: 500 });
   }

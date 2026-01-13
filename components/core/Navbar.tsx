@@ -30,6 +30,7 @@ import {
   LogOut,
   Shield,
   FileType,
+  Settings,
 } from 'lucide-react';
 import { useTheme } from '@/components/core/ThemeProvider';
 import { useAuth } from '@/lib/auth/provider';
@@ -50,6 +51,7 @@ type NavItem = {
 
 const publicNavigation: NavItem[] = [
   { name: 'Home', href: '/', icon: Home },
+  { name: 'Blog', href: '/blog', icon: FileText },
   { name: 'The Maron Project', href: '/themaronproject', icon: Mic },
   { name: 'RSS', href: '/rss', icon: Rss },
 ];
@@ -541,6 +543,16 @@ export default function Navbar() {
                             </div>
 
                             <div className="border-t border-gray-200/50 dark:border-gray-700/50 pt-2">
+                              {user?.has_argus_access && (
+                                <Link
+                                  href="/argus/settings"
+                                  className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
+                                  onClick={() => setIsUserMenuOpen(false)}
+                                >
+                                  <Settings className="w-4 h-4" />
+                                  <span>Settings</span>
+                                </Link>
+                              )}
                               {!isAdminArea && hasAdmin && (
                                 <Link
                                   href="/admin"

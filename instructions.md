@@ -345,3 +345,429 @@ export async function POST(request: Request) {
 3. Select role (Public, Administrator, etc.)
 4. Configure collection permissions
 5. Test with public/authenticated requests
+
+## Argus User Management
+
+Argus is a private content delivery system with controlled user activation. This section documents the user lifecycle and implementation patterns.
+
+### Overview
+
+Argus users follow a special lifecycle that differs from standard users:
+
+1. **Creation**: Users are created in `suspended` status without passwords
+2. **Initiation**: Administrators activate all suspended Argus users via "Initiate Argus" button
+3. **Activation**: Users receive emails with generated credentials
+4. **Access**: Users can log in and change passwords via Settings
+
+### User Roles
+
+**Argus Admin** (`role_name = 'Argus Admin'`):
+- Can create Argus users
+- Can initiate Argus (activate suspended users)
+- Can edit Argus User accounts
+- Full access to Argus content management
+
+**Argus User** (`role_name = 'Argus User'`):
+- Can access Argus content (has_argus_access = true)
+- Can view personalized messages
+- Can manage own account settings
+- Can change own password
+
+**Administrator** (`role_name = 'Administrator'`):
+- All permissions of Argus Admin
+- Full system access
+
+### User Creation Flow
+
+#### Non-Argus Users
+
+**Location**: `app/api/admin/users/route.ts::POST`
+
+```typescript
+const isArgusUser = payload.has_argus_access === true;
+const shouldGeneratePassword = !isArgusUser;
+const generatedPassword = shouldGeneratePassword ? generateRandomPassword(16) : undefined;
+
+const userPayload = {
+  first_name, last_name, email,
+  status: 'active',
+  role,
+  ...(generatedPassword && { password: generatedPassword })
+};
+
+await createUser(userPayload);
+
+if (shouldGeneratePassword) {
+  await sendPasswordEmail(email, firstName, lastName, generatedPassword, true);
+}
+```
+
+**Behavior**:
+- Status set to `active`
+- 16-character password generated immediately
+- Welcome email sent with credentials
+- User can log in immediately
+
+#### Argus Users
+
+**Location**: `app/api/admin/users/route.ts::POST`
+
+```typescript
+const isArgusUser = payload.has_argus_access === true;
+const shouldGeneratePassword = !isArgusUser;
+
+const userPayload = {
+  first_name, last_name, email,
+  status: 'suspended',  // Argus users start suspended
+  role
+  // No password field included
+};
+
+await createUser(userPayload);
+// No email sent
+```
+
+**Behavior**:
+- Status set to `suspended`
+- No password generated or set
+- No email sent
+- User cannot log in
+- Admin must use "Initiate Argus" to activate
+
+**Rationale**: Argus users are created in bulk and activated together, preventing premature access and wasted password generation.
+
+### Argus Initiation Flow
+
+**Trigger**: Admin/Argus Admin clicks "Initiate Argus" button
+
+**Location**: `app/api/admin/argus/initiate/route.ts`
+
+**Process**:
+1. Query for all suspended Argus users:
+   ```typescript
+   filter: {
+     has_argus_access: { _eq: true },
+     status: { _eq: 'suspended' }
+   }
+   ```
+
+2. For each user:
+   - Generate secure 16-character password
+   - Update user: `{ password: newPassword, status: 'active' }`
+   - Send welcome email with credentials
+   - Track success/failure
+
+3. Return summary:
+   ```typescript
+   {
+     success: true,
+     message: 'Successfully activated N Argus user(s).',
+     activated: [{ id, email, name, emailSent }],
+     errors: [{ email, error }]  // if any
+   }
+   ```
+
+**UI Location**: `app/admin/users/page.tsx`
+- Blue "Initiate Argus" button in header
+- Visible to: `admin` and `argus_admin` roles
+- Confirmation dialog before execution
+- Success toast with activation count
+
+### User Update Edge Cases
+
+**Location**: `app/api/admin/users/[id]/route.ts::PATCH`
+
+#### Edge Case: Manual Activation
+
+**Scenario**: Admin manually changes status from `suspended` to `active` for Argus user
+
+**Detection**:
+```typescript
+if (data.status === 'active') {
+  const existingUser = await readUser(id);
+
+  const isActivatingSuspendedArgusUser =
+    existingUser.status === 'suspended' &&
+    existingUser.has_argus_access === true;
+
+  if (isActivatingSuspendedArgusUser) {
+    // Auto-generate password and send email
+  }
+}
+```
+
+**Behavior**:
+- Generates new password automatically
+- Sends welcome email with credentials
+- Returns special message: "User activated and credentials sent via email."
+
+**Rationale**: Prevents creating active users without valid credentials, ensures they can log in.
+
+#### Other Update Scenarios
+
+**Adding Argus access to active user**:
+- User stays `active`
+- Keeps existing password
+- No email sent
+- Can immediately access Argus
+
+**Removing Argus access**:
+- User status unchanged
+- Password unchanged
+- Loses Argus access only
+
+**Editing suspended Argus user** (name, email, role):
+- No password generation
+- Status stays `suspended`
+- Waits for initiation
+
+### Password Management
+
+#### Password Generation
+
+**Location**: `lib/auth/password-utils.ts::generateRandomPassword()`
+
+**Requirements**:
+- 16 characters minimum
+- At least one uppercase letter
+- At least one lowercase letter
+- At least one number
+- At least one special character (!@#$%^&*()-_=+)
+- Cryptographically random
+
+**Usage**:
+```typescript
+import { generateRandomPassword } from '@/lib/auth/password-utils';
+const password = generateRandomPassword(16);
+```
+
+#### Password Email Delivery
+
+**Location**: `lib/auth/password-utils.ts::sendPasswordEmail()`
+
+**Parameters**:
+- `email`: Recipient email
+- `firstName`, `lastName`: Personalization
+- `password`: Generated password
+- `isNewUser`: true for welcome emails, false for password resets
+
+**Email Content**:
+- Branded HTML template with gradient header
+- Login credentials (email + password)
+- Security reminder to change password
+- Direct link to login page
+- Sent via Brevo SMTP API
+
+**Example**:
+```typescript
+await sendPasswordEmail(
+  'user@example.com',
+  'John',
+  'Doe',
+  generatedPassword,
+  true  // isNewUser
+);
+```
+
+### User Self-Service Password Change
+
+**Location**: `app/argus/settings/page.tsx`
+
+**Access**: Available to all Argus users from Settings page
+
+**API**: `app/api/auth/change-password/route.ts`
+
+**Flow**:
+1. User provides current password
+2. API validates by attempting Directus login
+3. User provides new password (must meet requirements)
+4. New password validated against schema
+5. Password updated in Directus
+6. Success message returned
+
+**Security**:
+- Current password verified before allowing change
+- New password must meet all complexity requirements
+- Real-time UI validation of requirements
+- Passwords match confirmation required
+
+### Access Control
+
+#### Argus Content Access
+
+**Check**: `user.has_argus_access === true`
+
+**Files**:
+- `app/argus/page.tsx` - Main Argus dashboard
+- `app/argus/[slug]/page.tsx` - Individual Argus posts
+- `app/argus/settings/page.tsx` - User settings
+
+**Pattern**:
+```typescript
+const user = await getMyProfile();
+if (!user?.has_argus_access) {
+  redirect('/login?redirect=/argus');
+}
+```
+
+#### Admin Operations
+
+**User Creation**: Requires `admin` role
+**Initiate Argus**: Requires `admin` or `argus_admin` role
+**Edit Argus Users**: Requires `admin` or `argus_admin` role
+**Delete Users**: Requires `admin` role
+
+**Implementation**: `app/admin/users/page.tsx`
+
+```typescript
+const canInitiateArgus = useMemo(() => {
+  return currentUserRole === 'admin' || currentUserRole === 'argus_admin';
+}, [currentUserRole]);
+```
+
+### Best Practices
+
+#### Creating Argus Users
+
+1. **Always use has_argus_access flag**: Don't manually create with passwords
+2. **Batch creation**: Create all Argus users before initiating
+3. **Verify email addresses**: Ensure all emails are valid before creation
+4. **Use Initiate Argus**: Don't manually activate suspended Argus users
+5. **Monitor initiation results**: Check for email delivery failures
+
+#### Error Handling
+
+1. **Email delivery failures**: Logged but don't block user activation
+2. **Partial failures**: Some users may succeed while others fail
+3. **Duplicate emails**: Directus will reject, handle gracefully
+4. **Missing env vars**: BREVO_API_KEY required for email delivery
+
+#### Security Considerations
+
+1. **Password storage**: Never log or display generated passwords
+2. **Email content**: Passwords sent over secure SMTP (Brevo)
+3. **Session management**: Use httpOnly cookies for authentication
+4. **Rate limiting**: Consider for password change endpoint
+5. **Audit logging**: Track Argus initiations and activations
+
+### Troubleshooting
+
+#### Users can't log in after creation
+
+**Symptom**: Argus user activated but login fails
+
+**Diagnosis**:
+1. Check user status: should be `active`
+2. Verify password was generated (check logs)
+3. Confirm email was sent (check Brevo logs)
+4. Test with password reset
+
+**Solution**: Use "Regenerate Password" button in admin UI
+
+#### Initiate Argus shows no users
+
+**Symptom**: "No suspended Argus users found"
+
+**Diagnosis**:
+1. Verify users have `has_argus_access = true`
+2. Check user status is `suspended`
+3. Query Directus directly to confirm
+
+**Solution**: Ensure users created with correct flags
+
+#### Email not received
+
+**Symptom**: User activated but no email
+
+**Diagnosis**:
+1. Check BREVO_API_KEY environment variable
+2. Verify email address is valid
+3. Check spam folder
+4. Review Brevo sending logs
+
+**Solution**: Use "Regenerate Password" to resend
+
+#### Manual activation issues
+
+**Symptom**: User activated manually but can't log in
+
+**Diagnosis**:
+1. Check if password was auto-generated
+2. Verify edge case handler triggered
+3. Review API logs for errors
+
+**Solution**: System should auto-generate password; if not, use password reset
+
+### API Endpoints Summary
+
+| Endpoint | Method | Purpose | Auth Required |
+|----------|--------|---------|---------------|
+| `/api/admin/users` | POST | Create user | Admin |
+| `/api/admin/users/[id]` | PATCH | Update user | Admin/Argus Admin |
+| `/api/admin/users/[id]/regenerate-password` | POST | Reset password | Admin/Argus Admin |
+| `/api/admin/argus/initiate` | POST | Activate all suspended Argus users | Admin/Argus Admin |
+| `/api/auth/change-password` | POST | User changes own password | Any authenticated user |
+
+### Testing Argus Flow
+
+**Manual Test Steps**:
+
+1. Create suspended Argus user:
+   ```bash
+   POST /api/admin/users
+   {
+     "first_name": "Test",
+     "last_name": "User",
+     "email": "test@example.com",
+     "role": "<argus_user_role_id>",
+     "has_argus_access": true
+   }
+   ```
+   Expected: User created with status=suspended, no email sent
+
+2. Verify user can't log in:
+   ```bash
+   POST https://cms.geralddagher.com/auth/login
+   { "email": "test@example.com", "password": "any" }
+   ```
+   Expected: Authentication fails (no password set)
+
+3. Initiate Argus:
+   ```bash
+   POST /api/admin/argus/initiate
+   ```
+   Expected: User activated, email sent with credentials
+
+4. Verify user can log in:
+   Use credentials from email
+   Expected: Login succeeds, can access /argus
+
+5. Test password change:
+   Navigate to /argus/settings
+   Change password
+   Expected: Password updated, can log in with new password
+
+### Database Schema
+
+**users collection** (Directus):
+
+```typescript
+{
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  password: string | null;  // Can be null for suspended Argus users
+  status: 'active' | 'suspended' | 'draft' | 'archived';
+  role: string;  // UUID reference to directus_roles
+  has_argus_access: boolean;  // Custom field
+  argus_message: string | null;  // Custom HTML content for user
+  // ... other fields
+}
+```
+
+**Key Fields**:
+- `has_argus_access`: Gates access to /argus routes
+- `status`: Controls login ability (`suspended` blocks login)
+- `password`: Can be null for newly created Argus users
+- `argus_message`: Optional personalized HTML content shown on Argus dashboard

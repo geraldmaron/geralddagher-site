@@ -1,5 +1,5 @@
 import React from 'react';
-import { getPosts, getCategories, getTags } from '@/lib/directus/queries';
+import { getPosts, getPostsCount, getCategories, getTags } from '@/lib/directus/queries';
 import BlogWrapper from '@/components/posts/BlogWrapper';
 import { BookOpen, Sparkles } from 'lucide-react';
 import { Metadata } from 'next';
@@ -16,13 +16,15 @@ export const metadata: Metadata = {
 
 export default async function BlogPage() {
   try {
-    const [postsResult, categoriesResult, tagsResult] = await Promise.allSettled([
+    const [postsResult, totalResult, categoriesResult, tagsResult] = await Promise.allSettled([
       getPosts({ limit: 100, status: 'published' }),
+      getPostsCount({ status: 'published' }),
       getCategories(),
       getTags()
     ]);
 
     const posts = postsResult.status === 'fulfilled' ? postsResult.value : [];
+    const total = totalResult.status === 'fulfilled' ? totalResult.value : posts.length;
     const categories = categoriesResult.status === 'fulfilled' ? categoriesResult.value : [];
     const tags = tagsResult.status === 'fulfilled' ? tagsResult.value : [];
 
@@ -56,6 +58,7 @@ export default async function BlogPage() {
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
           <BlogWrapper
             initialPosts={posts as any}
+            initialTotal={total}
             categories={categories as any}
             tags={tags as any}
           />

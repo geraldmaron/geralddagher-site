@@ -205,11 +205,11 @@ export default async function BlogPostPage({ params }: PageProps) {
             <div className="relative px-5 sm:px-8 lg:px-10 py-10 sm:py-12 lg:py-14 space-y-8 text-white">
               <div className="flex items-center justify-between gap-4">
                 <Link
-                  href="/"
+                  href="/blog"
                   className="inline-flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  Back to home
+                  Back to blog
                 </Link>
                 <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white ring-1 ring-white/20">
                   <Sparkles className="h-3.5 w-3.5 text-cyan-200" />
@@ -295,7 +295,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             {contentNodes ? (
               <SlateRenderer
                 content={contentNodes}
-                  className="prose prose-lg max-w-none text-slate-800 prose-headings:text-slate-900 prose-p:text-slate-700 prose-strong:text-slate-900 prose-h1:text-3xl sm:prose-h1:text-4xl prose-h2:text-2xl sm:prose-h2:text-3xl prose-h3:text-xl sm:prose-h3:text-2xl prose-h4:text-lg dark:prose-invert"
+                  className="prose prose-lg max-w-none text-slate-800 prose-headings:text-slate-900 prose-p:text-slate-700 prose-strong:text-slate-900 dark:prose-invert"
               />
             ) : (
               <div className="text-slate-500 dark:text-slate-400">No content available.</div>
@@ -325,11 +325,11 @@ export default async function BlogPostPage({ params }: PageProps) {
 
           <div className="mt-12 flex justify-center">
             <Link
-              href="/"
+              href="/blog"
               className="inline-flex items-center gap-2 px-5 py-3 rounded-full border border-slate-200 bg-white text-slate-900 hover:border-slate-300 hover:bg-slate-50 transition-all shadow-sm dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:border-white/40 dark:hover:bg-white/15"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back home
+              Back to blog
             </Link>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import {
   generateCSRFToken,
@@ -7,17 +7,6 @@ import {
 } from '@/lib/security/csrf';
 
 describe('CSRF Security', () => {
-  const originalEnv = process.env.NODE_ENV;
-
-  afterEach(() => {
-    if (originalEnv !== undefined) {
-      Object.defineProperty(process.env, 'NODE_ENV', {
-        value: originalEnv,
-        writable: true,
-        configurable: true,
-      });
-    }
-  });
 
   describe('generateCSRFToken', () => {
     it('should generate a 64-character hex string', () => {
@@ -35,11 +24,7 @@ describe('CSRF Security', () => {
 
   describe('createCSRFHeaders', () => {
     it('should include Secure flag in production', () => {
-      Object.defineProperty(process.env, 'NODE_ENV', {
-        value: 'production',
-        writable: true,
-        configurable: true,
-      });
+      vi.stubEnv('NODE_ENV', 'production');
       const token = 'test-token';
       const headers = createCSRFHeaders(token);
 
@@ -48,14 +33,11 @@ describe('CSRF Security', () => {
       expect(headers['Set-Cookie']).toContain('SameSite=Strict');
       expect(headers['Set-Cookie']).toContain(`csrf-token=${token}`);
       expect(headers['x-csrf-token']).toBe(token);
+      vi.unstubAllEnvs();
     });
 
     it('should not include Secure flag in development', () => {
-      Object.defineProperty(process.env, 'NODE_ENV', {
-        value: 'development',
-        writable: true,
-        configurable: true,
-      });
+      vi.stubEnv('NODE_ENV', 'development');
       const token = 'test-token';
       const headers = createCSRFHeaders(token);
 
@@ -63,6 +45,7 @@ describe('CSRF Security', () => {
       expect(headers['Set-Cookie']).toContain('HttpOnly');
       expect(headers['Set-Cookie']).toContain('SameSite=Strict');
       expect(headers['Set-Cookie']).toContain(`csrf-token=${token}`);
+      vi.unstubAllEnvs();
     });
 
     it('should set correct cookie attributes', () => {

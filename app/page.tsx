@@ -6,16 +6,18 @@ import BlogWrapper from '@/components/posts/BlogWrapper';
 
 export default async function Home() {
   try {
-    const { getPosts, getCategories, getTags, getMilestones } = await import('@/lib/directus/queries');
+    const { getPosts, getPostsCount, getCategories, getTags, getMilestones } = await import('@/lib/directus/queries');
 
-    const [postsResult, categoriesResult, tagsResult, milestonesResult] = await Promise.allSettled([
+    const [postsResult, totalResult, categoriesResult, tagsResult, milestonesResult] = await Promise.allSettled([
       getPosts({ limit: 6, status: 'published' }),
+      getPostsCount({ status: 'published' }),
       getCategories(),
       getTags(),
       getMilestones()
     ]);
 
     const posts = postsResult.status === 'fulfilled' ? postsResult.value : [];
+    const total = totalResult.status === 'fulfilled' ? totalResult.value : posts.length;
     const categories = categoriesResult.status === 'fulfilled' ? categoriesResult.value : [];
     const tags = tagsResult.status === 'fulfilled' ? tagsResult.value : [];
     const milestones = milestonesResult.status === 'fulfilled' ? milestonesResult.value : [];
@@ -32,6 +34,7 @@ export default async function Home() {
             </div>
             <BlogWrapper
               initialPosts={posts as any}
+              initialTotal={total}
               categories={categories as any}
               tags={tags as any}
             />

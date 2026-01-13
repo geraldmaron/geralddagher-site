@@ -78,19 +78,19 @@ export default function SlateRenderer({ content, className = '', compact = false
         );
       case 'heading-one':
         return (
-          <h1 key={index} className={`text-4xl sm:text-5xl md:text-6xl font-quicksand font-semibold tracking-tight text-gray-900 dark:text-white ${headingSpacing}`}>
+          <h1 key={index} className={`text-2xl font-quicksand font-semibold tracking-tight text-gray-900 dark:text-white ${headingSpacing}`}>
             {node.children?.map((child, i) => renderNode(child, i))}
           </h1>
         );
       case 'heading-two':
         return (
-          <h2 key={index} className={`text-3xl sm:text-4xl md:text-5xl font-quicksand font-semibold tracking-tight text-gray-900 dark:text-white ${headingSpacing}`}>
+          <h2 key={index} className={`text-xl font-quicksand font-semibold tracking-tight text-gray-900 dark:text-white ${headingSpacing}`}>
             {node.children?.map((child, i) => renderNode(child, i))}
           </h2>
         );
       case 'heading-three':
         return (
-          <h3 key={index} className={`text-2xl sm:text-3xl md:text-4xl font-quicksand font-semibold tracking-tight text-gray-900 dark:text-white ${headingSpacing}`}>
+          <h3 key={index} className={`text-lg font-quicksand font-semibold tracking-tight text-gray-900 dark:text-white ${headingSpacing}`}>
             {node.children?.map((child, i) => renderNode(child, i))}
           </h3>
         );

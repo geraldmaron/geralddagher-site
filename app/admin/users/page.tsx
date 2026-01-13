@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Mail, Shield, Plus, Trash2, Upload, Edit3, RefreshCw, Search, X, Users } from 'lucide-react';
+import { User, Mail, Shield, Plus, Trash2, Upload, Edit3, RefreshCw, Search, X, Users, Filter, ArrowUpDown, ChevronDown } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Image from 'next/image';
 import { getAvatarUrl } from '@/lib/directus/utils/avatar';
@@ -70,6 +70,14 @@ export default function AdminUsersPage() {
   const [currentUserRole, setCurrentUserRole] = useState<'admin' | 'argus_admin' | 'argus_user' | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [regeneratingPassword, setRegeneratingPassword] = useState(false);
+  const [initiatingArgus, setInitiatingArgus] = useState(false);
+  const [filterRole, setFilterRole] = useState<string>('');
+  const [filterStatus, setFilterStatus] = useState<string>('');
+  const [filterArgusAccess, setFilterArgusAccess] = useState<string>('');
+  const [filterIsAuthor, setFilterIsAuthor] = useState<string>('');
+  const [sortBy, setSortBy] = useState<'name' | 'email' | 'status' | 'role'>('name');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [showFilters, setShowFilters] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -119,13 +127,70 @@ export default function AdminUsersPage() {
   }, [form.role, roles, form.has_argus_access]);
 
   const filteredUsers = useMemo(() => {
-    if (!searchQuery.trim()) return users;
-    const q = searchQuery.toLowerCase();
-    return users.filter((user) => {
-      const name = [user.first_name, user.last_name].filter(Boolean).join(' ').toLowerCase();
-      return name.includes(q) || user.email.toLowerCase().includes(q);
+    let filtered = [...users];
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter((user) => {
+        const name = [user.first_name, user.last_name].filter(Boolean).join(' ').toLowerCase();
+        return name.includes(q) || user.email.toLowerCase().includes(q);
+      });
+    }
+
+    if (filterRole) {
+      filtered = filtered.filter((user) => {
+        const roleId = typeof user.role === 'object' ? user.role?.id : user.role;
+        return roleId === filterRole;
+      });
+    }
+
+    if (filterStatus) {
+      filtered = filtered.filter((user) => user.status === filterStatus);
+    }
+
+    if (filterArgusAccess) {
+      const hasAccess = filterArgusAccess === 'true';
+      filtered = filtered.filter((user) => user.has_argus_access === hasAccess);
+    }
+
+    if (filterIsAuthor) {
+      const isAuthor = filterIsAuthor === 'true';
+      filtered = filtered.filter((user) => user.is_author === isAuthor);
+    }
+
+    filtered.sort((a, b) => {
+      let aVal: string, bVal: string;
+
+      switch (sortBy) {
+        case 'name':
+          aVal = [a.first_name, a.last_name].filter(Boolean).join(' ').toLowerCase();
+          bVal = [b.first_name, b.last_name].filter(Boolean).join(' ').toLowerCase();
+          break;
+        case 'email':
+          aVal = a.email.toLowerCase();
+          bVal = b.email.toLowerCase();
+          break;
+        case 'status':
+          aVal = a.status || '';
+          bVal = b.status || '';
+          break;
+        case 'role':
+          aVal = (typeof a.role === 'object' ? a.role?.name : a.role) || '';
+          bVal = (typeof b.role === 'object' ? b.role?.name : b.role) || '';
+          break;
+        default:
+          return 0;
+      }
+
+      if (sortDirection === 'asc') {
+        return aVal.localeCompare(bVal);
+      } else {
+        return bVal.localeCompare(aVal);
+      }
     });
-  }, [users, searchQuery]);
+
+    return filtered;
+  }, [users, searchQuery, filterRole, filterStatus, filterArgusAccess, filterIsAuthor, sortBy, sortDirection]);
 
   const canCreateUsers = useMemo(() => {
     return currentUserRole === 'admin';
@@ -158,6 +223,35 @@ export default function AdminUsersPage() {
   const canChangeRole = useMemo(() => {
     return currentUserRole === 'admin';
   }, [currentUserRole]);
+
+  const canInitiateArgus = useMemo(() => {
+    return currentUserRole === 'admin' || currentUserRole === 'argus_admin';
+  }, [currentUserRole]);
+
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (filterRole) count++;
+    if (filterStatus) count++;
+    if (filterArgusAccess) count++;
+    if (filterIsAuthor) count++;
+    return count;
+  }, [filterRole, filterStatus, filterArgusAccess, filterIsAuthor]);
+
+  const clearFilters = () => {
+    setFilterRole('');
+    setFilterStatus('');
+    setFilterArgusAccess('');
+    setFilterIsAuthor('');
+  };
+
+  const toggleSort = (field: 'name' | 'email' | 'status' | 'role') => {
+    if (sortBy === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortDirection('asc');
+    }
+  };
 
   const startCreate = () => {
     if (!canCreateUsers) {
@@ -221,9 +315,7 @@ export default function AdminUsersPage() {
         payload.role = form.role || undefined;
       }
 
-      if (!form.id && form.password) {
-        payload.password = form.password;
-      } else if (form.id && form.password) {
+      if (form.id && form.password) {
         payload.password = form.password;
       }
 
@@ -232,8 +324,17 @@ export default function AdminUsersPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
+
       if (!res.ok) throw new Error();
-      toast.success(form.id ? 'User updated' : 'User created');
+
+      const result = await res.json();
+
+      if (!form.id && result.message) {
+        toast.success(result.message, { duration: 5000 });
+      } else {
+        toast.success(form.id ? 'User updated' : 'User created');
+      }
+
       closeForm();
       await load();
     } catch {
@@ -335,6 +436,43 @@ export default function AdminUsersPage() {
     }
   };
 
+  const handleInitiateArgus = async () => {
+    if (!canInitiateArgus) {
+      toast.error('You do not have permission to initiate Argus');
+      return;
+    }
+
+    if (!confirm('This will activate all suspended Argus users and send their login credentials via email. Continue?')) {
+      return;
+    }
+
+    setInitiatingArgus(true);
+    try {
+      const res = await fetch('/api/admin/argus/initiate', {
+        method: 'POST'
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to initiate Argus');
+      }
+
+      const data = await res.json();
+
+      if (data.activated && data.activated.length > 0) {
+        toast.success(data.message);
+      } else {
+        toast('No suspended Argus users found to activate');
+      }
+
+      await load();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to initiate Argus');
+    } finally {
+      setInitiatingArgus(false);
+    }
+  };
+
   const isEditing = useMemo(() => !!form.id, [form.id]);
 
   const StatusBadge = ({ status }: { status?: string }) => {
@@ -385,6 +523,20 @@ export default function AdminUsersPage() {
             <RefreshCw className={cn('h-4 w-4', loading && 'animate-spin')} />
             <span className="hidden sm:inline">Refresh</span>
           </motion.button>
+          {canInitiateArgus && (
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                onClick={handleInitiateArgus}
+                disabled={initiatingArgus}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all disabled:opacity-50"
+              >
+                <Shield className={cn('h-4 w-4', initiatingArgus && 'animate-pulse')} />
+                <span className="hidden sm:inline">
+                  {initiatingArgus ? 'Initiating...' : 'Initiate Argus'}
+                </span>
+              </Button>
+            </motion.div>
+          )}
           {canCreateUsers && (
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button
@@ -399,7 +551,7 @@ export default function AdminUsersPage() {
         </div>
       </motion.div>
 
-      {/* Search */}
+      {/* Search and Filters */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -407,24 +559,195 @@ export default function AdminUsersPage() {
         className={cn(
           'p-3 sm:p-4 rounded-2xl border',
           'bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm',
-          'border-gray-200/50 dark:border-gray-700/50'
+          'border-gray-200/50 dark:border-gray-700/50',
+          'space-y-3'
         )}
       >
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search users..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className={cn(
-              'w-full pl-10 pr-4 py-2.5 rounded-xl text-sm',
-              'bg-gray-50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
-              'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-              'placeholder-gray-500 dark:placeholder-gray-400',
-              'transition-all duration-200'
-            )}
-          />
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search users..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={cn(
+                'w-full pl-10 pr-4 py-2.5 rounded-xl text-sm',
+                'bg-gray-50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
+                'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'placeholder-gray-500 dark:placeholder-gray-400',
+                'transition-all duration-200'
+              )}
+            />
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={cn(
+                'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all',
+                'bg-gray-50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
+                'hover:bg-gray-100 dark:hover:bg-gray-700',
+                'focus:outline-none focus:ring-2 focus:ring-blue-500',
+                showFilters && 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+              )}
+            >
+              <Filter className="h-4 w-4" />
+              <span>Filters</span>
+              {activeFiltersCount > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-blue-600 text-white text-xs">
+                  {activeFiltersCount}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => toggleSort(sortBy)}
+              className={cn(
+                'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all',
+                'bg-gray-50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
+                'hover:bg-gray-100 dark:hover:bg-gray-700',
+                'focus:outline-none focus:ring-2 focus:ring-blue-500'
+              )}
+            >
+              <ArrowUpDown className="h-4 w-4" />
+              <span className="hidden sm:inline">Sort</span>
+            </button>
+          </div>
+        </div>
+
+        <AnimatePresence>
+          {showFilters && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
+                      Role
+                    </label>
+                    <select
+                      value={filterRole}
+                      onChange={(e) => setFilterRole(e.target.value)}
+                      className={cn(
+                        'w-full px-3 py-2 rounded-lg text-sm',
+                        'bg-gray-50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
+                        'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                        'transition-all'
+                      )}
+                    >
+                      <option value="">All Roles</option>
+                      {roles.map(role => (
+                        <option key={role.id} value={role.id}>
+                          {role.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
+                      Status
+                    </label>
+                    <select
+                      value={filterStatus}
+                      onChange={(e) => setFilterStatus(e.target.value)}
+                      className={cn(
+                        'w-full px-3 py-2 rounded-lg text-sm',
+                        'bg-gray-50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
+                        'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                        'transition-all'
+                      )}
+                    >
+                      <option value="">All Statuses</option>
+                      <option value="active">Active</option>
+                      <option value="suspended">Suspended</option>
+                      <option value="draft">Draft</option>
+                      <option value="archived">Archived</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
+                      Argus Access
+                    </label>
+                    <select
+                      value={filterArgusAccess}
+                      onChange={(e) => setFilterArgusAccess(e.target.value)}
+                      className={cn(
+                        'w-full px-3 py-2 rounded-lg text-sm',
+                        'bg-gray-50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
+                        'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                        'transition-all'
+                      )}
+                    >
+                      <option value="">All Users</option>
+                      <option value="true">Has Argus Access</option>
+                      <option value="false">No Argus Access</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
+                      Author
+                    </label>
+                    <select
+                      value={filterIsAuthor}
+                      onChange={(e) => setFilterIsAuthor(e.target.value)}
+                      className={cn(
+                        'w-full px-3 py-2 rounded-lg text-sm',
+                        'bg-gray-50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
+                        'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                        'transition-all'
+                      )}
+                    >
+                      <option value="">All Users</option>
+                      <option value="true">Is Author</option>
+                      <option value="false">Not Author</option>
+                    </select>
+                  </div>
+                </div>
+
+                {activeFiltersCount > 0 && (
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                      {filteredUsers.length} of {users.length} users
+                    </span>
+                    <button
+                      onClick={clearFilters}
+                      className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
+                    >
+                      Clear all filters
+                    </button>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+          <span>Sort by:</span>
+          {(['name', 'email', 'status', 'role'] as const).map((field) => (
+            <button
+              key={field}
+              onClick={() => toggleSort(field)}
+              className={cn(
+                'px-2 py-1 rounded-md transition-all capitalize',
+                sortBy === field
+                  ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium'
+                  : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+              )}
+            >
+              {field}
+              {sortBy === field && (
+                <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+              )}
+            </button>
+          ))}
         </div>
       </motion.div>
 
@@ -718,7 +1041,7 @@ export default function AdminUsersPage() {
                     }
                   }
 
-                  const canViewPassword = !isEditing || (
+                  const canViewPassword = isEditing && (
                     currentUserRole === 'admin' && (
                       isSelf ||
                       isTargetArgusUser ||
@@ -732,13 +1055,31 @@ export default function AdminUsersPage() {
                     (currentUserRole === 'argus_user' && isSelf)
                   );
 
+                  if (!isEditing) {
+                    return (
+                      <div className="rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4">
+                        <div className="flex items-start gap-3">
+                          <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <p className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
+                              Automatic Password Generation
+                            </p>
+                            <p className="text-xs text-blue-700 dark:text-blue-300">
+                              A secure password will be automatically generated and sent to the user's email address.
+                              The user will be able to change their password after logging in from their account settings.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+
                   return (
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                           Password
-                          {isEditing && canViewPassword && <span className="text-xs text-gray-400 ml-1">(leave blank to keep)</span>}
-                          {!isEditing && currentUserRole === 'admin' && <span className="text-xs text-gray-400 ml-1">(optional, user must set on first login)</span>}
+                          {canViewPassword && <span className="text-xs text-gray-400 ml-1">(leave blank to keep)</span>}
                         </label>
                         {canRegeneratePassword && (
                           <Button
@@ -774,9 +1115,8 @@ export default function AdminUsersPage() {
                           )}
                           value={form.password}
                           onChange={(e) => setForm({ ...form, password: e.target.value })}
-                          placeholder={isEditing ? '••••••••' : (!isEditing && currentUserRole === 'admin' ? 'Leave empty for user to set' : '')}
-                          autoComplete={isEditing ? 'new-password' : 'new-password'}
-                          {...(!isEditing && currentUserRole !== 'admin' ? { required: true } : {})}
+                          placeholder="••••••••"
+                          autoComplete="new-password"
                         />
                       )}
                       {!canViewPassword && isEditing && (

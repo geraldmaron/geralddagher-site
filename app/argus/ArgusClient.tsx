@@ -27,6 +27,12 @@ export default function ArgusClient({ user, posts }: ArgusClientProps) {
             </div>
             <div className="flex items-center gap-4">
               <Link
+                href="/argus/settings"
+                className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+              >
+                Settings
+              </Link>
+              <Link
                 href="/"
                 className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
               >

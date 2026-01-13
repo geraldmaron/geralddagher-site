@@ -15,6 +15,7 @@ import { useAuth } from '@/lib/auth/provider';
 import SubscriptionModal from '@/components/SubscriptionModal';
 interface BlogWrapperProps {
   initialPosts: PostData[];
+  initialTotal?: number;
   categories: Category[];
   tags: Tag[];
   isAdmin?: boolean;
@@ -23,6 +24,7 @@ interface BlogWrapperProps {
 }
 export default function BlogWrapper({
   initialPosts,
+  initialTotal,
   categories,
   tags,
   isAdmin,
@@ -32,7 +34,7 @@ export default function BlogWrapper({
   const { user } = useAuth();
   const effectiveIsAdmin = Boolean(isAdmin);
   const [posts, setPosts] = useState<PostData[]>(initialPosts);
-  const [totalPosts, setTotalPosts] = useState(initialPosts.length);
+  const [totalPosts, setTotalPosts] = useState(initialTotal ?? initialPosts.length);
   const [isLoading, setIsLoading] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
@@ -76,7 +78,7 @@ export default function BlogWrapper({
 
       const result = await response.json();
       setPosts(result.data || []);
-      setTotalPosts(result.data?.length ?? 0);
+      setTotalPosts(result.total ?? result.data?.length ?? 0);
       setError(null);
       setRetryCount(0);
     } catch (err) {
@@ -98,23 +100,46 @@ export default function BlogWrapper({
     retryCount
   ]);
   useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchQuery, selectedCategory, selectedTags, selectedStatus, itemsPerPage]);
+
+  useEffect(() => {
+    setSelectedPosts([]);
+  }, [currentPage]);
+
+  useEffect(() => {
     const hasFilters = debouncedSearchQuery || selectedCategory || selectedTags.length > 0 || (effectiveIsAdmin && selectedStatus.length > 0);
-    if (hasFilters) {
+    const needsPagination = currentPage > 1 || itemsPerPage !== initialPosts.length;
+
+    if (hasFilters || needsPagination) {
       fetchPosts();
     } else {
       setPosts(initialPosts);
-      setTotalPosts(initialPosts.length);
+      setTotalPosts(initialTotal ?? initialPosts.length);
     }
   }, [
+    currentPage,
     itemsPerPage,
     debouncedSearchQuery,
     selectedCategory,
     selectedTags,
     selectedStatus,
     effectiveIsAdmin,
-    initialPosts
+    initialPosts,
+    initialTotal,
+    fetchPosts
   ]);
+
   const totalPages = Math.ceil(totalPosts / itemsPerPage);
+
+  const hasFilters = debouncedSearchQuery || selectedCategory || selectedTags.length > 0 || (effectiveIsAdmin && selectedStatus.length > 0);
+  const needsPagination = currentPage > 1 || itemsPerPage !== initialPosts.length;
+  const usedAPI = hasFilters || needsPagination;
+
+  const paginatedPosts = usedAPI ? posts : posts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handleSelectPost = (postId: string) => {
     setSelectedPosts(prev => 
@@ -125,7 +150,7 @@ export default function BlogWrapper({
   };
 
   const handleSelectAll = () => {
-    setSelectedPosts(selectedPosts.length === posts.length ? [] : posts.map(p => p.id));
+    setSelectedPosts(selectedPosts.length === paginatedPosts.length ? [] : paginatedPosts.map(p => p.id));
   };
 
   const handleBulkDelete = async () => {
@@ -164,13 +189,13 @@ export default function BlogWrapper({
               <div className="text-sm font-medium text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-full bg-gray-100/80 dark:bg-gray-800/80 border border-gray-200/60 dark:border-gray-700/60">
                 {isLoading ? 'Loading...' : `${totalPosts} post${totalPosts !== 1 ? 's' : ''}`}
               </div>
-              {effectiveIsAdmin && posts.length > 0 && (
+              {effectiveIsAdmin && paginatedPosts.length > 0 && (
                 <div className="flex items-center gap-2">
                   <button
                     onClick={handleSelectAll}
                     className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
                   >
-                    {selectedPosts.length === posts.length ? 'Deselect All' : 'Select All'}
+                    {selectedPosts.length === paginatedPosts.length ? 'Deselect All' : 'Select All'}
                   </button>
                   {selectedPosts.length > 0 && (
                     <button
@@ -245,8 +270,8 @@ export default function BlogWrapper({
               <p className="text-red-600 dark:text-red-400 text-sm font-medium">{error}</p>
             </div>
           </div>
-        ) : posts.length > 0 ? (
-          posts.map((post) => {
+        ) : paginatedPosts.length > 0 ? (
+          paginatedPosts.map((post) => {
             return (
               <div key={post.id} className="relative">
                 {effectiveIsAdmin && (

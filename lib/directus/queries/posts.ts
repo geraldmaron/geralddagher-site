@@ -54,17 +54,13 @@ function normalizePost<T extends Partial<Post>>(post: T) {
   return normalized as T;
 }
 
-async function getPostsInternal(params: {
-  limit?: number;
-  offset?: number;
+function buildPostFilter(params: {
   status?: string;
   featured?: boolean;
   category?: number;
   search?: string;
-  sort?: string[];
 }) {
-  const { limit = 10, offset = 0, status, featured, category, search, sort = ['-published_at'] } = params;
-
+  const { status, featured, category, search } = params;
   const filter: any = {};
 
   if (status) {
@@ -86,6 +82,22 @@ async function getPostsInternal(params: {
       { content: { _contains: search } }
     ];
   }
+
+  return filter;
+}
+
+async function getPostsInternal(params: {
+  limit?: number;
+  offset?: number;
+  status?: string;
+  featured?: boolean;
+  category?: number;
+  search?: string;
+  sort?: string[];
+}) {
+  const { limit = 10, offset = 0, sort = ['-published_at'] } = params;
+
+  const filter = buildPostFilter(params);
 
   const fields: any[] = [
     'id',
@@ -115,6 +127,25 @@ async function getPostsInternal(params: {
   );
 
   return posts.map(normalizePost);
+}
+
+export async function getPostsCount(params: {
+  status?: string;
+  featured?: boolean;
+  category?: number;
+  search?: string;
+}) {
+  const filter = buildPostFilter(params);
+
+  const result = await getClient().request(
+    readItems('posts', {
+      filter,
+      limit: -1,
+      fields: ['id']
+    })
+  );
+
+  return Array.isArray(result) ? result.length : 0;
 }
 
 export async function getPosts(params: {

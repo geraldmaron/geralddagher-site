@@ -87,8 +87,9 @@ const Element = memo<ElementProps>(({
         );
 
       case 'list-item':
+        const listDepth = element.depth || 0;
         return (
-          <li {...elementProps}>
+          <li {...elementProps} style={{ marginLeft: `${listDepth * 1.5}rem` }}>
             {children}
           </li>
         );
@@ -101,15 +102,16 @@ const Element = memo<ElementProps>(({
         );
 
       case 'todo-item':
+        const todoDepth = element.depth || 0;
         return (
-          <div {...elementProps} className={cn(elementProps.className, 'flex items-start gap-2')}>
+          <div {...elementProps} className={cn(elementProps.className, 'flex items-start gap-2')} style={{ marginLeft: `${todoDepth * 1.5}rem` }}>
             <input
               type="checkbox"
               checked={element.checked || false}
               readOnly
-              className="mt-1"
+              className="mt-1 h-4 w-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 dark:bg-neutral-800 dark:checked:bg-blue-600 dark:checked:border-blue-600"
             />
-            <div className="flex-1">
+            <div className="flex-1 text-neutral-900 dark:text-neutral-100">
               {children}
             </div>
           </div>

@@ -18,6 +18,8 @@ interface SlateNode {
   emoji?: string;
   level?: number;
   ordered?: boolean;
+  depth?: number;
+  checked?: boolean;
   [key: string]: any;
 }
 interface SlateRendererProps {
@@ -121,10 +123,32 @@ export default function SlateRenderer({ content, className = '', compact = false
           </ol>
         );
       case 'list-item':
+        const listDepth = node.depth || 0;
         return (
-          <li key={index} className="leading-relaxed">
+          <li key={index} className="leading-relaxed" style={{ marginLeft: `${listDepth * 1.5}rem` }}>
             {node.children?.map((child, i) => renderNode(child, i))}
           </li>
+        );
+      case 'todo-list':
+        return (
+          <div key={index} className={`space-y-2 ${spacing}`}>
+            {node.children?.map((child, i) => renderNode(child, i))}
+          </div>
+        );
+      case 'todo-item':
+        const todoDepth = node.depth || 0;
+        return (
+          <div key={index} className="flex items-start gap-2" style={{ marginLeft: `${todoDepth * 1.5}rem` }}>
+            <input
+              type="checkbox"
+              checked={node.checked || false}
+              readOnly
+              className="mt-1 h-4 w-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 dark:bg-neutral-800 dark:checked:bg-blue-600 dark:checked:border-blue-600 pointer-events-none"
+            />
+            <div className="flex-1 text-neutral-900 dark:text-neutral-100">
+              {node.children?.map((child, i) => renderNode(child, i))}
+            </div>
+          </div>
         );
       case 'image':
         return (

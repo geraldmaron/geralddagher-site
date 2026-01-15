@@ -22,15 +22,20 @@ import {
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import * as Separator from '@radix-ui/react-separator';
-import { 
-  isInTable, 
-  insertTable, 
-  addTableRow, 
-  removeTableRow, 
-  addTableColumn, 
-  removeTableColumn, 
-  deleteTable 
+import {
+  isInTable,
+  insertTable,
+  addTableRow,
+  removeTableRow,
+  addTableColumn,
+  removeTableColumn,
+  deleteTable
 } from '@/lib/editor/tableUtils';
+import {
+  isListItem,
+  indentListItem,
+  outdentListItem
+} from '@/lib/editor/listUtils';
 
 interface FormattingRibbonProps {
   editor: any;
@@ -514,6 +519,22 @@ export const FormattingRibbon: React.FC<FormattingRibbonProps> = ({
           action: () => toggleBlock('todo-list'),
           isActive: isBlockActive('todo-list'),
           variant: 'success'
+        },
+        {
+          id: 'indent-list',
+          icon: Indent,
+          label: 'Increase Indent',
+          shortcut: 'Tab',
+          action: () => indentListItem(editor),
+          disabled: !isListItem(editor)
+        },
+        {
+          id: 'outdent-list',
+          icon: Outdent,
+          label: 'Decrease Indent',
+          shortcut: '⇧Tab',
+          action: () => outdentListItem(editor),
+          disabled: !isListItem(editor)
         }
       ]
     },

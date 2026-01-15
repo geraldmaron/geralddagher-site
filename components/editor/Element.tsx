@@ -74,14 +74,14 @@ const Element = memo<ElementProps>(({
 
       case 'bulleted-list':
         return (
-          <ul {...elementProps} className={cn(elementProps.className, 'list-disc list-inside space-y-1')}>
+          <ul {...elementProps} className={cn(elementProps.className, 'list-disc pl-6 space-y-1')}>
             {children}
           </ul>
         );
 
       case 'numbered-list':
         return (
-          <ol {...elementProps} className={cn(elementProps.className, 'list-decimal list-inside space-y-1')}>
+          <ol {...elementProps} className={cn(elementProps.className, 'list-decimal pl-6 space-y-1')}>
             {children}
           </ol>
         );

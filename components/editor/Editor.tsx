@@ -21,6 +21,7 @@ import { useEmojiPicker } from './hooks/useEmojiPicker';
 import { EditorElement } from './EditorElement';
 import { EditorLeaf } from './EditorLeaf';
 import { withMarkdownShortcuts, withSlashCommands, withEmojiCommands, withMediaHandling, withVoidElements } from '@/lib/editor/plugins';
+import { handleEnterInList, handleBackspaceInList, indentListItem, outdentListItem, isListItem } from '@/lib/editor/listUtils';
 
 interface EditorProps {
   initialContent?: Descendant[];
@@ -311,31 +312,35 @@ export const Editor: React.FC<EditorProps> = ({
       }
     }
 
-    if (event.key === 'Enter' && selection) {
-      try {
-        const [listItemMatch] = SlateEditor.nodes(editor, {
-          match: n => !SlateEditor.isEditor(n) && SlateElement.isElement(n) && n.type === 'list-item',
-        });
+    if (event.key === 'Enter' && !event.shiftKey) {
+      if (handleEnterInList(editor, event)) {
+        return;
+      }
+    }
 
-        if (listItemMatch) {
-          const [listItem, listItemPath] = listItemMatch;
-          const itemText = SlateEditor.string(editor, listItemPath);
+    if (event.key === 'Enter' && event.shiftKey) {
+      if (isListItem(editor)) {
+        event.preventDefault();
+        editor.insertText('\n');
+        return;
+      }
+    }
 
-          if (!itemText.trim()) {
-            event.preventDefault();
-
-            Transforms.unwrapNodes(editor, {
-              match: n => !SlateEditor.isEditor(n) && SlateElement.isElement(n) &&
-                ['bulleted-list', 'numbered-list'].includes((n as CustomElement).type),
-              split: true,
-            });
-
-            Transforms.setNodes(editor, { type: 'paragraph' } as Partial<CustomElement>);
-
-            return;
-          }
+    if (event.key === 'Tab') {
+      if (isListItem(editor)) {
+        event.preventDefault();
+        if (event.shiftKey) {
+          outdentListItem(editor);
+        } else {
+          indentListItem(editor);
         }
-      } catch (error) {
+        return;
+      }
+    }
+
+    if (event.key === 'Backspace') {
+      if (handleBackspaceInList(editor, event)) {
+        return;
       }
     }
 

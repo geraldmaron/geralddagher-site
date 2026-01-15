@@ -29,13 +29,24 @@ export const EditorElement: React.FC<EditorElementProps> = ({
           {children}
         </ul>
       );
-    case 'todo-item':
+    case 'todo-item': {
+      const todoDepth = element.depth || 0;
+      const todoIndentStyle = {
+        ...style,
+        marginLeft: `${todoDepth * 1.5}rem`
+      };
       return (
-        <li {...attributes} style={style} className="flex items-center gap-2">
-          <input type="checkbox" checked={!!element.checked} readOnly className="accent-blue-500 flex-shrink-0" />
-          <span className={element.checked ? 'line-through text-neutral-400 dark:text-neutral-500' : ''}>{children}</span>
+        <li {...attributes} style={todoIndentStyle} className="flex items-start gap-2">
+          <input
+            type="checkbox"
+            checked={!!element.checked}
+            readOnly
+            className="mt-1 h-4 w-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 dark:bg-neutral-800 dark:checked:bg-blue-600 dark:checked:border-blue-600 flex-shrink-0"
+          />
+          <span className={element.checked ? 'line-through text-neutral-400 dark:text-neutral-500' : 'text-neutral-900 dark:text-neutral-100'}>{children}</span>
         </li>
       );
+    }
     case 'toggle-list':
       return (
         <div {...attributes} style={style} className="mb-4">
@@ -110,28 +121,25 @@ export const EditorElement: React.FC<EditorElementProps> = ({
       );
     case 'bulleted-list':
       return (
-        <ul {...attributes} style={style} className="list-disc list-outside my-2 pl-6 ml-0 space-y-0.5">
-          {React.Children.map(children, (child) => child)}
+        <ul {...attributes} style={style} className="list-disc pl-6 my-2 ml-0 space-y-0.5">
+          {children}
         </ul>
       );
     case 'numbered-list':
       return (
-        <ol {...attributes} style={style} className="list-decimal list-outside my-2 pl-6 ml-0 space-y-0.5">
-          {React.Children.map(children, (child) => child)}
+        <ol {...attributes} style={style} className="list-decimal pl-6 my-2 ml-0 space-y-0.5">
+          {children}
         </ol>
       );
     case 'list-item': {
-      const childArray = React.Children.toArray(children);
-      const mainContent = childArray.filter(
-        (child: any) => !child?.props?.element || (child.props.element.type !== 'bulleted-list' && child.props.element.type !== 'numbered-list')
-      );
-      const nestedList = childArray.find(
-        (child: any) => child?.props?.element && (child.props.element.type === 'bulleted-list' || child.props.element.type === 'numbered-list')
-      );
+      const depth = element.depth || 0;
+      const indentStyle = {
+        ...style,
+        marginLeft: `${depth * 1.5}rem`
+      };
       return (
-        <li {...attributes} style={style} className="ml-0 leading-normal">
-          <div>{mainContent}</div>
-          {nestedList}
+        <li {...attributes} style={indentStyle} className="leading-normal">
+          {children}
         </li>
       );
     }

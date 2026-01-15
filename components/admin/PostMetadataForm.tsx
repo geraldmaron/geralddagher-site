@@ -557,7 +557,9 @@ export function PostMetadataForm({ data, onChange, onSave, isSaving, categories:
                   type="button"
                   onClick={() => {
                     const now = new Date();
-                    onChange({ published_at: now.toISOString() });
+                    const offset = now.getTimezoneOffset() * 60000;
+                    const localTime = new Date(now.getTime() - offset);
+                    onChange({ published_at: localTime.toISOString() });
                     toast.success('Set to current time');
                   }}
                   className="px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 hover:bg-neutral-50 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-colors flex items-center gap-1.5"

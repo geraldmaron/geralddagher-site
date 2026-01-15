@@ -219,7 +219,13 @@ export default function PostCard({
 
   const publishedDate = post.published_at ? new Date(post.published_at) : null;
   const createdDate = new Date(post.created_at);
-  const displayDate = publishedDate || createdDate;
+
+  const isValidPublishedDate = publishedDate && !isNaN(publishedDate.getTime());
+  const isValidCreatedDate = !isNaN(createdDate.getTime());
+
+  const displayDate = isValidPublishedDate ? publishedDate :
+                      isValidCreatedDate ? createdDate :
+                      new Date();
 
   const formattedDate = displayDate.toLocaleDateString('en-US', {
     month: 'short',

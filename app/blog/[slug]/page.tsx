@@ -174,7 +174,9 @@ export default async function BlogPostPage({ params }: PageProps) {
     contentNodes = null
   }
   const postDate = new Date(postRaw.published_at || postRaw.date_created)
-  const formattedDate = formatDate(postDate)
+  const isValidPostDate = !isNaN(postDate.getTime())
+  const safePostDate = isValidPostDate ? postDate : new Date()
+  const formattedDate = formatDate(safePostDate)
   const readingTime = calculateReadingTime(contentNodes || postRaw.content)
   const excerpt = hydratedPost.excerpt || ''
 
@@ -233,7 +235,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                   <Calendar className="h-4 w-4 text-cyan-200" />
                   <div>
                     <p className="text-xs text-white/70">Published</p>
-                    <time dateTime={postDate.toISOString()} className="font-medium text-white">{formattedDate}</time>
+                    <time dateTime={safePostDate.toISOString()} className="font-medium text-white">{formattedDate}</time>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 rounded-2xl bg-white/10 ring-1 ring-white/15 px-4 py-3">

@@ -15,7 +15,14 @@ const updateSchema = z.object({
   featured: z.boolean().optional(),
   category: z.number().optional().nullable(),
   tags: z.array(z.number()).optional(),
-  published_at: z.string().optional().nullable(),
+  published_at: z.string().optional().nullable().refine(
+    (val) => {
+      if (!val) return true;
+      const date = new Date(val);
+      return !isNaN(date.getTime());
+    },
+    { message: 'published_at must be a valid ISO date string' }
+  ),
   is_argus_content: z.boolean().optional(),
   argus_users: z.array(z.string()).optional(),
   document_type: z.number().optional().nullable()

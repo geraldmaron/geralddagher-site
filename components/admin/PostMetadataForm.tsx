@@ -15,7 +15,8 @@ import {
   Sparkles,
   User,
   Shield,
-  FileType
+  FileType,
+  Clock
 } from 'lucide-react';
 import { Button } from '@/components/core/Button';
 import { CoverImagePicker } from './CoverImagePicker';
@@ -521,12 +522,51 @@ export function PostMetadataForm({ data, onChange, onSave, isSaving, categories:
                 <Calendar className="h-4 w-4 text-blue-600" />
                 Publish Date
               </label>
-              <input
-                type="datetime-local"
-                value={data.published_at ? new Date(data.published_at).toISOString().slice(0, 16) : ''}
-                onChange={(e) => onChange({ published_at: e.target.value ? new Date(e.target.value).toISOString() : null })}
-                className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-600"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="datetime-local"
+                  value={(() => {
+                    if (!data.published_at) return '';
+                    try {
+                      const date = new Date(data.published_at);
+                      if (isNaN(date.getTime())) return '';
+                      return date.toISOString().slice(0, 16);
+                    } catch {
+                      return '';
+                    }
+                  })()}
+                  onChange={(e) => {
+                    if (!e.target.value) {
+                      onChange({ published_at: null });
+                      return;
+                    }
+                    try {
+                      const date = new Date(e.target.value);
+                      if (isNaN(date.getTime())) {
+                        toast.error('Invalid date/time value');
+                        return;
+                      }
+                      onChange({ published_at: date.toISOString() });
+                    } catch {
+                      toast.error('Invalid date/time value');
+                    }
+                  }}
+                  className="flex-1 px-4 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const now = new Date();
+                    onChange({ published_at: now.toISOString() });
+                    toast.success('Set to current time');
+                  }}
+                  className="px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 hover:bg-neutral-50 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-colors flex items-center gap-1.5"
+                  title="Set to current time"
+                >
+                  <Clock className="h-4 w-4" />
+                  Now
+                </button>
+              </div>
             </div>
           )}
         </motion.div>

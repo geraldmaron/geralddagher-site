@@ -33,7 +33,7 @@ jobs:
           cache: 'npm'
 
       - name: Cache dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: cache-deps
         with:
           path: node_modules
@@ -60,7 +60,7 @@ jobs:
           cache: 'npm'
 
       - name: Restore dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: node_modules
           key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
@@ -83,7 +83,7 @@ jobs:
           cache: 'npm'
 
       - name: Restore dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: node_modules
           key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
@@ -109,7 +109,7 @@ jobs:
           cache: 'npm'
 
       - name: Restore dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: node_modules
           key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
@@ -140,7 +140,7 @@ jobs:
           cache: 'npm'
 
       - name: Restore dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: node_modules
           key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
@@ -167,7 +167,7 @@ jobs:
           R2_BUCKET: placeholder
 
       - name: Cache build output
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .next
           key: ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}

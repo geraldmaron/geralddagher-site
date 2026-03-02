@@ -64,6 +64,8 @@ interface Tool {
   badge?: string;
 }
 
+const LIST_TYPES = ['bulleted-list', 'numbered-list', 'todo-list'];
+
 export const FormattingRibbon: React.FC<FormattingRibbonProps> = ({
   editor,
   className,
@@ -125,14 +127,14 @@ export const FormattingRibbon: React.FC<FormattingRibbonProps> = ({
     if (!selection) return;
     
     const isActive = isBlockActive(format);
-    const isList = ['bulleted-list', 'numbered-list', 'todo-list'].includes(format);
+    const isList = LIST_TYPES.includes(format);
 
     try {
       Transforms.unwrapNodes(editor, {
         match: (n) =>
           !Editor.isEditor(n) &&
           SlateElement.isElement(n) &&
-          ['bulleted-list', 'numbered-list', 'todo-list'].includes(n.type),
+          LIST_TYPES.includes(n.type),
         split: true,
       });
 

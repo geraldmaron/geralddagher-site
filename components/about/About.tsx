@@ -57,6 +57,19 @@ const DOMAIN_SECTIONS: DomainSection[] = [
     ]
   },
   {
+    id: 'operational-intelligence',
+    title: 'Operational Intelligence & AIOps',
+    color: 'blue' as const,
+    cluster: 'reliability',
+    summary: 'Signals, service graphing, AIOps, and change intelligence',
+    skills: [
+      'AIOps and change-risk assessment',
+      'Service and dependency graphing',
+      'Incident & change management',
+      'Probabilistic success criteria (precision/recall)'
+    ]
+  },
+  {
     id: 'platform-engineering',
     title: 'Platform Engineering & Infrastructure',
     color: 'blue' as const,
@@ -67,6 +80,20 @@ const DOMAIN_SECTIONS: DomainSection[] = [
       'Internal developer platforms (IDP)',
       'Service mesh patterns',
       'IaC automation and pipelines'
+    ]
+  },
+  {
+    id: 'ai-ml-platform',
+    title: 'Technical Platform & AI/ML',
+    color: 'green' as const,
+    cluster: 'platform',
+    summary: 'AI/ML product workflows, governance, and platform capabilities',
+    skills: [
+      'LLM-powered product development',
+      'Agentic workflows and automation',
+      'AI governance and responsible AI',
+      'MLOps and model drift detection',
+      'Human-in-the-loop experience design'
     ]
   },
   {
@@ -149,15 +176,16 @@ const DOMAIN_SECTIONS: DomainSection[] = [
   },
   {
     id: 'product-management',
-    title: 'Technical Program & Product Management',
+    title: 'Product Strategy & Portfolio Management',
     color: 'purple' as const,
     cluster: 'leadership',
-    summary: 'Initiative leadership, roadmaps, PRDs, strategy, and OKRs/KPIs',
+    summary: 'Discovery, roadmaps, OKRs, and executive alignment for product portfolios',
     skills: [
       'Cross-functional initiative leadership',
-      'Technical roadmap and delivery',
-      'Product strategy and vision',
-      'OKR/KPI definition and tracking'
+      'Customer discovery and qualitative research',
+      'Roadmap planning and portfolio tradeoffs',
+      'OKR/KPI and product metrics design',
+      'Executive communication and alignment'
     ]
   },
   {
@@ -314,8 +342,7 @@ const AboutSection: React.FC = () => {
   const [isPersonalOpen, setIsPersonalOpen] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<string>('reliability');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
-  const [domainSections, setDomainSections] = useState<DomainSection[]>(DOMAIN_SECTIONS);
-  const [isLoadingSkills, setIsLoadingSkills] = useState(true);
+  const [domainSections] = useState<DomainSection[]>(DOMAIN_SECTIONS);
   const [companyLogos, setCompanyLogos] = useState<Record<string, string>>({});
 
   const keywords = personalInfo?.profile?.keywords || [];
@@ -350,27 +377,6 @@ const AboutSection: React.FC = () => {
       }
     };
     fetchLogos();
-  }, []);
-
-  useEffect(() => {
-    const fetchSkills = async () => {
-      try {
-        const response = await fetch('/api/users/skills');
-        if (!response.ok) {
-          throw new Error('Failed to fetch skills');
-        }
-        const { data } = await response.json();
-        if (data && data.length > 0) {
-          setDomainSections(data);
-        }
-      } catch (error) {
-        console.error('Error fetching skills:', error);
-      } finally {
-        setIsLoadingSkills(false);
-      }
-    };
-
-    fetchSkills();
   }, []);
 
   const aggregatedThemes = useMemo(() => {
@@ -420,6 +426,14 @@ const AboutSection: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    const activeSections = domainSections.filter((section) =>
+      selectedFilter === 'all' ? true : section.cluster === selectedFilter
+    );
+    // Precompute active sections so the skill cloud always has consistent data
+    activeSections.flatMap((section) => section.skills);
+  }, [selectedFilter, domainSections]);
+
+  useEffect(() => {
     if (keywords.length < 2) return;
     const interval = setInterval(() => {
       setCurrentKeyword((prev) => (prev + 1) % keywords.length);
@@ -461,8 +475,8 @@ const AboutSection: React.FC = () => {
   };
 
   const ROLE_FOCUS: Record<string, string[]> = {
-    IBM: ['Reliability & DR', 'Platform Strategy', 'Risk & Compliance'],
-    HashiCorp: ['Cloud Reliability', 'Platform Delivery', 'Customer Trust'],
+    IBM: ['Platform reliability & DR', 'AI/ML operational intelligence', 'Risk & compliance'],
+    HashiCorp: ['Cloud reliability & DR', 'Platform delivery', 'Customer trust'],
     'The Craneware Group (formerly Sentry Data Systems)': ['Compliance SaaS', 'Product Delivery', 'Data Integrity'],
     'AT&T': ['Field Ops', 'Training & Coaching', 'Service Quality']
   };
@@ -574,7 +588,7 @@ const AboutSection: React.FC = () => {
               </div>
             </motion.div>
 
-            {/* ARR Impact Card */}
+            {/* Portfolio Impact Card */}
             <motion.div
               className={cn(
                 'p-6 rounded-2xl border transition-all duration-300',
@@ -589,8 +603,8 @@ const AboutSection: React.FC = () => {
                   <DollarSign className={cn('w-6 h-6', ACCENT_COLORS.green.icon)} />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">~$30 Million</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">ARR influenced across portfolio</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">Nine-figure+</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">ARR portfolio impact across enterprise automation</div>
                 </div>
               </div>
             </motion.div>
@@ -610,8 +624,8 @@ const AboutSection: React.FC = () => {
                   <Award className={cn('w-6 h-6', ACCENT_COLORS.green.icon)} />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">15 Domains</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Reliability · Platform · Risk · Product</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">Core Domains</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Reliability · Platform · AI/ML · Risk</div>
                 </div>
               </div>
             </motion.div>
@@ -694,7 +708,7 @@ const AboutSection: React.FC = () => {
                 <div className="flex items-center justify-between pt-2">
                   <div className={cn('inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border', ACCENT_COLORS.blue.border, ACCENT_COLORS.blue.text, ACCENT_COLORS.blue.bg)}>
                     <Award className="w-3 h-3" />
-                    <span>15 Core Domains</span>
+                    <span>Core Domains & Skills</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-sm font-medium text-gray-900 dark:text-white group-hover:gap-2 transition-all">
                     <span>View journey</span>
@@ -808,33 +822,38 @@ const AboutSection: React.FC = () => {
             </div>
 
             {/* Unified Skill Pill Cloud */}
-            <motion.div
-              className="flex flex-wrap gap-2"
-              initial="hidden"
-              animate="visible"
-              variants={containerVariants}
-            >
-              {domainSections.filter((section) =>
-                selectedFilter === 'all' ? true : section.cluster === selectedFilter
-              ).flatMap((section) => {
-                const color = ACCENT_COLORS[section.color as keyof typeof ACCENT_COLORS];
-                return section.skills.map((skill) => (
-                  <motion.span
-                    key={`${section.id}-${skill}`}
-                    variants={itemVariants}
-                    className={cn(
-                      'px-3 py-1.5 rounded-full text-sm border transition-colors',
-                      color.border,
-                      color.bg,
-                      color.text,
-                      'hover:shadow-sm hover:border-current'
-                    )}
-                  >
-                    {skill}
-                  </motion.span>
-                ));
-              })}
-            </motion.div>
+            <div className="relative">
+              <motion.div
+                key={selectedFilter}
+                className="flex flex-wrap gap-2 max-h-64 md:max-h-80 overflow-y-auto pr-1"
+                initial="hidden"
+                animate="visible"
+                variants={containerVariants}
+              >
+                {domainSections
+                  .filter((section) =>
+                    selectedFilter === 'all' ? true : section.cluster === selectedFilter
+                  )
+                  .flatMap((section) => {
+                    const color = ACCENT_COLORS[section.color as keyof typeof ACCENT_COLORS];
+                    return section.skills.map((skill) => (
+                      <motion.span
+                        key={`${section.id}-${skill}`}
+                        variants={itemVariants}
+                        className={cn(
+                          'px-3 py-1.5 rounded-full text-sm border transition-colors',
+                          color.border,
+                          color.bg,
+                          color.text,
+                          'hover:shadow-sm hover:border-current'
+                        )}
+                      >
+                        {skill}
+                      </motion.span>
+                    ));
+                  })}
+              </motion.div>
+            </div>
           </motion.div>
         </motion.div>
       </div>
@@ -879,7 +898,7 @@ const AboutSection: React.FC = () => {
                               Professional Journey
                             </h2>
                             <p className="text-sm text-gray-500 dark:text-gray-400">
-                              From burgers to cloud platforms
+                              From field operations to leading platform reliability and AI/ML-powered operational intelligence
                             </p>
                           </div>
                         </div>
@@ -1194,7 +1213,7 @@ const AboutSection: React.FC = () => {
                             <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                               Born and raised in the Bronx as a child of Caribbean immigrants. My heritage taught me 
                               the value of hard work, community, and never forgetting where you came from. These roots 
-                              ground everything I do—from how I lead teams to how I raise my children.
+                              ground everything I do, from how I lead teams to how I raise my children.
                             </p>
                           </div>
                         </div>

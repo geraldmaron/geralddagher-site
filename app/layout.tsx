@@ -14,7 +14,7 @@ import { name } from '@/lib/constants'
 import { Analytics } from "@vercel/analytics/react"
 export const metadata = {
   title: name,
-  description: 'Product and platform leader translating reliability, risk, and delivery discipline into durable business outcomes.',
+  description: 'Product and platform leader focused on reliability, AI/ML-powered operational intelligence, and risk across enterprise portfolios.',
   icons: {
     icon: '/Dagher_Logo_2024_Mark.png',
   },

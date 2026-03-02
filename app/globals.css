@@ -88,7 +88,7 @@
     @apply border-border;
   }
 
-  /* Apply 3D transforms only to specific elements that need them */
+  
   .perspective-1000,
   .transform-style-3d,
   .backface-hidden {
@@ -213,7 +213,6 @@
     @apply max-w-none font-normal;
   }
 
-  /* Reset excessive prose spacing for cleaner typography */
   .prose p {
     margin-top: 0.75em;
     margin-bottom: 0.75em;
@@ -223,29 +222,28 @@
   .prose ul,
   .prose ol {
     @apply text-sm;
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
-    padding-left: 1.5em;
+    margin-top: 0.4em;
+    margin-bottom: 0.4em;
+    padding-left: 1.5rem;
+    list-style-position: outside;
   }
 
   .prose li {
     @apply text-sm;
     line-height: 1.55;
-    margin-top: 0.15em;
-    margin-bottom: 0.15em;
+    margin-top: 0.2em;
+    margin-bottom: 0.2em;
   }
 
-  /* Critical fix: Remove paragraph margins inside list items */
   .prose li > p {
     margin-top: 0;
     margin-bottom: 0;
   }
 
-  /* Remove extra spacing around nested lists */
   .prose li > ul,
   .prose li > ol {
-    margin-top: 0.25em;
-    margin-bottom: 0.25em;
+    margin-top: 0.35em;
+    margin-bottom: 0.35em;
   }
 
   .prose p + ul,
@@ -254,7 +252,7 @@
   .prose ol + p,
   .prose ul + ul,
   .prose ol + ol {
-    margin-top: 0.25em;
+    margin-top: 0.35em;
   }
 
   .prose-lg ul,
@@ -266,7 +264,7 @@
     @apply text-sm !important;
   }
 
-  /* Tighter heading spacing */
+  
   .prose h1,
   .prose h2,
   .prose h3,
@@ -277,23 +275,23 @@
     margin-bottom: 0.5em;
   }
 
-  /* First element should have no top margin */
+  
   .prose > :first-child {
     margin-top: 0;
   }
 
-  /* Last element should have no bottom margin */
+  
   .prose > :last-child {
     margin-bottom: 0;
   }
 
-  /* Blockquote spacing */
+  
   .prose blockquote {
     margin-top: 1em;
     margin-bottom: 1em;
   }
 
-  /* Code block spacing */
+  
   .prose pre {
     margin-top: 1em;
     margin-bottom: 1em;
@@ -308,13 +306,13 @@
     tab-size: 2;
   }
 
-  /* Horizontal rule spacing */
+  
   .prose hr {
     margin-top: 1.5em;
     margin-bottom: 1.5em;
   }
 
-  /* Table spacing */
+  
   .prose table {
     margin-top: 1em;
     margin-bottom: 1em;
@@ -436,7 +434,7 @@
     @apply bg-muted-foreground/50 rounded-full hover:bg-muted-foreground/70 transition-colors;
   }
 
-  /* Drawer-specific scrollbar styling */
+  
   [data-radix-dialog-content] .custom-scrollbar::-webkit-scrollbar {
     @apply w-1;
   }
@@ -445,9 +443,9 @@
     @apply bg-gray-400/60 dark:bg-gray-500/60 rounded-full hover:bg-gray-500/80 dark:hover:bg-gray-400/80;
   }
 
-  /* Let Radix UI handle its own positioning - no forced transforms */
+  
 
-  /* Prevent body scroll when drawer is open */
+  
   body.drawer-open {
     overflow: hidden;
   }
@@ -494,7 +492,7 @@
 }
 
 @layer utilities {
-  /* Keep only the responsive utilities that were already there */
+  
   .text-responsive {
     @apply text-xs sm:text-sm md:text-base;
   }
@@ -777,14 +775,14 @@
 }
 
 
-/* Pixel art rendering utility */
+
 .pixelated {
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
 }
 
-/* Minimalist Button & Input Overrides */
+
 @layer components {
   .btn-minimal {
     @apply h-9 px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50;
@@ -795,7 +793,7 @@
   }
 }
 
-/* Line clamp utilities */
+
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -811,4 +809,3 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-

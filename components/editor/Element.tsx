@@ -1,5 +1,4 @@
 import React, { memo, useMemo } from 'react';
-import { Element as SlateElement } from 'slate';
 import { CustomElement } from '@/lib/types/editor';
 import { cn } from '@/lib/utils';
 
@@ -74,22 +73,21 @@ const Element = memo<ElementProps>(({
 
       case 'bulleted-list':
         return (
-          <ul {...elementProps} className={cn(elementProps.className, 'list-disc pl-6 space-y-1')}>
+          <ul {...elementProps} className={cn(elementProps.className, 'list-disc list-outside')}>
             {children}
           </ul>
         );
 
       case 'numbered-list':
         return (
-          <ol {...elementProps} className={cn(elementProps.className, 'list-decimal pl-6 space-y-1')}>
+          <ol {...elementProps} className={cn(elementProps.className, 'list-decimal list-outside')}>
             {children}
           </ol>
         );
 
       case 'list-item':
-        const listDepth = element.depth || 0;
         return (
-          <li {...elementProps} style={{ marginLeft: `${listDepth * 1.5}rem` }}>
+          <li {...elementProps}>
             {children}
           </li>
         );
@@ -102,9 +100,8 @@ const Element = memo<ElementProps>(({
         );
 
       case 'todo-item':
-        const todoDepth = element.depth || 0;
         return (
-          <div {...elementProps} className={cn(elementProps.className, 'flex items-start gap-2')} style={{ marginLeft: `${todoDepth * 1.5}rem` }}>
+          <div {...elementProps} className={cn(elementProps.className, 'flex items-start gap-2')}>
             <input
               type="checkbox"
               checked={element.checked || false}

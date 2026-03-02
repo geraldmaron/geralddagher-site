@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { X, Download } from 'lucide-react';
+import { X, Download, ExternalLink } from 'lucide-react';
+import { useMediaQuery } from 'usehooks-ts';
 import Button from './Button';
 
 interface ResumeModalProps {
@@ -9,16 +10,24 @@ interface ResumeModalProps {
   onClose: () => void;
 }
 
+const RESUME_URL = '/api/assets/Gerald-Dagher-Product-Management-Resume.pdf';
+
 const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => {
+  const isDesktop = useMediaQuery('(min-width: 768px)');
+
   if (!isOpen) return null;
 
   const handleDownload = () => {
     const link = document.createElement('a');
-    link.href = '/api/assets/Gerald-Dagher-Product-Management-Resume.pdf';
+    link.href = RESUME_URL;
     link.download = 'Gerald-Dagher-Product-Management-Resume.pdf';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleOpenInNewTab = () => {
+    window.open(RESUME_URL, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -26,17 +35,17 @@ const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => {
       role="dialog"
       aria-modal="true"
       aria-label="Resume viewer"
-      className="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto p-4 sm:p-6"
+      className="fixed inset-0 z-[9999] flex items-stretch justify-center p-0 sm:p-6"
       onClick={onClose}
     >
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
 
       <div
-        className="relative z-10 w-full max-w-6xl bg-white dark:bg-gray-900 rounded-xl shadow-2xl overflow-hidden"
+        className="relative z-10 flex h-full w-full max-w-[calc(100vw-2rem)] md:max-w-4xl lg:max-w-6xl bg-white dark:bg-gray-900 rounded-none sm:rounded-xl shadow-2xl flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-800">
+          <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 dark:text-white">
             Resume
           </h2>
           <div className="flex items-center gap-2">
@@ -44,10 +53,10 @@ const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => {
               variant="outline"
               size="sm"
               onClick={handleDownload}
-              className="flex items-center gap-2"
+              className="hidden xs:inline-flex items-center gap-2"
             >
               <Download className="h-4 w-4" />
-              Download
+              <span className="sr-only xs:not-sr-only">Download</span>
             </Button>
             <button
               onClick={onClose}
@@ -59,13 +68,41 @@ const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        <div className="w-full h-[calc(100vh-200px)] sm:h-[calc(100vh-150px)]">
-          <iframe
-            src="/api/assets/Gerald-Dagher-Product-Management-Resume.pdf"
-            className="w-full h-full border-0"
-            title="Resume PDF"
-          />
-        </div>
+        {isDesktop ? (
+          <div className="flex-1 min-h-0">
+            <iframe
+              src={RESUME_URL}
+              className="w-full h-full border-0"
+              title="Resume PDF"
+            />
+          </div>
+        ) : (
+          <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 space-y-4">
+            <p className="text-sm text-gray-700 dark:text-gray-200">
+              For the best experience on mobile devices, open the résumé in a new tab or download it to your device.
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button
+                variant="primary"
+                size="md"
+                onClick={handleOpenInNewTab}
+                className="flex-1 inline-flex items-center justify-center gap-2"
+              >
+                <ExternalLink className="h-4 w-4" />
+                Open Résumé
+              </Button>
+              <Button
+                variant="secondary"
+                size="md"
+                onClick={handleDownload}
+                className="flex-1 inline-flex items-center justify-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Download PDF
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

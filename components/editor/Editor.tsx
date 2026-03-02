@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
-import { createEditor, Descendant, Editor as SlateEditor, Element as SlateElement, Transforms, Range } from 'slate';
+import { createEditor, Descendant, Editor as SlateEditor, Transforms, Range } from 'slate';
 import { Slate, Editable, withReact, useSlate, ReactEditor } from 'slate-react';
 import { withHistory } from 'slate-history';
 import { CustomElement } from '@/lib/types/editor';
@@ -22,6 +22,8 @@ import { EditorElement } from './EditorElement';
 import { EditorLeaf } from './EditorLeaf';
 import { withMarkdownShortcuts, withSlashCommands, withEmojiCommands, withMediaHandling, withVoidElements } from '@/lib/editor/plugins';
 import { handleEnterInList, handleBackspaceInList, indentListItem, outdentListItem, isListItem } from '@/lib/editor/listUtils';
+import { withListNormalizer } from '@/lib/editor/listNormalizer';
+import { normalizeContent } from '@/lib/editor/normalizeContent';
 
 interface EditorProps {
   initialContent?: Descendant[];
@@ -82,7 +84,8 @@ export const Editor: React.FC<EditorProps> = ({
   const editorRef = useRef<HTMLDivElement>(null);
   const [editor] = useState(() => {
     const baseEditor = withHistory(withReact(createEditor()));
-    const withVoidEditor = withVoidElements(baseEditor);
+    const withNormalizerEditor = withListNormalizer(baseEditor);
+    const withVoidEditor = withVoidElements(withNormalizerEditor);
     const withMediaEditor = withMediaHandling(withVoidEditor);
     const withMarkdownEditor = withMarkdownShortcuts(withMediaEditor);
     const withEmojiEditor = withEmojiCommands(withMarkdownEditor);
@@ -102,7 +105,8 @@ export const Editor: React.FC<EditorProps> = ({
   const hasInitializedRef = useRef(false);
 
   useEffect(() => {
-    const contentKey = JSON.stringify(initialContent);
+    const normalizedContent = normalizeContent(initialContent);
+    const contentKey = JSON.stringify(normalizedContent);
 
     const shouldUpdate = !hasInitializedRef.current ||
       (contentKey !== lastInitializedContentRef.current && !isUpdatingFromPropsRef.current);
@@ -112,7 +116,7 @@ export const Editor: React.FC<EditorProps> = ({
       lastInitializedContentRef.current = contentKey;
       isUpdatingFromPropsRef.current = true;
 
-      editorState.initializeContent(initialContent);
+      editorState.initializeContent(normalizedContent);
 
       const currentContentKey = JSON.stringify(editor.children);
       if (currentContentKey !== contentKey) {
@@ -122,7 +126,7 @@ export const Editor: React.FC<EditorProps> = ({
             Transforms.removeNodes(editor, { at: [i] });
           }
 
-          Transforms.insertNodes(editor, initialContent, { at: [0] });
+          Transforms.insertNodes(editor, normalizedContent, { at: [0] });
         });
       }
 
@@ -295,20 +299,6 @@ export const Editor: React.FC<EditorProps> = ({
           }
           return;
         }
-      }
-    }
-
-    if (event.key === 'Tab' && selection) {
-      try {
-        const [match] = SlateEditor.nodes(editor, {
-          match: n => !SlateEditor.isEditor(n) && SlateElement.isElement(n) && n.type === 'list-item',
-        });
-
-        if (match) {
-          event.preventDefault();
-          return;
-        }
-      } catch (error) {
       }
     }
 

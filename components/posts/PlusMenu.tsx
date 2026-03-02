@@ -265,7 +265,7 @@ export const PlusMenu = ({ isVisible, position, onClose, editor, onBlockInsert }
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95, y: -10 }}
       transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
-      className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-2xl overflow-hidden min-w-[360px] max-w-[400px]"
+      className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-2xl overflow-hidden w-[min(360px,calc(100vw-2rem))] max-w-[400px]"
       style={{
         position: 'fixed',
         top: position.top,

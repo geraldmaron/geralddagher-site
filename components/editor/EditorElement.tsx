@@ -1,5 +1,4 @@
 import React from 'react';
-import { Element as SlateElement } from 'slate';
 import { cn } from '@/lib/utils';
 
 interface EditorElementProps {
@@ -25,25 +24,22 @@ export const EditorElement: React.FC<EditorElementProps> = ({
       );
     case 'todo-list':
       return (
-        <ul {...attributes} style={style} className="list-none pl-0 my-2 space-y-1">
+        <ul {...attributes} style={style} className="list-none pl-0 space-y-1">
           {children}
         </ul>
       );
     case 'todo-item': {
-      const todoDepth = element.depth || 0;
-      const todoIndentStyle = {
-        ...style,
-        marginLeft: `${todoDepth * 1.5}rem`
-      };
       return (
-        <li {...attributes} style={todoIndentStyle} className="flex items-start gap-2">
+        <li {...attributes} style={style} className="flex items-start gap-2">
           <input
             type="checkbox"
             checked={!!element.checked}
             readOnly
             className="mt-1 h-4 w-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 dark:bg-neutral-800 dark:checked:bg-blue-600 dark:checked:border-blue-600 flex-shrink-0"
           />
-          <span className={element.checked ? 'line-through text-neutral-400 dark:text-neutral-500' : 'text-neutral-900 dark:text-neutral-100'}>{children}</span>
+          <div className={element.checked ? 'line-through text-neutral-400 dark:text-neutral-500' : 'text-neutral-900 dark:text-neutral-100'}>
+            {children}
+          </div>
         </li>
       );
     }
@@ -121,24 +117,19 @@ export const EditorElement: React.FC<EditorElementProps> = ({
       );
     case 'bulleted-list':
       return (
-        <ul {...attributes} style={style} className="list-disc pl-6 my-2 ml-0 space-y-0.5">
+        <ul {...attributes} style={style} className="list-disc list-outside">
           {children}
         </ul>
       );
     case 'numbered-list':
       return (
-        <ol {...attributes} style={style} className="list-decimal pl-6 my-2 ml-0 space-y-0.5">
+        <ol {...attributes} style={style} className="list-decimal list-outside">
           {children}
         </ol>
       );
     case 'list-item': {
-      const depth = element.depth || 0;
-      const indentStyle = {
-        ...style,
-        marginLeft: `${depth * 1.5}rem`
-      };
       return (
-        <li {...attributes} style={indentStyle} className="leading-normal">
+        <li {...attributes} style={style} className="leading-normal">
           {children}
         </li>
       );
@@ -234,4 +225,3 @@ export const EditorElement: React.FC<EditorElementProps> = ({
       );
   }
 };
-

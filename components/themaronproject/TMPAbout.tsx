@@ -15,7 +15,7 @@ const highlights = [
   },
   {
     title: 'Crafted delivery',
-    description: 'Thoughtful pacing, visual polish, and editing that amplifies—not alters—your voice.'
+    description: 'Thoughtful pacing, visual polish, and editing that amplifies your voice, not alters it.'
   }
 ];
 
@@ -137,7 +137,7 @@ const TMPAbout = () => {
                 A safe place to speak plainly
               </span>
               <p className="text-base leading-relaxed text-slate-100/90">
-                We hold the mic with you—not for you—so your lived experience lands with honesty, nuance, and respect.
+                We hold the mic with you, not for you, so your lived experience lands with honesty, nuance, and respect.
               </p>
               <div className="flex flex-wrap gap-3">
                 <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-white/90 backdrop-blur">

@@ -4,6 +4,7 @@ import { Search, X, Filter } from 'lucide-react';
 import * as Select from '@radix-ui/react-select';
 import { cn } from '@/lib/utils';
 import { zIndex } from '@/lib/utils/z-index';
+import Chip from '@/components/core/Chip';
 import { PostStatus } from '@/lib/types/database';
 import type { Category, Tag } from '@/lib/types/database';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -161,84 +162,104 @@ export default function BlogFilters({
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">Category</label>
               <div className="flex flex-wrap gap-2">
-                <span
-                  className={cn(
-                    "cursor-pointer transition-all duration-200 px-3 py-1.5 rounded-full text-sm whitespace-nowrap",
-                    selectedCategory === 'all' 
-                      ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                      : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600"
-                  )}
+                <Chip
+                  as="button"
+                  type="button"
+                  size="sm"
+                  variant={selectedCategory === 'all' ? 'filled' : 'subtle'}
+                  color={selectedCategory === 'all' ? 'blue' : 'neutral'}
                   onClick={() => handleCategoryChange('all')}
                 >
-                  All Categories
-                  {selectedCategory === 'all' && (
-                    <X className="ml-1 h-3 w-3 inline" />
-                  )}
-                </span>
-                {categories.map((category) => (
-                  <span
-                    key={category.id}
-                    className={cn(
-                      "cursor-pointer transition-all duration-200 px-3 py-1.5 rounded-full text-sm whitespace-nowrap",
-                      selectedCategory === category.id 
-                        ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                        : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600"
-                    )}
-                    onClick={() => handleCategoryChange(category.id)}
-                  >
-                    {category.name}
-                    {selectedCategory === category.id && (
+                  <>
+                    All Categories
+                    {selectedCategory === 'all' && (
                       <X className="ml-1 h-3 w-3 inline" />
                     )}
-                  </span>
-                ))}
+                  </>
+                </Chip>
+                {categories.map((category) => {
+                  const isActive = selectedCategory === category.id;
+                  return (
+                    <Chip
+                      key={category.id}
+                      as="button"
+                      type="button"
+                      size="sm"
+                      variant={isActive ? 'filled' : 'subtle'}
+                      color={isActive ? 'blue' : 'neutral'}
+                      onClick={() => handleCategoryChange(category.id)}
+                    >
+                      <>
+                        {category.name}
+                        {isActive && (
+                          <X className="ml-1 h-3 w-3 inline" />
+                        )}
+                      </>
+                    </Chip>
+                  );
+                })}
               </div>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">Tags</label>
               <div className="flex flex-wrap gap-2">
-                {tags.map((tag) => (
-                  <span
-                    key={tag.id}
-                    className={cn(
-                      "cursor-pointer transition-all duration-200 px-3 py-1.5 rounded-full text-sm whitespace-nowrap",
-                      selectedTags.includes(tag.id) 
-                        ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                        : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600",
-                      selectedTags.length >= 5 && !selectedTags.includes(tag.id) && "opacity-50 cursor-not-allowed"
-                    )}
-                    onClick={() => handleTagChange(tag.id)}
-                  >
-                    {tag.name}
-                    {selectedTags.includes(tag.id) && (
-                      <X className="ml-1 h-3 w-3 inline" />
-                    )}
-                  </span>
-                ))}
+                {tags.map((tag) => {
+                  const isActive = selectedTags.includes(tag.id);
+                  const isDisabled = selectedTags.length >= 5 && !isActive;
+                  return (
+                    <Chip
+                      key={tag.id}
+                      as="button"
+                      type="button"
+                      size="sm"
+                      variant={isActive ? 'filled' : 'subtle'}
+                      color={isActive ? 'blue' : 'neutral'}
+                      onClick={() => !isDisabled && handleTagChange(tag.id)}
+                      className={cn(
+                        isDisabled && 'opacity-50 cursor-not-allowed'
+                      )}
+                    >
+                      <>
+                        {tag.name}
+                        {isActive && (
+                          <X className="ml-1 h-3 w-3 inline" />
+                        )}
+                      </>
+                    </Chip>
+                  );
+                })}
               </div>
             </div>
             {isAdmin && (
               <div className="space-y-2">
                 <label className="text-sm font-medium text-muted-foreground">Status</label>
                 <div className="flex flex-wrap gap-2">
-                  {Object.values(PostStatus).map((status) => (
-                    <span
-                      key={status}
-                      className={cn(
-                        "cursor-pointer transition-all duration-200 px-3 py-1.5 rounded-full text-sm whitespace-nowrap",
-                        selectedStatus.includes(status) 
-                          ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                          : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600",
-                        selectedStatus.length >= 2 && !selectedStatus.includes(status) && "opacity-50 cursor-not-allowed"
-                      )}
-                      onClick={() => handleStatusChange(status)}
-                    >
-                      {status}
-                      {selectedStatus.includes(status) && (
-                        <X className="ml-1 h-3 w-3 inline" />
-                      )}
-                    </span>
-                  ))}
+                  {Object.values(PostStatus).map((status) => {
+                    const isActive = selectedStatus.includes(status);
+                    const isDisabled = selectedStatus.length >= 2 && !isActive;
+                    return (
+                      <Chip
+                        key={status}
+                        as="button"
+                        type="button"
+                        size="sm"
+                        variant={isActive ? 'filled' : 'subtle'}
+                        color={isActive ? 'blue' : 'neutral'}
+                        onClick={() => !isDisabled && handleStatusChange(status)}
+                        className={cn(
+                          'whitespace-nowrap',
+                          isDisabled && 'opacity-50 cursor-not-allowed'
+                        )}
+                      >
+                        <>
+                          {status}
+                          {isActive && (
+                            <X className="ml-1 h-3 w-3 inline" />
+                          )}
+                        </>
+                      </Chip>
+                    );
+                  })}
                 </div>
               </div>
             )}

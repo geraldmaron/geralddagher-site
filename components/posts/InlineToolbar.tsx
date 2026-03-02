@@ -176,7 +176,7 @@ export const InlineToolbar: React.FC<InlineToolbarProps> = ({
         </Popover.Trigger>
         <Popover.Portal>
           <Popover.Content 
-            className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-2xl p-4 flex flex-col gap-3 min-w-[300px] z-[1002] animate-in fade-in-0 zoom-in-95 duration-150"
+            className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-2xl p-4 flex flex-col gap-3 w-[min(300px,calc(100vw-2rem))] z-[1002] animate-in fade-in-0 zoom-in-95 duration-150"
             sideOffset={8}
           >
             <div className="flex items-center gap-2">

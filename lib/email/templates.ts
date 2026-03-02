@@ -281,7 +281,7 @@ export function generateConfirmationEmailTemplate(params: ConfirmationEmailParam
             
             <div style="text-align: center; margin: 32px 0;">
                 <p style="color: #6b7280; font-size: 14px; margin: 0;">
-                    If you didn't sign up for this, no worries—just ignore this email and you won't hear from me again.
+                    If you didn't sign up for this, no worries, just ignore this email and you won't hear from me again.
                 </p>
             </div>
         </div>
@@ -316,7 +316,7 @@ ${confirmationUrl}
 
 This link will expire in 24 hours for security reasons.
 
-If you didn't sign up for this, no worries—just ignore this email and you won't hear from me again.
+If you didn't sign up for this, no worries, just ignore this email and you won't hear from me again.
 
 Looking forward to connecting,
 ${senderName}

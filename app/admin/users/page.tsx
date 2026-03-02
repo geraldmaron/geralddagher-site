@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { getAvatarUrl } from '@/lib/directus/utils/avatar';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/core/Button';
+import { Badge } from '@/components/core/Badge';
 
 type UserType = {
   id: string;
@@ -475,20 +476,11 @@ export default function AdminUsersPage() {
 
   const isEditing = useMemo(() => !!form.id, [form.id]);
 
-  const StatusBadge = ({ status }: { status?: string }) => {
-    const colors: Record<string, string> = {
-      active: 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800',
-      draft: 'bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700',
-      suspended: 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800',
-    };
-    return (
-      <span className={cn(
-        'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border capitalize',
-        colors[status || 'active'] || colors.draft
-      )}>
-        {status || 'active'}
-      </span>
-    );
+  const statusStyles: Record<string, { variant: 'success' | 'warning' | 'destructive' | 'neutral'; label: string }> = {
+    active: { variant: 'success', label: 'Active' },
+    draft: { variant: 'neutral', label: 'Draft' },
+    suspended: { variant: 'destructive', label: 'Suspended' },
+    archived: { variant: 'warning', label: 'Archived' },
   };
 
   return (
@@ -819,7 +811,15 @@ export default function AdminUsersPage() {
                           {name}
                         </h3>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <StatusBadge status={user.status} />
+                          {(() => {
+                            const key = (user.status || 'active').toLowerCase();
+                            const style = statusStyles[key] || statusStyles.draft;
+                            return (
+                              <Badge variant={style.variant}>
+                                {style.label}
+                              </Badge>
+                            );
+                          })()}
                           {roleName && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                               <Shield className="h-3 w-3" />

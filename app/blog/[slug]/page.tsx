@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     if (!post) {
       return {
         title: 'Post Not Found',
-        description: 'The requested blog post could not be found.'
+        description: "We couldn't find this blog post."
       }
     }
 
@@ -59,7 +59,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   } catch (error) {
     return {
       title: 'Post Not Found',
-      description: 'The requested blog post could not be found.'
+      description: "We couldn't find this blog post."
     }
   }
 }

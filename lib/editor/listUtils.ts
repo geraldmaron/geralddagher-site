@@ -1,7 +1,8 @@
-import { Editor, Transforms, Element as SlateElement, Node, Path, Range, Point } from 'slate';
+import { Editor, Transforms, Element as SlateElement, Node, Path, Range, Point, Text } from 'slate';
 import { CustomElement } from '@/lib/types/editor';
 
-const MAX_DEPTH = 5;
+const LIST_TYPES = ['bulleted-list', 'numbered-list', 'todo-list'];
+const LIST_ITEM_TYPES = ['list-item', 'todo-item'];
 
 export function isInList(editor: Editor): boolean {
   const { selection } = editor;
@@ -12,7 +13,7 @@ export function isInList(editor: Editor): boolean {
       match: (n) =>
         !Editor.isEditor(n) &&
         SlateElement.isElement(n) &&
-        ['bulleted-list', 'numbered-list', 'todo-list'].includes(n.type),
+        LIST_TYPES.includes(n.type),
     })
   );
 
@@ -28,7 +29,7 @@ export function isListItem(editor: Editor): boolean {
       match: (n) =>
         !Editor.isEditor(n) &&
         SlateElement.isElement(n) &&
-        ['list-item', 'todo-item'].includes(n.type),
+        LIST_ITEM_TYPES.includes(n.type),
     })
   );
 
@@ -44,7 +45,7 @@ export function getListItemEntry(editor: Editor): [CustomElement, Path] | null {
       match: (n) =>
         !Editor.isEditor(n) &&
         SlateElement.isElement(n) &&
-        ['list-item', 'todo-item'].includes(n.type),
+        LIST_ITEM_TYPES.includes(n.type),
     })
   );
 
@@ -55,64 +56,83 @@ export function indentListItem(editor: Editor): void {
   const { selection } = editor;
   if (!selection || !isListItem(editor)) return;
 
-  const [listItemMatch] = Array.from(
-    Editor.nodes(editor, {
-      match: (n) =>
-        !Editor.isEditor(n) &&
-        SlateElement.isElement(n) &&
-        ['list-item', 'todo-item'].includes(n.type),
-    })
+  const listItemEntry = getListItemEntry(editor);
+  if (!listItemEntry) return;
+
+  const [, listItemPath] = listItemEntry;
+  const parentListPath = Path.parent(listItemPath);
+  const parentList = Node.get(editor, parentListPath);
+
+  if (!SlateElement.isElement(parentList) || !LIST_TYPES.includes(parentList.type)) {
+    return;
+  }
+
+  const listItemIndex = listItemPath[listItemPath.length - 1];
+  if (listItemIndex === 0) return;
+
+  const previousItemPath = Path.previous(listItemPath);
+  const previousItem = Node.get(editor, previousItemPath);
+  if (!SlateElement.isElement(previousItem) || !LIST_ITEM_TYPES.includes(previousItem.type)) {
+    return;
+  }
+
+  const existingSublistIndex = previousItem.children.findIndex(
+    (child) => SlateElement.isElement(child) && child.type === parentList.type
   );
 
-  if (!listItemMatch) return;
+  let sublistPath: Path;
+  if (existingSublistIndex >= 0) {
+    sublistPath = previousItemPath.concat([existingSublistIndex]);
+  } else {
+    const newSublist: CustomElement = { type: parentList.type as CustomElement['type'], children: [] };
+    const insertPath = previousItemPath.concat([previousItem.children.length]);
+    Transforms.insertNodes(editor, newSublist, { at: insertPath });
+    sublistPath = insertPath;
+  }
 
-  const [listItem] = listItemMatch as [CustomElement, Path];
-  const currentDepth = listItem.depth || 0;
-
-  if (currentDepth >= MAX_DEPTH) return;
-
-  Transforms.setNodes(
-    editor,
-    { depth: currentDepth + 1 } as Partial<CustomElement>,
-    {
-      match: (n) =>
-        !Editor.isEditor(n) &&
-        SlateElement.isElement(n) &&
-        ['list-item', 'todo-item'].includes(n.type),
-    }
-  );
+  const sublistNode = Node.get(editor, sublistPath) as CustomElement;
+  const destination = sublistPath.concat([sublistNode.children.length]);
+  Transforms.moveNodes(editor, { at: listItemPath, to: destination });
 }
 
 export function outdentListItem(editor: Editor): void {
   const { selection } = editor;
   if (!selection || !isListItem(editor)) return;
 
-  const [listItemMatch] = Array.from(
-    Editor.nodes(editor, {
-      match: (n) =>
-        !Editor.isEditor(n) &&
-        SlateElement.isElement(n) &&
-        ['list-item', 'todo-item'].includes(n.type),
-    })
-  );
+  const listItemEntry = getListItemEntry(editor);
+  if (!listItemEntry) return;
 
-  if (!listItemMatch) return;
+  const [, listItemPath] = listItemEntry;
+  const parentListPath = Path.parent(listItemPath);
+  const parentList = Node.get(editor, parentListPath);
 
-  const [listItem] = listItemMatch as [CustomElement, Path];
-  const currentDepth = listItem.depth || 0;
+  if (!SlateElement.isElement(parentList) || !LIST_TYPES.includes(parentList.type)) {
+    return;
+  }
 
-  if (currentDepth <= 0) return;
+  const parentListItemPath = Path.parent(parentListPath);
+  const parentListItem = Node.get(editor, parentListItemPath);
 
-  Transforms.setNodes(
-    editor,
-    { depth: currentDepth - 1 } as Partial<CustomElement>,
-    {
-      match: (n) =>
-        !Editor.isEditor(n) &&
-        SlateElement.isElement(n) &&
-        ['list-item', 'todo-item'].includes(n.type),
+  if (!SlateElement.isElement(parentListItem) || !LIST_ITEM_TYPES.includes(parentListItem.type)) {
+    return;
+  }
+
+  const grandParentListPath = Path.parent(parentListItemPath);
+  const grandParentList = Node.get(editor, grandParentListPath);
+  if (!SlateElement.isElement(grandParentList) || !LIST_TYPES.includes(grandParentList.type)) {
+    return;
+  }
+
+  const newPath = Path.next(parentListItemPath);
+  Transforms.moveNodes(editor, { at: listItemPath, to: newPath });
+
+  try {
+    const updatedParentList = Node.get(editor, parentListPath) as CustomElement;
+    if (SlateElement.isElement(updatedParentList) && updatedParentList.children.length === 0) {
+      Transforms.removeNodes(editor, { at: parentListPath });
     }
-  );
+  } catch {
+  }
 }
 
 export function handleEnterInList(editor: Editor, event: React.KeyboardEvent): boolean {
@@ -123,38 +143,51 @@ export function handleEnterInList(editor: Editor, event: React.KeyboardEvent): b
   if (!listItemEntry) return false;
 
   const [listItem, listItemPath] = listItemEntry;
-  const itemText = Editor.string(editor, listItemPath);
+  const itemText = listItem.children
+    .filter((child) => !SlateElement.isElement(child) || !LIST_TYPES.includes(child.type))
+    .map((child) => (Text.isText(child) ? child.text : Node.string(child)))
+    .join('');
 
   if (!itemText.trim()) {
     event.preventDefault();
+    const parentListPath = Path.parent(listItemPath);
+    const parentListItemPath = Path.parent(parentListPath);
+    const parentListItem = Node.get(editor, parentListItemPath);
 
-    const currentDepth = listItem.depth || 0;
-    if (currentDepth > 0) {
+    if (SlateElement.isElement(parentListItem) && LIST_ITEM_TYPES.includes(parentListItem.type)) {
       outdentListItem(editor);
-    } else {
-      Transforms.unwrapNodes(editor, {
-        match: (n) =>
-          !Editor.isEditor(n) &&
-          SlateElement.isElement(n) &&
-          ['bulleted-list', 'numbered-list', 'todo-list'].includes(n.type),
-        split: true,
-      });
-      Transforms.setNodes(editor, { type: 'paragraph' } as Partial<CustomElement>);
+      return true;
     }
+
+    Transforms.unwrapNodes(editor, {
+      match: (n) =>
+        !Editor.isEditor(n) &&
+        SlateElement.isElement(n) &&
+        LIST_TYPES.includes(n.type),
+      split: true,
+    });
+    Transforms.setNodes(editor, { type: 'paragraph' } as Partial<CustomElement>);
     return true;
   }
 
   event.preventDefault();
-
-  const currentDepth = listItem.depth || 0;
   const isTodoItem = listItem.type === 'todo-item';
+  Transforms.splitNodes(editor, {
+    match: (n) =>
+      !Editor.isEditor(n) &&
+      SlateElement.isElement(n) &&
+      LIST_ITEM_TYPES.includes(n.type),
+    always: true,
+  });
 
-  const newListItem: CustomElement = isTodoItem
-    ? { type: 'todo-item', checked: false, depth: currentDepth, children: [{ text: '' }] }
-    : { type: 'list-item', depth: currentDepth, children: [{ text: '' }] };
-
-  Transforms.splitNodes(editor, { always: true });
-  Transforms.setNodes(editor, newListItem);
+  if (isTodoItem) {
+    const nextItem = Editor.above(editor, {
+      match: (n) => SlateElement.isElement(n) && n.type === 'todo-item',
+    });
+    if (nextItem) {
+      Transforms.setNodes(editor, { checked: false } as Partial<CustomElement>, { at: nextItem[1] });
+    }
+  }
 
   return true;
 }
@@ -166,25 +199,28 @@ export function handleBackspaceInList(editor: Editor, event: React.KeyboardEvent
   const listItemEntry = getListItemEntry(editor);
   if (!listItemEntry) return false;
 
-  const [listItem, listItemPath] = listItemEntry;
+  const [, listItemPath] = listItemEntry;
   const start = Editor.start(editor, listItemPath);
 
   if (Point.equals(selection.anchor, start)) {
     event.preventDefault();
+    const parentListPath = Path.parent(listItemPath);
+    const parentListItemPath = Path.parent(parentListPath);
+    const parentListItem = Node.get(editor, parentListItemPath);
 
-    const currentDepth = listItem.depth || 0;
-    if (currentDepth > 0) {
+    if (SlateElement.isElement(parentListItem) && LIST_ITEM_TYPES.includes(parentListItem.type)) {
       outdentListItem(editor);
-    } else {
-      Transforms.unwrapNodes(editor, {
-        match: (n) =>
-          !Editor.isEditor(n) &&
-          SlateElement.isElement(n) &&
-          ['bulleted-list', 'numbered-list', 'todo-list'].includes(n.type),
-        split: true,
-      });
-      Transforms.setNodes(editor, { type: 'paragraph' } as Partial<CustomElement>);
+      return true;
     }
+
+    Transforms.unwrapNodes(editor, {
+      match: (n) =>
+        !Editor.isEditor(n) &&
+        SlateElement.isElement(n) &&
+        LIST_TYPES.includes(n.type),
+      split: true,
+    });
+    Transforms.setNodes(editor, { type: 'paragraph' } as Partial<CustomElement>);
     return true;
   }
 

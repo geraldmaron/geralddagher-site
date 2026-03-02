@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Button from '@/components/core/Button';
+import Chip from '@/components/core/Chip';
 import { ArrowRight } from 'lucide-react';
 import { motion, useReducedMotion, useScroll, useTransform, Variants } from 'framer-motion';
 import BusinessCard from '@/components/core/BusinessCard';
@@ -28,9 +29,9 @@ const itemVariants: Variants = {
 };
 
 const highlightPills = [
-  'Reliability & platform',
-  'Product leadership',
-  'Mentor & coach'
+  'Platform reliability & resilience',
+  'AI/ML product leadership',
+  'Operational intelligence & risk'
 ];
 
 const Hero: React.FC = () => {
@@ -177,7 +178,7 @@ const Hero: React.FC = () => {
               variants={itemVariants}
               className="max-w-2xl text-base leading-relaxed text-slate-100/90"
             >
-              Product and platform leader translating reliability, risk, and delivery discipline into durable business outcomes. I help teams ship fast without breaking trust.
+              Product and platform leader focused on reliability, AI/ML-powered operational intelligence, and risk. I help teams ship fast without breaking trust across enterprise portfolios.
             </motion.p>
 
             <motion.div
@@ -185,13 +186,18 @@ const Hero: React.FC = () => {
               className="flex flex-wrap gap-3"
             >
               {highlightPills.map((pill) => (
-                <span
+                <Chip
                   key={pill}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-sm font-medium text-white/90 shadow-sm backdrop-blur"
+                  variant="subtle"
+                  color="blue"
+                  size="sm"
+                  className="border border-white/20 bg-white/10 text-white/90 shadow-sm backdrop-blur"
                 >
-                  <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-blue-500 to-emerald-500" />
-                  {pill}
-                </span>
+                  <span className="flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-blue-500 to-emerald-500" />
+                    {pill}
+                  </span>
+                </Chip>
               ))}
             </motion.div>
 

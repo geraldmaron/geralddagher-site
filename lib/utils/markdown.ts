@@ -69,7 +69,12 @@ function serializeSlateToMarkdown(nodes: SlateNode[]): string {
   return validNodes.map(node => serializeNode(node)).join('');
 }
 
-function serializeNode(node: SlateNode): string {
+type ListContext = {
+  listType?: 'bulleted-list' | 'numbered-list' | 'todo-list';
+  depth?: number;
+};
+
+function serializeNode(node: SlateNode, context: ListContext = {}): string {
   if (!validateSlateNode(node)) {
     return '';
   }
@@ -83,7 +88,7 @@ function serializeNode(node: SlateNode): string {
     return text;
   }
   
-  const children = node.children ? node.children.map(child => serializeNode(child)).join('') : '';
+  const children = node.children ? node.children.map(child => serializeNode(child, context)).join('') : '';
   
   switch (node.type) {
     case 'paragraph':
@@ -103,14 +108,14 @@ function serializeNode(node: SlateNode): string {
     case 'block-quote':
       return `> ${children}\n\n`;
     case 'bulleted-list':
-      return `${children}\n`;
+      return serializeList(node, { ...context, listType: 'bulleted-list' });
     case 'numbered-list':
-      return `${children}\n`;
-    case 'list-item': {
-      const listType = node.children?.[0]?.type;
-      const bullet = listType === 'numbered-list' ? '1.' : '-';
-      return `${bullet} ${children}\n`;
-    }
+      return serializeList(node, { ...context, listType: 'numbered-list' });
+    case 'todo-list':
+      return serializeList(node, { ...context, listType: 'todo-list' });
+    case 'list-item':
+    case 'todo-item':
+      return serializeListItem(node, context);
     case 'code-block': {
       const language = node.language || '';
       return `\`\`\`${language}\n${children}\`\`\`\n\n`;
@@ -141,6 +146,46 @@ function serializeNode(node: SlateNode): string {
     default:
       return children;
   }
+}
+
+function serializeList(listNode: SlateNode, context: ListContext): string {
+  const listType = context.listType ?? (listNode.type as ListContext['listType']) ?? 'bulleted-list';
+  const depth = context.depth ?? 0;
+  const items = listNode.children ? listNode.children.map(child => serializeNode(child, { listType, depth })).join('') : '';
+  return depth === 0 ? `${items}\n` : items;
+}
+
+function serializeListItem(node: SlateNode, context: ListContext): string {
+  const listType = context.listType ?? 'bulleted-list';
+  const depth = context.depth ?? 0;
+  const indent = '  '.repeat(depth);
+  const marker = listType === 'numbered-list'
+    ? '1.'
+    : listType === 'todo-list'
+      ? (node as any).checked ? '- [x]' : '- [ ]'
+      : '-';
+
+  const textParts: string[] = [];
+  const nestedParts: string[] = [];
+
+  node.children?.forEach((child) => {
+    if (child.type === 'bulleted-list' || child.type === 'numbered-list' || child.type === 'todo-list') {
+      nestedParts.push(serializeList(child, { listType: child.type as ListContext['listType'], depth: depth + 1 }));
+      return;
+    }
+
+    if (child.type === 'paragraph') {
+      const paragraphText = child.children ? child.children.map(grandChild => serializeNode(grandChild, context)).join('') : '';
+      textParts.push(paragraphText);
+      return;
+    }
+
+    textParts.push(serializeNode(child, context));
+  });
+
+  const textContent = textParts.join('').trimEnd();
+  const line = textContent ? `${indent}${marker} ${textContent}\n` : `${indent}${marker}\n`;
+  return line + nestedParts.join('');
 }
 
 function serializeTable(tableNode: SlateNode): string {

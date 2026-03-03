@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { X, Download, ExternalLink } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { X, Download, ExternalLink, Loader2 } from 'lucide-react';
 import { useMediaQuery } from 'usehooks-ts';
 import Button from './Button';
 
@@ -14,6 +14,19 @@ const RESUME_URL = '/api/assets/Gerald-Dagher-Product-Management-Resume.pdf';
 
 const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => {
   const isDesktop = useMediaQuery('(min-width: 768px)');
+  const [iframeLoading, setIframeLoading] = useState(true);
+
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
+  useEffect(() => {
+    setIframeLoading(true);
+  }, [isDesktop]);
 
   if (!isOpen) return null;
 
@@ -35,13 +48,13 @@ const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => {
       role="dialog"
       aria-modal="true"
       aria-label="Resume viewer"
-      className="fixed inset-0 z-[9999] flex items-stretch justify-center p-0 sm:p-6"
+      className="fixed inset-0 z-[9999] flex items-stretch justify-center overflow-hidden p-0 sm:p-6"
       onClick={onClose}
     >
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
 
       <div
-        className="relative z-10 flex h-full w-full max-w-[calc(100vw-2rem)] md:max-w-4xl lg:max-w-6xl bg-white dark:bg-gray-900 rounded-none sm:rounded-xl shadow-2xl flex-col overflow-hidden"
+        className="relative z-10 flex h-full w-full md:max-w-4xl lg:max-w-6xl bg-white dark:bg-gray-900 rounded-none sm:rounded-xl shadow-2xl flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-800">
@@ -53,10 +66,10 @@ const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => {
               variant="outline"
               size="sm"
               onClick={handleDownload}
-              className="hidden xs:inline-flex items-center gap-2"
+              className="inline-flex items-center gap-2"
             >
               <Download className="h-4 w-4" />
-              <span className="sr-only xs:not-sr-only">Download</span>
+              <span className="hidden sm:inline">Download</span>
             </Button>
             <button
               onClick={onClose}
@@ -69,24 +82,31 @@ const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         {isDesktop ? (
-          <div className="flex-1 min-h-0">
+          <div className="relative flex-1 min-h-0">
+            {iframeLoading && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white dark:bg-gray-900">
+                <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                <p className="text-sm text-gray-500 dark:text-gray-400">Loading résumé…</p>
+              </div>
+            )}
             <iframe
               src={RESUME_URL}
               className="w-full h-full border-0"
               title="Resume PDF"
+              onLoad={() => setIframeLoading(false)}
             />
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 space-y-4">
+          <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 space-y-4">
             <p className="text-sm text-gray-700 dark:text-gray-200">
-              For the best experience on mobile devices, open the résumé in a new tab or download it to your device.
+              For the best experience on mobile, open the résumé in a new tab or download it.
             </p>
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex flex-col gap-3">
               <Button
                 variant="primary"
                 size="md"
                 onClick={handleOpenInNewTab}
-                className="flex-1 inline-flex items-center justify-center gap-2"
+                className="w-full inline-flex items-center justify-center gap-2"
               >
                 <ExternalLink className="h-4 w-4" />
                 Open Résumé
@@ -95,7 +115,7 @@ const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => {
                 variant="secondary"
                 size="md"
                 onClick={handleDownload}
-                className="flex-1 inline-flex items-center justify-center gap-2"
+                className="w-full inline-flex items-center justify-center gap-2"
               >
                 <Download className="h-4 w-4" />
                 Download PDF

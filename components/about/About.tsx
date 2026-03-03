@@ -499,7 +499,7 @@ const AboutSection: React.FC = () => {
       aria-label="About me"
       data-section="about"
       className={cn(
-        "relative w-full py-16 md:py-24 px-4",
+        "relative w-full py-16 md:py-24",
         isDarkMode ? "bg-black" : "bg-white"
       )}
     >

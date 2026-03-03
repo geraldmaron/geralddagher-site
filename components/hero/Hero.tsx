@@ -183,7 +183,7 @@ const Hero: React.FC = () => {
 
             <motion.div
               variants={itemVariants}
-              className="flex flex-wrap gap-3"
+              className="flex flex-wrap justify-center gap-3"
             >
               {highlightPills.map((pill) => (
                 <Chip

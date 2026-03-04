@@ -23,7 +23,7 @@ jobs:
       url: https://${{ secrets.CMS_DOMAIN }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Copy files via SSH
         uses: appleboy/scp-action@master

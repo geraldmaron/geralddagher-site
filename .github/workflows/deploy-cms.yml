@@ -2,11 +2,6 @@ name: Deploy CMS
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - 'ops/compose/**'
 
 concurrency:
   group: deploy-cms

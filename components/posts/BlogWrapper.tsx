@@ -141,6 +141,8 @@ export default function BlogWrapper({
     currentPage * itemsPerPage
   );
 
+  const showFeatured = !isLoading && !hasFilters && currentPage === 1 && paginatedPosts.length > 1;
+
   const handleSelectPost = (postId: string) => {
     setSelectedPosts(prev => 
       prev.includes(postId) 
@@ -172,12 +174,12 @@ export default function BlogWrapper({
   };
 
   return (
-    <div className="space-y-0">
-      <div className="rounded-2xl border border-gray-200/80 dark:border-gray-800/80 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm shadow-lg overflow-hidden">
-        <div className="p-4 sm:p-6 border-b border-gray-200/60 dark:border-gray-800/60 bg-gradient-to-r from-white/50 via-white/30 to-white/50 dark:from-neutral-900/50 dark:via-neutral-900/30 dark:to-neutral-900/50">
-          <BlogFilters
-            categories={categories}
-            tags={tags}
+    <div className="space-y-8">
+      {/* Sticky frosted filter bar */}
+      <div className="sticky top-16 lg:top-20 z-30 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 bg-white/80 dark:bg-background/80 backdrop-blur-xl border-b border-blue-200/30 dark:border-blue-800/20">
+        <BlogFilters
+          categories={categories}
+          tags={tags}
             onSearchChange={handleSearchChange}
             onCategoryChange={setSelectedCategory}
             onTagsChange={setSelectedTags}
@@ -186,14 +188,14 @@ export default function BlogWrapper({
           />
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mt-4">
             <div className="flex items-center gap-4 flex-wrap">
-              <div className="text-sm font-medium text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-full bg-gray-100/80 dark:bg-gray-800/80 border border-gray-200/60 dark:border-gray-700/60">
+              <div className="text-sm font-medium text-muted-foreground">
                 {isLoading ? 'Loading...' : `${totalPosts} post${totalPosts !== 1 ? 's' : ''}`}
               </div>
               {effectiveIsAdmin && paginatedPosts.length > 0 && (
                 <div className="flex items-center gap-2">
                   <button
                     onClick={handleSelectAll}
-                    className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
+                    className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
                   >
                     {selectedPosts.length === paginatedPosts.length ? 'Deselect All' : 'Select All'}
                   </button>
@@ -216,49 +218,64 @@ export default function BlogWrapper({
                   variant="primary"
                   size="md"
                   aria-label="Subscribe to updates"
-                  className="shadow-md shadow-blue-500/25"
+                  className="shadow-md shadow-blue-500/25 bg-blue-600 hover:bg-blue-700 border-blue-600"
                 >
                   <Mail className="w-4 h-4 mr-2" />
                   Subscribe
                 </Button>
               )}
-              <div className="inline-flex rounded-xl border border-gray-200/80 dark:border-gray-700/80 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm p-1.5 gap-1 shadow-sm">
-                <Button
-                  variant={viewMode === 'grid' ? 'primary' : 'ghost'}
-                  size="sm"
+              <div className="inline-flex rounded-lg border border-input bg-muted p-1">
+                <button
                   onClick={() => setViewMode('grid')}
                   className={cn(
-                    'rounded-lg transition-all h-8 w-8 p-0 flex items-center justify-center',
-                    viewMode === 'grid' 
-                      ? 'bg-white dark:bg-gray-700 shadow-sm' 
-                      : 'hover:bg-gray-100/80 dark:hover:bg-gray-700/80'
+                    'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                    viewMode === 'grid'
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
                   )}
                 >
                   <Grid3X3 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'primary' : 'ghost'}
-                  size="sm"
+                </button>
+                <button
                   onClick={() => setViewMode('list')}
                   className={cn(
-                    'rounded-lg transition-all h-8 w-8 p-0 flex items-center justify-center',
-                    viewMode === 'list' 
-                      ? 'bg-white dark:bg-gray-700 shadow-sm' 
-                      : 'hover:bg-gray-100/80 dark:hover:bg-gray-700/80'
+                    'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                    viewMode === 'list'
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
                   )}
                 >
                   <List className="h-4 w-4" />
-                </Button>
+                </button>
               </div>
             </div>
           </div>
+      </div>
+
+      {/* Featured post — first post gets a hero treatment */}
+      {showFeatured && (
+        <div className="mb-2">
+          <div className="relative">
+            <PostCard
+              post={paginatedPosts[0]}
+              viewMode="list"
+              isAdmin={effectiveIsAdmin}
+              onEdit={onEditPost ? () => onEditPost(paginatedPosts[0].id) : undefined}
+              onDelete={onDeletePost ? () => onDeletePost(paginatedPosts[0].id) : undefined}
+              searchQuery={debouncedSearchQuery}
+              allTags={tags}
+            />
+          </div>
         </div>
-        <div className="p-4 sm:p-6 lg:p-8">
+      )}
+
+      {/* Post grid — remaining posts */}
+      <div>
         <div
           className={cn(
             'grid',
             viewMode === 'grid'
-              ? 'gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3'
+              ? 'gap-6 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3'
               : 'gap-4 grid-cols-1'
           )}
         >
@@ -271,7 +288,7 @@ export default function BlogWrapper({
             </div>
           </div>
         ) : paginatedPosts.length > 0 ? (
-          paginatedPosts.map((post) => {
+          (showFeatured ? paginatedPosts.slice(1) : paginatedPosts).map((post) => {
             return (
               <div key={post.id} className="relative">
                 {effectiveIsAdmin && (
@@ -280,7 +297,7 @@ export default function BlogWrapper({
                       type="checkbox"
                       checked={selectedPosts.includes(post.id)}
                       onChange={() => handleSelectPost(post.id)}
-                      className="w-4 h-4 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                      className="w-4 h-4 text-primary bg-white border-gray-300 rounded focus-visible:ring-ring dark:ring-offset-gray-800 focus-visible:ring-2 dark:bg-gray-700 dark:border-gray-600"
                     />
                   </div>
                 )}
@@ -322,19 +339,20 @@ export default function BlogWrapper({
           </div>
         )}
         </div>
-        </div>
-        {totalPosts > 0 && (
-          <div className="px-4 sm:px-6 lg:px-8 pb-4 sm:pb-6 border-t border-gray-200/60 dark:border-gray-800/60 pt-4 sm:pt-6 bg-gradient-to-r from-white/30 via-white/20 to-white/30 dark:from-neutral-900/30 dark:via-neutral-900/20 dark:to-neutral-900/30">
-            <BlogPagination
-              currentPage={currentPage}
-              totalPages={Math.ceil(totalPosts / itemsPerPage)}
-              itemsPerPage={itemsPerPage}
-              onPageChange={setCurrentPage}
-              onItemsPerPageChange={setItemsPerPage}
-            />
-          </div>
-        )}
       </div>
+
+      {/* Pagination */}
+      {totalPosts > 0 && (
+        <div className="pt-6 border-t border-border/40">
+          <BlogPagination
+            currentPage={currentPage}
+            totalPages={Math.ceil(totalPosts / itemsPerPage)}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+            onItemsPerPageChange={setItemsPerPage}
+          />
+        </div>
+      )}
 
       <SubscriptionModal 
         isOpen={subscriptionModalOpen}

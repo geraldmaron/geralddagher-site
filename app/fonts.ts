@@ -1,4 +1,4 @@
-import { Inter, Oswald } from 'next/font/google';
+import { Inter, Playfair_Display } from 'next/font/google';
 
 export const inter = Inter({
   subsets: ['latin'],
@@ -7,9 +7,9 @@ export const inter = Inter({
   variable: '--font-inter',
 });
 
-export const oswald = Oswald({
+export const playfair = Playfair_Display({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
   display: 'swap',
-  variable: '--font-oswald',
+  variable: '--font-display',
 });

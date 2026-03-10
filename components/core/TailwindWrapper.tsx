@@ -9,8 +9,6 @@ import 'prismjs/components/prism-typescript';
 import 'prismjs/components/prism-javascript';
 import 'prismjs/components/prism-css';
 import 'prismjs/components/prism-jsx';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCopy } from '@fortawesome/free-solid-svg-icons';
 interface TailwindHTMLWrapperProps {
   content: string | ReactElement | ReactNode;
 }
@@ -94,7 +92,7 @@ const TailwindHTMLWrapper: React.FC<TailwindHTMLWrapperProps> = ({ content }) =>
         const language = code.className.replace('language-', '');
         code.classList.add(`language-${language}`);
         const copyButton = document.createElement('button');
-        copyButton.innerHTML = '<FontAwesomeIcon icon={faCopy} />';
+        copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>';
         copyButton.classList.add('absolute', 'top-2', 'right-2', 'bg-blue-700', 'text-white', 'p-2', 'rounded');
         copyButton.onclick = () => {
           navigator.clipboard.writeText(code.textContent || '');

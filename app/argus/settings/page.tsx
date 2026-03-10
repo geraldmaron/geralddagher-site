@@ -27,7 +27,7 @@ export default async function ArgusSettingsPage() {
 
     if (!user.has_argus_access) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black px-4">
+        <div data-area="argus" className="min-h-screen flex items-center justify-center bg-background px-4">
           <div className="max-w-md w-full text-center">
             <div className="mb-8">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/20 mb-4">
@@ -35,16 +35,16 @@ export default async function ArgusSettingsPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              <h1 className="text-2xl font-bold text-foreground mb-2">
                 Access Denied
               </h1>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-muted-foreground">
                 You don't have permission to access Argus. Please contact the administrator if you believe this is an error.
               </p>
             </div>
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+              className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Home
@@ -55,25 +55,25 @@ export default async function ArgusSettingsPage() {
     }
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-blue-50/30 dark:from-neutral-950 dark:via-neutral-900 dark:to-blue-950/30">
+      <div data-area="argus" className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-violet-50/20 dark:from-indigo-950/20 dark:via-gray-950 dark:to-violet-950/10">
         <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
           <div className="mb-8">
             <Link
               href="/argus"
-              className="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 mb-4 transition-colors"
+              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Argus
             </Link>
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg">
                 <Shield className="h-7 w-7 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-neutral-900 dark:text-white">
+                <h1 className="text-3xl font-bold text-foreground">
                   Settings
                 </h1>
-                <p className="text-neutral-600 dark:text-neutral-400 mt-1">
+                <p className="text-muted-foreground mt-1">
                   Manage your account settings and security
                 </p>
               </div>
@@ -81,36 +81,36 @@ export default async function ArgusSettingsPage() {
           </div>
 
           <div className="space-y-6">
-            <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-6 shadow-sm">
+            <div className="bg-card dark:bg-card rounded-2xl border border-border p-6 shadow-sm">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 rounded-lg bg-neutral-50 dark:bg-neutral-800">
-                  <User className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
+                <div className="p-2 rounded-lg bg-muted">
+                  <User className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">
+                  <h2 className="text-lg font-semibold text-foreground">
                     Profile Information
                   </h2>
-                  <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                  <p className="text-sm text-muted-foreground">
                     Your account details
                   </p>
                 </div>
               </div>
               <div className="space-y-3 text-sm">
-                <div className="flex items-center justify-between py-3 border-b border-neutral-200 dark:border-neutral-800">
-                  <span className="text-neutral-600 dark:text-neutral-400">Name</span>
-                  <span className="font-medium text-neutral-900 dark:text-white">
+                <div className="flex items-center justify-between py-3 border-b border-border">
+                  <span className="text-muted-foreground">Name</span>
+                  <span className="font-medium text-foreground">
                     {user.first_name} {user.last_name}
                   </span>
                 </div>
-                <div className="flex items-center justify-between py-3 border-b border-neutral-200 dark:border-neutral-800">
-                  <span className="text-neutral-600 dark:text-neutral-400">Email</span>
-                  <span className="font-medium text-neutral-900 dark:text-white">
+                <div className="flex items-center justify-between py-3 border-b border-border">
+                  <span className="text-muted-foreground">Email</span>
+                  <span className="font-medium text-foreground">
                     {user.email}
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-3">
-                  <span className="text-neutral-600 dark:text-neutral-400">Role</span>
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                  <span className="text-muted-foreground">Role</span>
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
                     {typeof user.role === 'object' ? user.role?.name : user.role}
                   </span>
                 </div>
@@ -119,16 +119,16 @@ export default async function ArgusSettingsPage() {
 
             <ChangePasswordForm />
 
-            <div className="bg-amber-50 dark:bg-amber-900/20 rounded-2xl border border-amber-200 dark:border-amber-800 p-6">
+            <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl border border-indigo-200 dark:border-indigo-800 p-6">
               <div className="flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/40">
-                  <Shield className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/40">
+                  <Shield className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-amber-900 dark:text-amber-100 mb-1">
+                  <h3 className="text-sm font-semibold text-indigo-900 dark:text-indigo-100 mb-1">
                     Security Tip
                   </h3>
-                  <p className="text-xs text-amber-700 dark:text-amber-300 leading-relaxed">
+                  <p className="text-xs text-indigo-700 dark:text-indigo-300 leading-relaxed">
                     For better security, change your password regularly and use a unique password that you don't use anywhere else.
                     Consider using a password manager to generate and store strong passwords.
                   </p>

@@ -1,8 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBrain, faFileLines, faComments, faVideo } from '@fortawesome/free-solid-svg-icons';
+import { Brain, FileText, MessageSquare, Video } from 'lucide-react';
 import { useTheme } from '@/components/core/ThemeProvider';
 import { usePathname, useSearchParams } from 'next/navigation';
 import Button from '@/components/core/Button';
@@ -12,7 +11,7 @@ import TMPQuestions from './TMPQuestions';
 import TMPWhatToExpect from './TMPWhatToExpect';
 
 interface Step {
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   title: string;
   description: string;
 }
@@ -71,22 +70,22 @@ const TMPHowToHelp: React.FC = () => {
 
   const steps: Step[] = [
     {
-      icon: faBrain,
+      icon: Brain,
       title: 'Share your story',
       description: 'Reflect on what you want to voice and the change you hope it sparks.'
     },
     {
-      icon: faFileLines,
+      icon: FileText,
       title: 'Connect with us',
       description: 'Fill in a few details so we can prepare the right space for you.'
     },
     {
-      icon: faComments,
-      title: "Let’s chat",
-      description: 'We’ll align on what feels comfortable, then explore the heart of your experience.'
+      icon: MessageSquare,
+      title: "Let's chat",
+      description: "We'll align on what feels comfortable, then explore the heart of your experience."
     },
     {
-      icon: faVideo,
+      icon: Video,
       title: 'Create impact',
       description: 'Record, refine, and share your story in a format that meets you where you are.'
     }
@@ -120,7 +119,7 @@ const TMPHowToHelp: React.FC = () => {
   return (
     <section className="relative isolate overflow-hidden px-4 py-16 sm:px-6 sm:py-20 lg:px-10 lg:py-24">
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(59,130,246,0.2),transparent_28%),radial-gradient(circle_at_85%_10%,rgba(236,72,153,0.16),transparent_32%),radial-gradient(circle_at_50%_85%,rgba(52,211,153,0.14),transparent_30%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(59,130,246,0.18),transparent_28%),radial-gradient(circle_at_85%_10%,rgba(45,212,191,0.18),transparent_32%),radial-gradient(circle_at_50%_85%,rgba(251,191,36,0.13),transparent_30%)]" />
         <div className={`absolute inset-0 opacity-80 ${isDarkMode ? 'bg-slate-950/50' : 'bg-white/70'}`} />
       </div>
 
@@ -134,7 +133,7 @@ const TMPHowToHelp: React.FC = () => {
           <span className="inline-flex items-center justify-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-200">
             Join the work
           </span>
-          <h2 className="text-3xl leading-tight text-slate-900 dark:text-white sm:text-4xl">
+          <h2 className="text-3xl text-slate-900 dark:text-white sm:text-4xl overflow-visible pb-1" style={{ fontFamily: 'var(--font-display)', lineHeight: '1.2' }}>
             How can you help?
           </h2>
           <p className="mx-auto max-w-2xl text-base text-slate-600 dark:text-slate-300">
@@ -144,19 +143,19 @@ const TMPHowToHelp: React.FC = () => {
 
         <motion.div
           variants={itemVariants}
-          className="grid gap-6 md:grid-cols-2"
+          className="grid gap-6 md:grid-cols-4"
         >
           {steps.map((step, index) => (
             <motion.div
               key={step.title}
               variants={itemVariants}
               whileHover={{ y: -4 }}
-              className="group relative overflow-hidden rounded-2xl border border-slate-200/70 bg-white/80 p-6 shadow-md shadow-blue-500/5 ring-1 ring-slate-200/60 backdrop-blur transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900/70 dark:ring-slate-800"
+              className="group relative overflow-hidden rounded-2xl border border-slate-200/70 bg-white/80 p-6 shadow-md shadow-teal-500/5 ring-1 ring-slate-200/60 backdrop-blur transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900/70 dark:ring-slate-800"
             >
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-blue-500/6 via-purple-500/6 to-emerald-400/6 opacity-80 group-hover:opacity-100" />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-blue-500/6 via-teal-500/6 to-amber-400/6 opacity-80 group-hover:opacity-100" />
               <div className="relative flex items-start gap-4">
-                <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 via-purple-500 to-emerald-400 text-white shadow-lg shadow-blue-500/30">
-                  <FontAwesomeIcon icon={step.icon} />
+                <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 via-teal-500 to-amber-400 text-white shadow-lg shadow-teal-500/30">
+                  <step.icon className="w-5 h-5" />
                   <span className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full border border-white/40 bg-white/90 text-xs font-semibold text-slate-900 shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-white">
                     {index + 1}
                   </span>
@@ -172,14 +171,14 @@ const TMPHowToHelp: React.FC = () => {
 
         <motion.div
           variants={itemVariants}
-          className="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-gradient-to-r from-blue-600 via-purple-600 to-emerald-500 p-1 shadow-2xl ring-1 ring-blue-500/30 dark:border-slate-800 dark:ring-blue-400/30"
+          className="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-gradient-to-r from-blue-600 via-teal-500 to-amber-400 p-1 shadow-2xl ring-1 ring-teal-500/30 dark:border-slate-800 dark:ring-teal-400/30"
         >
           <div className="relative grid gap-8 rounded-[22px] bg-white/90 p-8 shadow-lg backdrop-blur dark:bg-slate-950/70 md:grid-cols-[1.2fr_0.8fr]">
             <div className="space-y-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-200">
                 Ready when you are
               </p>
-              <h3 className="text-2xl font-semibold text-slate-900 dark:text-white">
+              <h3 className="text-2xl font-semibold text-slate-900 dark:text-white overflow-visible" style={{ fontFamily: 'var(--font-display)', lineHeight: '1.3' }}>
                 Let&apos;s make space for your story
               </h3>
               <p className="text-base text-slate-700 dark:text-slate-300">

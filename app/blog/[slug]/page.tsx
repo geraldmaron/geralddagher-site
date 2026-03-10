@@ -181,14 +181,14 @@ export default async function BlogPostPage({ params }: PageProps) {
   const excerpt = hydratedPost.excerpt || ''
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 dark:bg-black dark:text-white">
+    <div data-area="blog" className="min-h-screen bg-background text-foreground">
       <div className="relative isolate overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(56,189,248,0.08),transparent_25%),radial-gradient(circle_at_80%_0%,rgba(167,139,250,0.08),transparent_20%),radial-gradient(circle_at_50%_80%,rgba(74,222,128,0.08),transparent_22%)]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-white via-white to-white dark:from-black dark:via-black dark:to-black opacity-95" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-background opacity-95" />
         <div className="absolute inset-0 pointer-events-none [mask-image:radial-gradient(ellipse_at_top,white,transparent_72%)]" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
-          <div className="relative overflow-hidden rounded-3xl border border-slate-200 shadow-[0_24px_80px_-32px_rgba(0,0,0,0.35)] bg-slate-950/70 dark:border-white/10 dark:bg-black/60">
+          <div className="relative overflow-hidden rounded-3xl border border-gray-200 shadow-[0_24px_80px_-32px_rgba(0,0,0,0.35)] bg-gray-950/70 dark:border-white/10 dark:bg-black/60">
             <div className="absolute inset-0">
               {hydratedPost.cover_image ? (
                 <Image
@@ -200,7 +200,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                   sizes="100vw"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-slate-800 via-slate-900 to-black" />
+                <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-900 to-black" />
               )}
             </div>
             <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-black/80" />
@@ -224,7 +224,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                   <BookOpen className="h-3.5 w-3.5" />
                   {readingTime} min read
                 </div>
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold leading-tight tracking-tight">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold overflow-visible pb-2 tracking-tight" style={{ fontFamily: 'var(--font-display)', lineHeight: '1.15' }}>
                   {hydratedPost.title}
                 </h1>
                 {excerpt && <p className="text-base sm:text-lg text-white/80 max-w-3xl">{excerpt}</p>}
@@ -292,27 +292,27 @@ export default async function BlogPostPage({ params }: PageProps) {
       </div>
 
       <div className="relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 pb-20">
-            <div className="rounded-3xl border border-slate-200 bg-white shadow-[0_20px_80px_-30px_rgba(0,0,0,0.25)] p-6 sm:p-10 dark:border-slate-800 dark:bg-black/60">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 pb-20">
+            <div className="rounded-3xl border border-gray-200/80 bg-background shadow-[0_20px_80px_-30px_rgba(0,0,0,0.15)] p-6 sm:p-10 lg:p-14 dark:border-gray-800/60 dark:bg-card/50 dark:shadow-[0_20px_80px_-30px_rgba(0,0,0,0.5)]">
             {contentNodes ? (
               <SlateRenderer
                 content={contentNodes}
-                  className="prose prose-lg max-w-none text-slate-800 prose-headings:text-slate-900 prose-p:text-slate-700 prose-strong:text-slate-900 dark:prose-invert"
+                  className="prose prose-lg max-w-none text-gray-800 prose-headings:text-gray-900 prose-headings:tracking-tight prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-4 prose-h3:text-xl prose-h3:mt-8 prose-p:text-gray-700 prose-p:leading-[1.8] prose-strong:text-gray-900 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-primary/40 prose-blockquote:text-gray-600 prose-blockquote:not-italic prose-img:rounded-xl dark:prose-invert dark:prose-p:text-gray-300 dark:prose-headings:text-white dark:prose-blockquote:text-gray-400"
               />
             ) : (
-              <div className="text-slate-500 dark:text-slate-400">No content available.</div>
+              <div className="text-gray-500 dark:text-gray-400">No content available.</div>
             )}
           </div>
 
-          <div className="mt-16">
+          <div className="mt-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Up next</p>
-                <h2 className="text-3xl sm:text-4xl font-semibold text-slate-900 dark:text-white">Recent posts</h2>
+                <p className="text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 mb-1">Up next</p>
+                <h2 className="text-3xl sm:text-4xl font-semibold text-gray-900 dark:text-white overflow-visible" style={{ fontFamily: 'var(--font-display)', lineHeight: '1.2' }}>Recent posts</h2>
               </div>
               <Link
                 href="/blog"
-                className="text-sm text-slate-700 hover:text-slate-900 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition-colors dark:text-slate-200 dark:hover:text-white dark:hover:bg-white/10"
+                className="text-sm text-gray-700 hover:text-gray-900 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors dark:text-gray-200 dark:hover:text-white dark:hover:bg-white/10"
               >
                 Browse all
                 <ArrowLeft className="h-4 w-4 rotate-180" />
@@ -328,7 +328,7 @@ export default async function BlogPostPage({ params }: PageProps) {
           <div className="mt-12 flex justify-center">
             <Link
               href="/blog"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-full border border-slate-200 bg-white text-slate-900 hover:border-slate-300 hover:bg-slate-50 transition-all shadow-sm dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:border-white/40 dark:hover:bg-white/15"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-full border border-gray-200 bg-background text-foreground hover:border-gray-300 hover:bg-gray-50 transition-all shadow-sm dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:border-white/40 dark:hover:bg-white/15"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to blog

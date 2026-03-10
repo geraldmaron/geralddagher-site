@@ -1,15 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '@/components/core/ThemeProvider';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faTimes,
-  faLaptop,
-  faClock,
-  faComments,
-  faVideo,
-  faShare
-} from '@fortawesome/free-solid-svg-icons';
+import { X, Laptop, Clock, MessageSquare, Video, Share2 } from 'lucide-react';
 import { RemoveScroll } from 'react-remove-scroll';
 
 interface TMPWhatToExpectProps {
@@ -29,25 +21,25 @@ const TMPWhatToExpect: React.FC<TMPWhatToExpectProps> = ({
   };
   const steps = [
     {
-      icon: faLaptop,
+      icon: Laptop,
       title: 'Scheduling and Descript Invite',
       description:
         "After we schedule your session, you'll receive an invite from Descript. Keep an eye on your inbox because the invite contains the link to the Descript virtual studio we'll use. It's similar to Zoom, but with extra features. You may need to download the app beforehand, so please follow any instructions provided."
     },
     {
-      icon: faClock,
+      icon: Clock,
       title: 'Session Duration & Preparation',
       description:
         "Each session lasts about an hour, and you'll be on camera, so wear whatever makes you comfortable - a T-shirt or hoodie is fine. The first 15 minutes will cover any questions you have, a quick technical check, and confirm any areas you might not want to discuss."
     },
     {
-      icon: faComments,
+      icon: MessageSquare,
       title: 'Recording Kickoff',
       description:
         "When we start recording, I'll do a brief welcome, introduce myself, and then introduce you. I'll ask you to share a bit about yourself, and from there, we'll keep things relaxed and conversational."
     },
     {
-      icon: faVideo,
+      icon: Video,
       title: 'Conversational Flow & Question Bank',
       description: (
         <>
@@ -56,7 +48,7 @@ const TMPWhatToExpect: React.FC<TMPWhatToExpectProps> = ({
           pull ideas from our{' '}
           <button
             onClick={handleQuestionBankClick}
-            className="text-purple-500 hover:text-purple-600 underline focus:outline-none focus:ring-2 focus:ring-purple-500 rounded"
+            className="text-purple-500 hover:text-purple-600 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
             aria-label="Open question bank"
           >
             question bank
@@ -66,7 +58,7 @@ const TMPWhatToExpect: React.FC<TMPWhatToExpectProps> = ({
       )
     },
     {
-      icon: faShare,
+      icon: Share2,
       title: 'Post-Recording & Distribution',
       description:
         "After recording, I'll work on editing, then the edited session will be posted to YouTube and my public social media pages (which may include Instagram, LinkedIn, TikTok, Facebook, and more). If you look back and notice a section of the session or a moment that you rather not be posted, please let me know and I'll edit it out."
@@ -126,7 +118,7 @@ const TMPWhatToExpect: React.FC<TMPWhatToExpectProps> = ({
                     className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800"
                     aria-label="Close what to expect dialog"
                   >
-                    <FontAwesomeIcon icon={faTimes} className="w-5 h-5" />
+                    <X className="w-5 h-5" />
                   </motion.button>
                                      <h2 id="what-to-expect-title" className="mb-8 pr-8">
                      What to Expect
@@ -149,7 +141,7 @@ const TMPWhatToExpect: React.FC<TMPWhatToExpectProps> = ({
                             }`}
                             aria-hidden="true"
                           >
-                            <FontAwesomeIcon icon={step.icon} className="text-purple-500 w-5 h-5" />
+                            <step.icon className="text-purple-500 w-5 h-5" />
                           </div>
                           <div>
                                                          <h3 className="mb-2 text-base font-medium">{step.title}</h3>

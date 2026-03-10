@@ -1,17 +1,12 @@
-import { inter, oswald } from '@/app/fonts'
+import { inter, playfair } from '@/app/fonts'
 import { cn } from '@/lib/utils'
 import './globals.css'
-import Navbar from '@/components/core/Navbar'
-import Footer from '@/components/core/Footer'
 import ThemeProvider from '@/components/core/ThemeProvider'
 import { AuthProvider } from '@/lib/auth/provider'
-import { Theme } from '@radix-ui/themes'
-import '@radix-ui/themes/styles.css'
 import { headers } from 'next/headers'
 import React from 'react'
 import RootLayoutClient from './RootLayoutClient'
 import { name } from '@/lib/constants'
-import { Analytics } from "@vercel/analytics/react"
 export const metadata = {
   title: name,
   description: 'Product and platform leader focused on reliability, AI/ML-powered operational intelligence, and risk across enterprise portfolios.',
@@ -28,7 +23,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const theme = hdrs.get('x-theme');
   let htmlClass = cn(
     inter.variable,
-    oswald.variable,
+    playfair.variable,
     'antialiased',
     'font-sans',
     theme === 'dark' ? 'dark' : ''
@@ -41,19 +36,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     >
       <body className={cn(
         'min-h-screen',
-        'bg-white dark:bg-black',
-        'text-black dark:text-white',
+        'bg-background text-foreground',
         'transition-colors duration-300',
         'font-sans'
       )}>
         <AuthProvider>
           <ThemeProvider>
-            <Theme>
-              <RootLayoutClient>
-                {children}
-                <Analytics />
-              </RootLayoutClient>
-            </Theme>
+            <RootLayoutClient>
+              {children}
+            </RootLayoutClient>
           </ThemeProvider>
         </AuthProvider>
         <script dangerouslySetInnerHTML={{

@@ -3,6 +3,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Edit, Trash2, MoreHorizontal, ArrowRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 import * as Dialog from '@radix-ui/react-dialog';
 import Button from '@/components/core/Button';
 import { cn } from '@/lib/utils';
@@ -285,18 +286,17 @@ export default function PostCard({
         <Link
           href={postLink}
           className="group block h-full focus:outline-none"
-          role="article"
           aria-labelledby={`post-title-${post.id}`}
         >
-          <article className="bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-200/80 dark:border-neutral-800/80 hover:border-gray-300 dark:hover:border-neutral-700 transition-all duration-200 h-full flex shadow-sm hover:shadow-lg">
-            <div className="relative w-40 sm:w-48 flex-shrink-0 bg-gray-100 dark:bg-neutral-800">
+          <article className="bg-white dark:bg-card rounded-2xl overflow-hidden border border-gray-200/60 dark:border-gray-800/60 hover:border-primary/30 dark:hover:border-primary/40 transition-all duration-300 h-full flex shadow-sm hover:shadow-xl hover:shadow-primary/5 dark:hover:shadow-primary/5 hover:-translate-y-0.5">
+            <div className="relative w-40 sm:w-52 flex-shrink-0 bg-gray-100 dark:bg-gray-800 overflow-hidden">
               <Image
                 src={imageUrl}
                 alt={post.title}
                 fill
                 sizes="(max-width: 640px) 160px, 192px"
                 className={cn(
-                  'object-cover transition-opacity duration-300',
+                  'object-cover transition-all duration-500 group-hover:scale-105',
                   imageLoaded ? 'opacity-100' : 'opacity-0'
                 )}
                 onLoad={() => setImageLoaded(true)}
@@ -323,7 +323,7 @@ export default function PostCard({
                   <span>•</span>
                   <span>{readingTime} min read</span>
                   {categoryName && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200 text-[11px] font-medium border border-blue-200/70 dark:border-blue-800/70">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[11px] font-medium border border-primary/20">
                       {categoryName}
                     </span>
                   )}
@@ -337,13 +337,13 @@ export default function PostCard({
                         e.stopPropagation();
                         setShowAdminMenu(!showAdminMenu);
                       }}
-                      className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                      className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                     >
                       <MoreHorizontal className="w-4 h-4" />
                     </button>
 
                     {showAdminMenu && (
-                      <div className="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-neutral-900 rounded-lg shadow-lg border border-gray-200 dark:border-neutral-800 py-1 z-50">
+                      <div className="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-card rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 py-1 z-50">
                         <button
                           onClick={(e) => {
                             e.preventDefault();
@@ -352,7 +352,7 @@ export default function PostCard({
                             if (onEdit) onEdit();
                             else handleEdit(e);
                           }}
-                          className="w-full px-3 py-1.5 text-left text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-800 flex items-center gap-2"
+                          className="w-full px-3 py-1.5 text-left text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2"
                         >
                           <Edit className="w-3.5 h-3.5" />
                           Edit
@@ -377,7 +377,8 @@ export default function PostCard({
 
               <h2
                 id={`post-title-${post.id}`}
-                className="text-base font-semibold text-gray-900 dark:text-white leading-tight line-clamp-1 mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"
+                className="text-base font-semibold text-gray-900 dark:text-white leading-snug line-clamp-1 mb-2 group-hover:text-primary transition-colors"
+                style={{ fontFamily: 'var(--font-display)' }}
               >
                 {searchQuery ? highlightText(post.title, searchQuery) : post.title}
               </h2>
@@ -394,36 +395,36 @@ export default function PostCard({
                     ) : (
                       <div className="max-h-20 overflow-hidden">
                         <SlateRenderer content={previewContent as any} compact className="[&_p]:mb-2 [&_p]:text-sm [&_ul]:my-1 [&_ol]:my-1" />
-                        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white dark:from-neutral-900 to-transparent" />
+                        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white dark:from-card to-transparent" />
                       </div>
                     )}
                   </div>
                 )}
               </div>
 
-              <div className="flex items-center justify-between gap-3 pt-4 border-t border-gray-100 dark:border-neutral-800 mt-auto">
-                <div className="flex min-w-0 items-center gap-2 overflow-hidden flex-nowrap h-8">
+              <div className="flex items-center justify-between gap-3 pt-3 border-t border-gray-100 dark:border-gray-800/60 mt-auto">
+                <div className="flex min-w-0 items-center gap-1.5 overflow-hidden flex-nowrap h-8">
                   {authorName && (
-                    <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200 shrink-0">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-primary/10 text-primary shrink-0">
                       {authorName}
                     </span>
                   )}
                   {tagNames.slice(0, 2).map((tagName, index) => (
                     <span
                       key={`${tagName}-${index}`}
-                      className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-50 dark:bg-neutral-800 text-gray-600 dark:text-gray-400 shrink-0"
+                      className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-muted text-muted-foreground shrink-0"
                     >
                       {tagName}
                     </span>
                   ))}
                   {tagNames.length > 2 && (
-                    <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">
+                    <span className="text-[11px] text-gray-400 dark:text-gray-500 shrink-0">
                       +{tagNames.length - 2}
                     </span>
                   )}
                 </div>
 
-                <div className="flex items-center gap-1.5 text-sm font-medium text-gray-900 dark:text-white group-hover:gap-2 transition-all">
+                <div className="flex items-center gap-1.5 text-sm font-medium text-primary group-hover:gap-2.5 transition-all duration-300">
                   <span>Read</span>
                   <ArrowRight className="w-4 h-4" />
                 </div>
@@ -435,7 +436,7 @@ export default function PostCard({
         <Dialog.Root open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
           <Dialog.Portal>
             <Dialog.Overlay className="fixed inset-0 bg-black/20 dark:bg-black/40 backdrop-blur-sm transition-opacity" />
-            <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white dark:bg-neutral-900 p-6 shadow-xl border border-gray-200 dark:border-neutral-800 w-full max-w-sm">
+            <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white dark:bg-card p-6 shadow-xl border border-gray-200 dark:border-gray-800 w-full max-w-sm">
               <Dialog.Title className="text-base font-semibold text-gray-900 dark:text-white mb-2">
                 Delete Post
               </Dialog.Title>
@@ -473,11 +474,14 @@ export default function PostCard({
       <Link
         href={postLink}
         className="group block h-full focus:outline-none"
-        role="article"
         aria-labelledby={`post-title-${post.id}`}
       >
-        <article className="bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-200/80 dark:border-neutral-800/80 hover:border-gray-300 dark:hover:border-neutral-700 transition-all duration-200 h-full flex flex-col shadow-sm hover:shadow-lg">
-          <div className="relative aspect-[16/9] overflow-hidden bg-gray-100 dark:bg-neutral-800">
+        <motion.article
+          whileHover={{ y: -6 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          className="bg-white dark:bg-card rounded-2xl overflow-hidden border border-gray-200/60 dark:border-gray-800/60 h-full flex flex-col shadow-sm hover:shadow-xl hover:shadow-primary/5 transition-shadow duration-300"
+        >
+          <div className="relative aspect-[16/10] overflow-hidden bg-gray-100 dark:bg-gray-800">
             <Image
               src={imageUrl}
               alt={post.title}
@@ -490,14 +494,26 @@ export default function PostCard({
               onLoad={() => setImageLoaded(true)}
             />
 
+            {/* Gradient overlay for depth */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
             {!forcePreview && post.status !== PostStatus.Published && (
               <div className="absolute top-3 left-3">
                 <span className={cn(
-                  "inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium backdrop-blur-sm shadow-sm",
+                  "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-sm shadow-sm",
                   statusConfig.bgColor,
                   statusConfig.textColor
                 )}>
                   {statusConfig.label}
+                </span>
+              </div>
+            )}
+
+            {/* Category badge on image */}
+            {categoryName && (
+              <div className="absolute bottom-3 left-3">
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-white/90 dark:bg-black/60 backdrop-blur-sm text-[11px] font-semibold text-gray-800 dark:text-gray-200 shadow-sm">
+                  {categoryName}
                 </span>
               </div>
             )}
@@ -511,7 +527,7 @@ export default function PostCard({
                     if (onEdit) onEdit();
                     else handleEdit(e);
                   }}
-                  className="p-2 rounded-lg bg-white/90 dark:bg-neutral-900/90 backdrop-blur-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 shadow-sm transition-colors"
+                  className="p-2 rounded-lg bg-white/90 dark:bg-card/90 backdrop-blur-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 shadow-sm transition-colors"
                 >
                   <Edit className="w-4 h-4" />
                 </button>
@@ -521,7 +537,7 @@ export default function PostCard({
                     e.stopPropagation();
                     setIsDeleteDialogOpen(true);
                   }}
-                  className="p-2 rounded-lg bg-white/90 dark:bg-neutral-900/90 backdrop-blur-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 shadow-sm transition-colors"
+                  className="p-2 rounded-lg bg-white/90 dark:bg-card/90 backdrop-blur-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 shadow-sm transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -530,78 +546,74 @@ export default function PostCard({
           </div>
 
           <div className="p-5 flex-1 flex flex-col">
-            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-3 flex-wrap">
+            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-3">
               <time dateTime={displayDate.toISOString()}>{formattedDate}</time>
-              <span>•</span>
+              <span className="text-gray-300 dark:text-gray-600">·</span>
               <span>{readingTime} min read</span>
-              {categoryName && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200 text-[11px] font-medium border border-blue-200/70 dark:border-blue-800/70">
-                  {categoryName}
-                </span>
-              )}
             </div>
 
             <h2
               id={`post-title-${post.id}`}
-              className="text-lg font-semibold text-gray-900 dark:text-white leading-tight line-clamp-2 mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"
+              className="text-lg font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 mb-3 group-hover:text-primary transition-colors duration-300"
+              style={{ fontFamily: 'var(--font-display)' }}
             >
               {searchQuery ? highlightText(post.title, searchQuery) : post.title}
             </h2>
 
             <div className="relative mb-4">
               {searchQuery.trim() ? (
-                <div className="prose prose-sm prose-gray dark:prose-invert max-w-none text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-3">
+                <div className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-3">
                   {displayText}
                 </div>
               ) : (
-                <div className="prose prose-sm prose-gray dark:prose-invert max-w-none text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                <div className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                   {post.excerpt ? (
                     <p className="line-clamp-3">{post.excerpt}</p>
                   ) : (
-                    <div className="max-h-24 overflow-hidden">
+                    <div className="max-h-[4.5rem] overflow-hidden">
                       <SlateRenderer content={previewContent as any} compact className="[&_p]:mb-2 [&_p]:text-sm [&_ul]:my-1 [&_ol]:my-1" />
-                      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-white dark:from-neutral-900 to-transparent" />
+                      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-white dark:from-card to-transparent" />
                     </div>
                   )}
                 </div>
               )}
             </div>
 
-            <div className="flex items-center justify-between gap-3 pt-4 border-t border-gray-100 dark:border-neutral-800 mt-auto">
-              <div className="flex min-w-0 items-center gap-2 overflow-hidden flex-nowrap h-8">
+            <div className="flex items-center justify-between gap-3 pt-3 border-t border-gray-100 dark:border-gray-800/60 mt-auto">
+              <div className="flex min-w-0 items-center gap-1.5 overflow-hidden flex-nowrap h-7">
                 {authorName && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200 shrink-0">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-primary/10 text-primary shrink-0">
                     {authorName}
                   </span>
                 )}
                 {tagNames.slice(0, 2).map((tagName, index) => (
                   <span
                     key={`${tagName}-${index}`}
-                    className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-50 dark:bg-neutral-800 text-gray-600 dark:text-gray-400 shrink-0"
+                    className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-muted text-muted-foreground shrink-0"
                   >
                     {tagName}
                   </span>
                 ))}
                 {tagNames.length > 2 && (
-                  <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">
+                  <span className="text-[11px] text-gray-400 dark:text-gray-500 shrink-0">
                     +{tagNames.length - 2}
                   </span>
                 )}
               </div>
 
-              <div className="flex items-center gap-1.5 text-sm font-medium text-gray-900 dark:text-white group-hover:gap-2 transition-all">
+              <div className="flex items-center gap-1.5 text-sm font-medium text-primary group-hover:gap-2.5 transition-all duration-300">
                 <span>Read</span>
                 <ArrowRight className="w-4 h-4" />
               </div>
             </div>
           </div>
-        </article>
+        </motion.article>
       </Link>
 
       <Dialog.Root open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/20 dark:bg-black/40 backdrop-blur-sm transition-opacity" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white dark:bg-neutral-900 p-6 shadow-xl border border-gray-200 dark:border-neutral-800 w-full max-w-sm">
+          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white dark:bg-card p-6 shadow-xl border border-gray-200 dark:border-gray-800 w-full max-w-sm">
             <Dialog.Title className="text-base font-semibold text-gray-900 dark:text-white mb-2">
               Delete Post
             </Dialog.Title>

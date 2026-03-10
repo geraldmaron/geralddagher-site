@@ -5,8 +5,7 @@ import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faThreads } from '@fortawesome/free-brands-svg-icons';
+import { ThreadsIcon } from '@/components/core/icons/BrandIcons';
 import {
   Heart,
   MessageCircle,
@@ -162,7 +161,7 @@ const ThreadsFeed: React.FC = () => {
     >
       <div className="flex items-center justify-center gap-3">
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-900 text-white dark:bg-white dark:text-black shadow-lg shadow-black/10">
-          <FontAwesomeIcon icon={faThreads} className="w-7 h-7" />
+          <ThreadsIcon className="w-7 h-7" />
         </div>
         <h1 className="text-4xl md:text-5xl font-black tracking-tight text-gray-900 dark:text-white">
           threads
@@ -190,7 +189,7 @@ const ThreadsFeed: React.FC = () => {
             </svg>
           </Link>
           <Link href={socialLinks.threads} target="_blank" rel="noopener noreferrer" className="hover:text-black dark:hover:text-white transition-colors p-1 rounded focus:outline-none focus:ring-2 focus:ring-gray-400">
-            <FontAwesomeIcon icon={faThreads} className="w-5 h-5" />
+            <ThreadsIcon className="w-5 h-5" />
           </Link>
           <Link href={socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="hover:text-black dark:hover:text-white transition-colors p-1 rounded focus:outline-none focus:ring-2 focus:ring-gray-400">
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

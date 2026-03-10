@@ -98,7 +98,7 @@ const NavItemComponent: React.FC<{
             className={cn(
               'w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200',
               isChildActive
-                ? 'bg-blue-500 text-white shadow-lg'
+                ? 'bg-primary text-primary-foreground shadow-sm'
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
             )}
           >
@@ -130,7 +130,7 @@ const NavItemComponent: React.FC<{
                       className={cn(
                         'flex items-center space-x-3 px-4 py-2 rounded-lg transition-all duration-200',
                         childActive
-                          ? 'bg-blue-400 text-white'
+                          ? 'bg-primary/80 text-primary-foreground'
                           : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                       )}
                     >
@@ -153,7 +153,7 @@ const NavItemComponent: React.FC<{
         className={cn(
           'flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200',
           isActive
-            ? 'bg-blue-500 text-white shadow-lg'
+            ? 'bg-primary text-primary-foreground shadow-sm'
             : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
         )}
       >
@@ -174,16 +174,23 @@ const NavItemComponent: React.FC<{
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           className={cn(
-            'relative flex items-center space-x-2 px-3 py-2 rounded-xl transition-all duration-200',
-            'group focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+            'relative flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200',
+            'group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
             isChildActive
-              ? 'bg-white/80 dark:bg-gray-800/80 shadow-lg border border-gray-200/50 dark:border-gray-700/50 text-gray-900 dark:text-gray-100'
-              : 'hover:bg-white/50 dark:hover:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+              ? 'text-primary font-semibold'
+              : 'hover:bg-gray-100/60 dark:hover:bg-gray-800/40 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
           )}
         >
           <Icon className="w-4 h-4" />
           <span className="text-sm font-medium whitespace-nowrap">{item.name}</span>
           <ChevronDown className="w-3 h-3" />
+          {isChildActive && (
+            <motion.span
+              layoutId="nav-underline"
+              className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-primary"
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            />
+          )}
         </motion.button>
 
         <AnimatePresence>
@@ -211,7 +218,7 @@ const NavItemComponent: React.FC<{
                     className={cn(
                       'flex items-center space-x-2 px-4 py-2 text-sm transition-colors',
                       childActive
-                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                        ? 'bg-primary/10 text-primary'
                         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
                     )}
                   >
@@ -233,20 +240,20 @@ const NavItemComponent: React.FC<{
         href={item.href}
         onClick={onClick}
         className={cn(
-          'relative flex items-center space-x-2 px-3 py-2 rounded-xl transition-all duration-200',
-          'group focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+          'relative flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200',
+          'group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
           isActive
-            ? 'bg-white/80 dark:bg-gray-800/80 shadow-lg border border-gray-200/50 dark:border-gray-700/50 text-gray-900 dark:text-gray-100'
-            : 'hover:bg-white/50 dark:hover:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+            ? 'text-primary font-semibold'
+            : 'hover:bg-gray-100/60 dark:hover:bg-gray-800/40 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
         )}
       >
         <Icon className="w-4 h-4" />
         <span className="text-sm font-medium whitespace-nowrap">{item.name}</span>
         {isActive && (
-          <motion.div
-            layoutId="nav-indicator"
-            className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl"
-            transition={{ type: "spring", stiffness: 380, damping: 30 }}
+          <motion.span
+            layoutId="nav-underline"
+            className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-primary"
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
           />
         )}
       </Link>
@@ -364,8 +371,8 @@ export default function Navbar() {
                   href="/"
                   aria-label="Home"
                   className={cn(
-                    'flex items-center space-x-3 group focus:outline-none focus:ring-2',
-                    'focus:ring-blue-500 rounded-lg p-1 transition-all duration-200'
+                    'flex items-center space-x-3 group focus-visible:outline-none focus-visible:ring-2',
+                    'focus-visible:ring-ring rounded-lg p-1 transition-all duration-200'
                   )}
                 >
                   <div className="relative w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16">
@@ -410,7 +417,7 @@ export default function Navbar() {
                         'pl-10 pr-4 py-2 w-48 rounded-xl text-sm',
                         'bg-white/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
                         'backdrop-blur-sm placeholder-gray-400 dark:placeholder-gray-500',
-                        'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent',
                         'transition-all duration-200'
                       )}
                     />
@@ -418,25 +425,47 @@ export default function Navbar() {
                 )}
 
                 {/* Theme Toggle - Desktop only, available for all users */}
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => {
-                    const nextMode = themeMode === 'system' ? 'light' : themeMode === 'light' ? 'dark' : 'system';
-                    setThemeMode(nextMode);
-                  }}
-                  className={cn(
-                    'hidden md:flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200',
-                    'bg-white/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
-                    'hover:bg-white/70 dark:hover:bg-gray-800/70',
-                    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
-                  )}
-                  aria-label={`Current theme: ${themeMode}. Click to cycle between themes.`}
-                >
-                  {themeMode === 'light' && <Sun className="w-5 h-5 text-amber-500" />}
-                  {themeMode === 'dark' && <Moon className="w-5 h-5 text-blue-400" />}
-                  {themeMode === 'system' && <Monitor className="w-5 h-5 text-gray-500 dark:text-gray-400" />}
-                </motion.button>
+                <div className="hidden md:flex items-center rounded-full border border-gray-200/60 dark:border-gray-700/60 bg-gray-100/80 dark:bg-gray-800/80 p-0.5 relative">
+                  {/* Sliding indicator */}
+                  <motion.div
+                    className="absolute top-0.5 bottom-0.5 w-8 rounded-full bg-white dark:bg-gray-600 shadow-sm"
+                    initial={false}
+                    animate={{
+                      left: themeMode === 'light' ? 2 : themeMode === 'dark' ? 34 : 66,
+                    }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                  />
+                  <button
+                    onClick={() => setThemeMode('light')}
+                    className={cn(
+                      'relative z-10 flex items-center justify-center w-8 h-8 rounded-full transition-colors duration-200',
+                      themeMode === 'light' ? 'text-amber-500' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
+                    )}
+                    aria-label="Light mode"
+                  >
+                    <Sun className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setThemeMode('dark')}
+                    className={cn(
+                      'relative z-10 flex items-center justify-center w-8 h-8 rounded-full transition-colors duration-200',
+                      themeMode === 'dark' ? 'text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
+                    )}
+                    aria-label="Dark mode"
+                  >
+                    <Moon className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setThemeMode('system')}
+                    className={cn(
+                      'relative z-10 flex items-center justify-center w-8 h-8 rounded-full transition-colors duration-200',
+                      themeMode === 'system' ? 'text-primary' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
+                    )}
+                    aria-label="System theme"
+                  >
+                    <Monitor className="w-3.5 h-3.5" />
+                  </button>
+                </div>
 
                 {/* Quick Actions - Desktop only */}
                 {isAdminArea && (
@@ -449,7 +478,7 @@ export default function Navbar() {
                       'bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 dark:hover:bg-gray-200',
                       'text-white dark:text-gray-900 font-medium text-sm',
                       'transition-all duration-200',
-                      'focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2'
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                     )}
                   >
                     <Plus className="w-4 h-4" />
@@ -469,7 +498,7 @@ export default function Navbar() {
                           'flex items-center space-x-2 px-3 py-2 rounded-xl',
                           'bg-white/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
                           'hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all duration-200',
-                          'focus:outline-none focus:ring-2 focus:ring-blue-500'
+                          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
                         )}
                       >
                         {user?.avatar_url ? (
@@ -531,7 +560,7 @@ export default function Navbar() {
                                       'w-full flex items-center space-x-3 px-4 py-2 text-sm',
                                       'hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors',
                                       themeMode === option.value
-                                        ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                                        ? 'bg-primary/10 text-primary'
                                         : 'text-gray-700 dark:text-gray-300'
                                     )}
                                   >
@@ -592,16 +621,16 @@ export default function Navbar() {
                         className={cn(
                           'flex items-center px-4 py-2 rounded-xl transition-all duration-200',
                           'hover:bg-white/50 dark:hover:bg-gray-800/50',
-                          'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+                          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                           'text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white',
                           'font-medium text-sm'
                         )}
-                        aria-label="Sign in"
+                        aria-label="Admin"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
                         <LogIn className="w-4 h-4 mr-2" />
-                        <span>Sign in</span>
+                        <span>Admin</span>
                       </motion.button>
 
                       {!isAdminArea && (
@@ -610,8 +639,8 @@ export default function Navbar() {
                           className={cn(
                             'flex items-center px-3 py-2 rounded-xl transition-all duration-200',
                             'hover:bg-white/50 dark:hover:bg-gray-800/50',
-                            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
-                            'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400',
+                            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                            'text-gray-700 dark:text-gray-300 hover:text-primary',
                             'font-medium text-sm'
                           )}
                           aria-label="Subscribe to updates"
@@ -632,9 +661,11 @@ export default function Navbar() {
                     'lg:hidden flex items-center justify-center w-10 h-10 rounded-xl',
                     'bg-white/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
                     'hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all duration-200',
-                    'focus:outline-none focus:ring-2 focus:ring-blue-500'
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
                   )}
                   aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+                  aria-expanded={isMenuOpen}
+                  aria-controls="mobile-navigation"
                 >
                   {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                 </motion.button>
@@ -656,6 +687,10 @@ export default function Navbar() {
               onClick={() => setIsMenuOpen(false)}
             />
             <motion.div
+              id="mobile-navigation"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Navigation menu"
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
@@ -735,7 +770,7 @@ export default function Navbar() {
                           className={cn(
                             'w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200',
                             themeMode === option.value
-                              ? 'bg-blue-500 text-white shadow-lg'
+                              ? 'bg-primary text-primary-foreground shadow-sm'
                               : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                           )}
                         >
@@ -811,7 +846,7 @@ export default function Navbar() {
                     )}
                   >
                     <LogIn className="w-5 h-5" />
-                    <span>Sign in</span>
+                    <span>Admin</span>
                   </button>
 
                   {!isAdminArea && (

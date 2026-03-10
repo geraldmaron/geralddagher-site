@@ -29,32 +29,39 @@ export default async function BlogPage() {
     const tags = tagsResult.status === 'fulfilled' ? tagsResult.value : [];
 
     return (
-      <main className="w-full min-h-screen">
-        <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-blue-950/30">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.15),transparent_25%),radial-gradient(circle_at_80%_0%,rgba(236,72,153,0.15),transparent_20%),radial-gradient(circle_at_50%_80%,rgba(34,197,94,0.12),transparent_25%)] dark:bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.25),transparent_25%),radial-gradient(circle_at_80%_0%,rgba(236,72,153,0.25),transparent_20%),radial-gradient(circle_at_50%_80%,rgba(34,197,94,0.2),transparent_25%)]" />
+      <main data-area="blog" className="w-full min-h-screen">
+        <div className="relative overflow-hidden bg-gradient-to-b from-blue-50 via-white to-white dark:from-blue-950/40 dark:via-gray-950 dark:to-gray-950">
+          {/* Large decorative orbs */}
+          <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-blue-400/15 dark:bg-blue-600/10 blur-3xl" />
+          <div className="absolute -top-12 right-0 w-72 h-72 rounded-full bg-cyan-400/10 dark:bg-cyan-600/8 blur-3xl" />
+          <div className="absolute bottom-0 left-1/3 w-80 h-48 rounded-full bg-sky-400/10 dark:bg-sky-600/10 blur-3xl" />
 
-          <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8 lg:py-32">
+          <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8 lg:py-28">
             <div className="flex flex-col items-center text-center">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-200/50 bg-blue-50/80 px-4 py-1.5 text-sm font-medium text-blue-700 backdrop-blur dark:border-blue-800/50 dark:bg-blue-950/50 dark:text-blue-300">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-300/40 dark:border-blue-500/30 bg-blue-100/60 dark:bg-blue-900/30 px-4 py-1.5 text-sm font-medium text-blue-700 dark:text-blue-300 backdrop-blur-sm">
                 <BookOpen className="h-4 w-4" />
                 <span>Writing</span>
               </div>
 
-              <h1 className="mb-6 text-balance text-4xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-5xl lg:text-6xl">
-                Thoughts, Stories,{' '}
+              <h1 className="mb-6 text-balance text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl" style={{ fontFamily: 'var(--font-display)', lineHeight: '1.25' }}>
+                <span className="text-gray-900 dark:text-white">Thoughts, Stories,</span>{' '}
                 <span className="inline-flex items-center gap-2">
-                  & Reflections
-                  <Sparkles className="h-8 w-8 text-blue-600 dark:text-blue-400 sm:h-10 sm:w-10" />
+                  <em><span className="galaxy-text">& Reflections</span></em>
+                  <Sparkles className="h-8 w-8 text-blue-500 dark:text-blue-400 sm:h-10 sm:w-10 animate-pulse" />
                 </span>
               </h1>
 
-              <p className="mx-auto max-w-2xl text-balance text-lg text-slate-600 dark:text-slate-300 sm:text-xl">
+              <p className="mx-auto max-w-2xl text-balance text-lg text-gray-600 dark:text-gray-300 sm:text-xl">
                 Exploring technology, culture, leadership, and the spaces in between. Writing about what shapes us and what we shape.
               </p>
             </div>
           </div>
+
+          {/* Gradient divider into content */}
+          <div className="h-px bg-gradient-to-r from-transparent via-blue-300/50 dark:via-blue-600/30 to-transparent" />
         </div>
 
+        <div className="relative bg-gradient-to-b from-blue-50/40 via-transparent to-transparent dark:from-blue-950/20 dark:via-transparent dark:to-transparent">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
           <BlogWrapper
             initialPosts={posts as any}
@@ -63,30 +70,32 @@ export default async function BlogPage() {
             tags={tags as any}
           />
         </div>
+        </div>
       </main>
     );
   } catch (error) {
     return (
-      <main className="w-full min-h-screen">
-        <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-blue-950/30">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.15),transparent_25%),radial-gradient(circle_at_80%_0%,rgba(236,72,153,0.15),transparent_20%),radial-gradient(circle_at_50%_80%,rgba(34,197,94,0.12),transparent_25%)]" />
+      <main data-area="blog" className="w-full min-h-screen">
+        <div className="relative overflow-hidden bg-gradient-to-b from-blue-50 via-white to-white dark:from-blue-950/40 dark:via-gray-950 dark:to-gray-950">
+          <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-blue-400/15 dark:bg-blue-600/10 blur-3xl" />
+          <div className="absolute -top-12 right-0 w-72 h-72 rounded-full bg-cyan-400/10 dark:bg-cyan-600/8 blur-3xl" />
 
-          <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8 lg:py-32">
+          <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8 lg:py-28">
             <div className="flex flex-col items-center text-center">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-200/50 bg-blue-50/80 px-4 py-1.5 text-sm font-medium text-blue-700 backdrop-blur dark:border-blue-800/50 dark:bg-blue-950/50 dark:text-blue-300">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-300/40 dark:border-blue-500/30 bg-blue-100/60 dark:bg-blue-900/30 px-4 py-1.5 text-sm font-medium text-blue-700 dark:text-blue-300 backdrop-blur-sm">
                 <BookOpen className="h-4 w-4" />
                 <span>Writing</span>
               </div>
 
-              <h1 className="mb-6 text-balance text-4xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-5xl lg:text-6xl">
-                Thoughts, Stories,{' '}
+              <h1 className="mb-6 text-balance text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl" style={{ fontFamily: 'var(--font-display)', lineHeight: '1.25' }}>
+                <span className="text-gray-900 dark:text-white">Thoughts, Stories,</span>{' '}
                 <span className="inline-flex items-center gap-2">
-                  & Reflections
-                  <Sparkles className="h-8 w-8 text-blue-600 dark:text-blue-400 sm:h-10 sm:w-10" />
+                  <em><span className="galaxy-text">& Reflections</span></em>
+                  <Sparkles className="h-8 w-8 text-blue-500 dark:text-blue-400 sm:h-10 sm:w-10 animate-pulse" />
                 </span>
               </h1>
 
-              <p className="mx-auto max-w-2xl text-balance text-lg text-slate-600 dark:text-slate-300 sm:text-xl">
+              <p className="mx-auto max-w-2xl text-balance text-lg text-gray-600 dark:text-gray-300 sm:text-xl">
                 Exploring technology, culture, leadership, and the spaces in between.
               </p>
             </div>

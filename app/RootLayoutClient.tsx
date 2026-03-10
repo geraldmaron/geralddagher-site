@@ -8,6 +8,7 @@
 'use client';
 import React, { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Analytics } from "@vercel/analytics/react";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
@@ -79,12 +80,28 @@ export default function RootLayoutClient({ children }: RootLayoutClientProps) {
   // Main site layout
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex flex-col min-h-screen bg-white dark:bg-black relative">
+      <div className="flex flex-col min-h-screen bg-background relative">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-primary focus:text-primary-foreground focus:font-medium focus:shadow-lg focus:outline-none"
+        >
+          Skip to content
+        </a>
         <Navbar />
-        {/* Main content area */}
-        <div className="relative">
-          {children}
-        </div>
+        {/* Main content area with page transitions */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={pathname}
+            id="main-content"
+            className="relative"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+          >
+            {children}
+          </motion.div>
+        </AnimatePresence>
         <Footer />
       </div>
       <Toaster

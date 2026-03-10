@@ -1,8 +1,7 @@
 'use client';
 import React, { useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faExclamationTriangle, faTimes, faExclamationCircle, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
+import { AlertTriangle, X, AlertCircle, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/components/core/ThemeProvider';
 export interface ErrorMessage {
@@ -39,19 +38,9 @@ const Errors: React.FC<ErrorsProps> = ({ errors, onDismiss }) => {
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <FontAwesomeIcon
-                  icon={
-                    error.type === 'error' ? faExclamationCircle :
-                    error.type === 'warning' ? faExclamationTriangle :
-                    faInfoCircle
-                  }
-                  className={cn(
-                    'mr-3',
-                    error.type === 'error' ? 'text-red-500' :
-                    error.type === 'warning' ? 'text-yellow-500' :
-                    'text-blue-500'
-                  )}
-                />
+                {error.type === 'error' && <AlertCircle className={cn('mr-3 w-5 h-5', 'text-red-500')} />}
+                {error.type === 'warning' && <AlertTriangle className={cn('mr-3 w-5 h-5', 'text-yellow-500')} />}
+                {error.type === 'info' && <Info className={cn('mr-3 w-5 h-5', 'text-blue-500')} />}
                 <span>{error.message}</span>
               </div>
               <button
@@ -61,7 +50,7 @@ const Errors: React.FC<ErrorsProps> = ({ errors, onDismiss }) => {
                   isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
                 )}
               >
-                <FontAwesomeIcon icon={faTimes} className="w-4 h-4" />
+                <X className="w-4 h-4" />
               </button>
             </div>
           </motion.div>

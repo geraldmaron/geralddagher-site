@@ -2,28 +2,27 @@
 import React, { useEffect, useState } from 'react';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { motion } from 'framer-motion';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faInstagram, faFacebook, faLinkedin, faXTwitter, faYoutube, faGithub, faThreads } from '@fortawesome/free-brands-svg-icons';
-import { faEnvelope, faGlobe } from '@fortawesome/free-solid-svg-icons';
+import { Globe, Mail } from 'lucide-react';
+import { LinkedInIcon, InstagramIcon, ThreadsIcon, YouTubeIcon, XTwitterIcon, GitHubIcon } from '@/components/core/icons/BrandIcons';
 import { useTheme } from '@/components/core/ThemeProvider';
 interface SocialLink {
   name: string;
   url: string;
-  icon: any;
+  Icon: React.ComponentType<{ className?: string }>;
 }
 interface SocialMediaBarProps {
   variant?: 'default' | 'card';
   className?: string;
 }
 const socialLinks: SocialLink[] = [
-  { name: 'LinkedIn', url: 'https://www.linkedin.com/in/geraldmdagher/', icon: faLinkedin },
-  { name: 'Instagram', url: 'https://www.instagram.com/geraldmdagher/', icon: faInstagram },
-  { name: 'Threads', url: 'https://threads.net/@geraldmdagher', icon: faThreads },
-  { name: 'YouTube', url: 'https://www.youtube.com/@geraldmdagher', icon: faYoutube },
-  { name: 'Twitter', url: 'https://x.com/geraldmdagher', icon: faXTwitter },
-  { name: 'GitHub', url: 'https://github.com/geraldmdagher', icon: faGithub },
-  { name: 'Website', url: 'https://geralddagher.com', icon: faGlobe },
-  { name: 'Email', url: 'mailto:me@geralddagher.com', icon: faEnvelope },
+  { name: 'LinkedIn',  url: 'https://www.linkedin.com/in/geraldmdagher/',    Icon: LinkedInIcon },
+  { name: 'Instagram', url: 'https://www.instagram.com/geraldmdagher/',      Icon: InstagramIcon },
+  { name: 'Threads',   url: 'https://threads.net/@geraldmdagher',            Icon: ThreadsIcon },
+  { name: 'YouTube',   url: 'https://www.youtube.com/@geraldmdagher',        Icon: YouTubeIcon },
+  { name: 'Twitter',   url: 'https://x.com/geraldmdagher',                   Icon: XTwitterIcon },
+  { name: 'GitHub',    url: 'https://github.com/geraldmdagher',              Icon: GitHubIcon },
+  { name: 'Website',   url: 'https://geralddagher.com',                      Icon: Globe },
+  { name: 'Email',     url: 'mailto:me@geralddagher.com',                    Icon: Mail },
 ];
 const SocialMediaBar: React.FC<SocialMediaBarProps> = ({ 
   variant = 'default',
@@ -49,22 +48,22 @@ const SocialMediaBar: React.FC<SocialMediaBarProps> = ({
   return (
     <Tooltip.Provider>
       <div className={`flex justify-center gap-4 ${variants[variant]} ${className}`}>
-        {socialLinks.map((link) => (
-          <Tooltip.Root key={link.name}>
+        {socialLinks.map(({ name, url, Icon }) => (
+          <Tooltip.Root key={name}>
             <Tooltip.Trigger asChild>
-              <motion.div 
-                whileHover={{ scale: 1.1 }} 
+              <motion.div
+                whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 className="transition-all duration-300"
               >
                 <a
-                  href={link.url}
+                  href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={`Visit ${link.name}`}
+                  aria-label={`Visit ${name}`}
                   className={`inline-flex items-center justify-center p-2 rounded-md ${iconStyles[variant]}`}
                 >
-                  <FontAwesomeIcon icon={link.icon} size="lg" />
+                  <Icon className="w-5 h-5" />
                 </a>
               </motion.div>
             </Tooltip.Trigger>
@@ -73,7 +72,7 @@ const SocialMediaBar: React.FC<SocialMediaBarProps> = ({
                 className="z-50 overflow-hidden rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-sm text-gray-900 dark:text-white shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
                 sideOffset={5}
               >
-                {link.name}
+                {name}
                 <Tooltip.Arrow className="fill-white dark:fill-gray-800" />
               </Tooltip.Content>
             </Tooltip.Portal>

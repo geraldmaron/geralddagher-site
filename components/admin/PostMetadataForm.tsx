@@ -15,8 +15,7 @@ import {
   Sparkles,
   User,
   Shield,
-  FileType,
-  Clock
+  FileType
 } from 'lucide-react';
 import { Button } from '@/components/core/Button';
 import { CoverImagePicker } from './CoverImagePicker';
@@ -337,6 +336,7 @@ export function PostMetadataForm({ data, onChange, onSave, isSaving, categories:
             <select
               value={data.author || ''}
               onChange={(e) => {
+                console.log('Author selected:', e.target.value);
                 onChange({ author: e.target.value || null });
               }}
               className="w-full px-4 py-2.5 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm cursor-pointer"
@@ -344,11 +344,14 @@ export function PostMetadataForm({ data, onChange, onSave, isSaving, categories:
             >
               <option value="">No author</option>
               {authors.length === 0 && <option disabled>Loading authors...</option>}
-              {authors.map((author) => (
-                <option key={author.id} value={author.id}>
-                  {author.first_name} {author.last_name}
-                </option>
-              ))}
+              {authors.map((author) => {
+                console.log('Rendering author option:', author);
+                return (
+                  <option key={author.id} value={author.id}>
+                    {author.first_name} {author.last_name}
+                  </option>
+                );
+              })}
             </select>
           </div>
         </motion.div>
@@ -518,53 +521,12 @@ export function PostMetadataForm({ data, onChange, onSave, isSaving, categories:
                 <Calendar className="h-4 w-4 text-blue-600" />
                 Publish Date
               </label>
-              <div className="flex gap-2">
-                <input
-                  type="datetime-local"
-                  value={(() => {
-                    if (!data.published_at) return '';
-                    try {
-                      const date = new Date(data.published_at);
-                      if (isNaN(date.getTime())) return '';
-                      return date.toISOString().slice(0, 16);
-                    } catch {
-                      return '';
-                    }
-                  })()}
-                  onChange={(e) => {
-                    if (!e.target.value) {
-                      onChange({ published_at: null });
-                      return;
-                    }
-                    try {
-                      const date = new Date(e.target.value);
-                      if (isNaN(date.getTime())) {
-                        toast.error('Invalid date/time value');
-                        return;
-                      }
-                      onChange({ published_at: date.toISOString() });
-                    } catch {
-                      toast.error('Invalid date/time value');
-                    }
-                  }}
-                  className="flex-1 px-4 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    const now = new Date();
-                    const offset = now.getTimezoneOffset() * 60000;
-                    const localTime = new Date(now.getTime() - offset);
-                    onChange({ published_at: localTime.toISOString() });
-                    toast.success('Set to current time');
-                  }}
-                  className="px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 hover:bg-neutral-50 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-colors flex items-center gap-1.5"
-                  title="Set to current time"
-                >
-                  <Clock className="h-4 w-4" />
-                  Now
-                </button>
-              </div>
+              <input
+                type="datetime-local"
+                value={data.published_at ? new Date(data.published_at).toISOString().slice(0, 16) : ''}
+                onChange={(e) => onChange({ published_at: e.target.value ? new Date(e.target.value).toISOString() : null })}
+                className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-600"
+              />
             </div>
           )}
         </motion.div>

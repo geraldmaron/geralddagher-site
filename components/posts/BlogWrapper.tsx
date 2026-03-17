@@ -142,8 +142,8 @@ export default function BlogWrapper({
   );
 
   const handleSelectPost = (postId: string) => {
-    setSelectedPosts(prev => 
-      prev.includes(postId) 
+    setSelectedPosts(prev =>
+      prev.includes(postId)
         ? prev.filter(id => id !== postId)
         : [...prev, postId]
     );
@@ -155,7 +155,7 @@ export default function BlogWrapper({
 
   const handleBulkDelete = async () => {
     if (selectedPosts.length === 0) return;
-    
+
     setIsBulkDeleting(true);
     try {
       for (const postId of selectedPosts) {
@@ -173,8 +173,8 @@ export default function BlogWrapper({
 
   return (
     <div className="space-y-0">
-      <div className="rounded-2xl border border-gray-200/80 dark:border-gray-800/80 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm shadow-lg overflow-hidden">
-        <div className="p-4 sm:p-6 border-b border-gray-200/60 dark:border-gray-800/60 bg-gradient-to-r from-white/50 via-white/30 to-white/50 dark:from-neutral-900/50 dark:via-neutral-900/30 dark:to-neutral-900/50">
+      <div className="rounded-2xl border border-border/80 bg-card/80 backdrop-blur-sm shadow-lg overflow-hidden">
+        <div className="p-4 sm:p-6 border-b border-border/60 bg-gradient-to-r from-card/50 via-card/30 to-card/50">
           <BlogFilters
             categories={categories}
             tags={tags}
@@ -186,14 +186,14 @@ export default function BlogWrapper({
           />
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mt-4">
             <div className="flex items-center gap-4 flex-wrap">
-              <div className="text-sm font-medium text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-full bg-gray-100/80 dark:bg-gray-800/80 border border-gray-200/60 dark:border-gray-700/60">
+              <div className="text-sm font-medium text-muted-foreground px-3 py-1.5 rounded-full bg-muted/80 border border-border/60">
                 {isLoading ? 'Loading...' : `${totalPosts} post${totalPosts !== 1 ? 's' : ''}`}
               </div>
               {effectiveIsAdmin && paginatedPosts.length > 0 && (
                 <div className="flex items-center gap-2">
                   <button
                     onClick={handleSelectAll}
-                    className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
+                    className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
                   >
                     {selectedPosts.length === paginatedPosts.length ? 'Deselect All' : 'Select All'}
                   </button>
@@ -216,22 +216,22 @@ export default function BlogWrapper({
                   variant="primary"
                   size="md"
                   aria-label="Subscribe to updates"
-                  className="shadow-md shadow-blue-500/25"
+                  className="shadow-md shadow-primary/25"
                 >
                   <Mail className="w-4 h-4 mr-2" />
                   Subscribe
                 </Button>
               )}
-              <div className="inline-flex rounded-xl border border-gray-200/80 dark:border-gray-700/80 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm p-1.5 gap-1 shadow-sm">
+              <div className="inline-flex rounded-xl border border-border/80 bg-muted/60 backdrop-blur-sm p-1.5 gap-1 shadow-sm">
                 <Button
                   variant={viewMode === 'grid' ? 'primary' : 'ghost'}
                   size="sm"
                   onClick={() => setViewMode('grid')}
                   className={cn(
                     'rounded-lg transition-all h-8 w-8 p-0 flex items-center justify-center',
-                    viewMode === 'grid' 
-                      ? 'bg-white dark:bg-gray-700 shadow-sm' 
-                      : 'hover:bg-gray-100/80 dark:hover:bg-gray-700/80'
+                    viewMode === 'grid'
+                      ? 'bg-background shadow-sm'
+                      : 'hover:bg-muted/80'
                   )}
                 >
                   <Grid3X3 className="h-4 w-4" />
@@ -242,9 +242,9 @@ export default function BlogWrapper({
                   onClick={() => setViewMode('list')}
                   className={cn(
                     'rounded-lg transition-all h-8 w-8 p-0 flex items-center justify-center',
-                    viewMode === 'list' 
-                      ? 'bg-white dark:bg-gray-700 shadow-sm' 
-                      : 'hover:bg-gray-100/80 dark:hover:bg-gray-700/80'
+                    viewMode === 'list'
+                      ? 'bg-background shadow-sm'
+                      : 'hover:bg-muted/80'
                   )}
                 >
                   <List className="h-4 w-4" />
@@ -280,7 +280,7 @@ export default function BlogWrapper({
                       type="checkbox"
                       checked={selectedPosts.includes(post.id)}
                       onChange={() => handleSelectPost(post.id)}
-                      className="w-4 h-4 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                      className="w-4 h-4 accent-primary bg-background border-input rounded"
                     />
                   </div>
                 )}
@@ -300,11 +300,11 @@ export default function BlogWrapper({
         ) : (
           <div className="col-span-full">
             <div className="text-center py-16">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-gray-100/80 to-gray-200/60 dark:from-gray-800/80 dark:to-gray-900/60 border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm flex items-center justify-center shadow-sm">
-                <Grid3X3 className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-muted border border-border/60 backdrop-blur-sm flex items-center justify-center shadow-sm">
+                <Grid3X3 className="h-8 w-8 text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No posts found</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+              <h3 className="text-lg font-semibold text-foreground mb-2">No posts found</h3>
+              <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
                 Try adjusting your search or filters to find what you&apos;re looking for.
               </p>
               {effectiveIsAdmin && (
@@ -324,7 +324,7 @@ export default function BlogWrapper({
         </div>
         </div>
         {totalPosts > 0 && (
-          <div className="px-4 sm:px-6 lg:px-8 pb-4 sm:pb-6 border-t border-gray-200/60 dark:border-gray-800/60 pt-4 sm:pt-6 bg-gradient-to-r from-white/30 via-white/20 to-white/30 dark:from-neutral-900/30 dark:via-neutral-900/20 dark:to-neutral-900/30">
+          <div className="px-4 sm:px-6 lg:px-8 pb-4 sm:pb-6 border-t border-border/60 pt-4 sm:pt-6 bg-gradient-to-r from-card/30 via-card/20 to-card/30">
             <BlogPagination
               currentPage={currentPage}
               totalPages={Math.ceil(totalPosts / itemsPerPage)}
@@ -336,10 +336,10 @@ export default function BlogWrapper({
         )}
       </div>
 
-      <SubscriptionModal 
+      <SubscriptionModal
         isOpen={subscriptionModalOpen}
         onClose={() => setSubscriptionModalOpen(false)}
       />
     </div>
   );
-} 
+}

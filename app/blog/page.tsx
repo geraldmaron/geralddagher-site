@@ -29,26 +29,26 @@ export default async function BlogPage() {
     const tags = tagsResult.status === 'fulfilled' ? tagsResult.value : [];
 
     return (
-      <main className="w-full min-h-screen">
-        <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-blue-950/30">
+      <main aria-label="Blog" className="w-full min-h-screen">
+        <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 via-background to-primary/5 dark:from-gray-950 dark:via-background dark:to-primary/10">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.15),transparent_25%),radial-gradient(circle_at_80%_0%,rgba(236,72,153,0.15),transparent_20%),radial-gradient(circle_at_50%_80%,rgba(34,197,94,0.12),transparent_25%)] dark:bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.25),transparent_25%),radial-gradient(circle_at_80%_0%,rgba(236,72,153,0.25),transparent_20%),radial-gradient(circle_at_50%_80%,rgba(34,197,94,0.2),transparent_25%)]" />
 
           <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8 lg:py-32">
             <div className="flex flex-col items-center text-center">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-200/50 bg-blue-50/80 px-4 py-1.5 text-sm font-medium text-blue-700 backdrop-blur dark:border-blue-800/50 dark:bg-blue-950/50 dark:text-blue-300">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary backdrop-blur">
                 <BookOpen className="h-4 w-4" />
                 <span>Writing</span>
               </div>
 
-              <h1 className="mb-6 text-balance text-4xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-5xl lg:text-6xl">
+              <h1 className="mb-6 text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
                 Thoughts, Stories,{' '}
                 <span className="inline-flex items-center gap-2">
                   & Reflections
-                  <Sparkles className="h-8 w-8 text-blue-600 dark:text-blue-400 sm:h-10 sm:w-10" />
+                  <Sparkles className="h-8 w-8 text-primary sm:h-10 sm:w-10" />
                 </span>
               </h1>
 
-              <p className="mx-auto max-w-2xl text-balance text-lg text-slate-600 dark:text-slate-300 sm:text-xl">
+              <p className="mx-auto max-w-2xl text-balance text-lg text-muted-foreground sm:text-xl">
                 Exploring technology, culture, leadership, and the spaces in between. Writing about what shapes us and what we shape.
               </p>
             </div>
@@ -67,26 +67,26 @@ export default async function BlogPage() {
     );
   } catch (error) {
     return (
-      <main className="w-full min-h-screen">
-        <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-blue-950/30">
+      <main aria-label="Blog" className="w-full min-h-screen">
+        <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 via-background to-primary/5 dark:from-gray-950 dark:via-background dark:to-primary/10">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.15),transparent_25%),radial-gradient(circle_at_80%_0%,rgba(236,72,153,0.15),transparent_20%),radial-gradient(circle_at_50%_80%,rgba(34,197,94,0.12),transparent_25%)]" />
 
           <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8 lg:py-32">
             <div className="flex flex-col items-center text-center">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-200/50 bg-blue-50/80 px-4 py-1.5 text-sm font-medium text-blue-700 backdrop-blur dark:border-blue-800/50 dark:bg-blue-950/50 dark:text-blue-300">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary backdrop-blur">
                 <BookOpen className="h-4 w-4" />
                 <span>Writing</span>
               </div>
 
-              <h1 className="mb-6 text-balance text-4xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-5xl lg:text-6xl">
+              <h1 className="mb-6 text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
                 Thoughts, Stories,{' '}
                 <span className="inline-flex items-center gap-2">
                   & Reflections
-                  <Sparkles className="h-8 w-8 text-blue-600 dark:text-blue-400 sm:h-10 sm:w-10" />
+                  <Sparkles className="h-8 w-8 text-primary sm:h-10 sm:w-10" />
                 </span>
               </h1>
 
-              <p className="mx-auto max-w-2xl text-balance text-lg text-slate-600 dark:text-slate-300 sm:text-xl">
+              <p className="mx-auto max-w-2xl text-balance text-lg text-muted-foreground sm:text-xl">
                 Exploring technology, culture, leadership, and the spaces in between.
               </p>
             </div>

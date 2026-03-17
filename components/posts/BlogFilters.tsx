@@ -96,9 +96,8 @@ export default function BlogFilters({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={cn(
-              "w-full pl-10 pr-3 h-10 py-2 border border-gray-200/80 dark:border-gray-700/80 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 text-sm shadow-sm",
-              filterError && "border-red-500/80 dark:border-red-500/80",
-              "focus:ring-2 focus:ring-blue-500/20"
+              "w-full pl-10 pr-3 h-10 py-2 border border-border/80 rounded-xl bg-background/80 backdrop-blur-sm text-foreground placeholder-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-all duration-200 text-sm shadow-sm",
+              filterError && "border-destructive/80"
             )}
             aria-invalid={!!filterError}
             aria-describedby={filterError ? "search-error" : undefined}
@@ -164,9 +163,9 @@ export default function BlogFilters({
                 <span
                   className={cn(
                     "cursor-pointer transition-all duration-200 px-3 py-1.5 rounded-full text-sm whitespace-nowrap",
-                    selectedCategory === 'all' 
-                      ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                      : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600"
+                    selectedCategory === 'all'
+                      ? "bg-primary/10 text-primary"
+                      : "bg-muted text-muted-foreground border border-border"
                   )}
                   onClick={() => handleCategoryChange('all')}
                 >
@@ -180,9 +179,9 @@ export default function BlogFilters({
                     key={category.id}
                     className={cn(
                       "cursor-pointer transition-all duration-200 px-3 py-1.5 rounded-full text-sm whitespace-nowrap",
-                      selectedCategory === category.id 
-                        ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                        : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600"
+                      selectedCategory === category.id
+                        ? "bg-primary/10 text-primary"
+                        : "bg-muted text-muted-foreground border border-border"
                     )}
                     onClick={() => handleCategoryChange(category.id)}
                   >
@@ -202,9 +201,9 @@ export default function BlogFilters({
                     key={tag.id}
                     className={cn(
                       "cursor-pointer transition-all duration-200 px-3 py-1.5 rounded-full text-sm whitespace-nowrap",
-                      selectedTags.includes(tag.id) 
-                        ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                        : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600",
+                      selectedTags.includes(tag.id)
+                        ? "bg-primary/10 text-primary"
+                        : "bg-muted text-muted-foreground border border-border",
                       selectedTags.length >= 5 && !selectedTags.includes(tag.id) && "opacity-50 cursor-not-allowed"
                     )}
                     onClick={() => handleTagChange(tag.id)}
@@ -226,9 +225,9 @@ export default function BlogFilters({
                       key={status}
                       className={cn(
                         "cursor-pointer transition-all duration-200 px-3 py-1.5 rounded-full text-sm whitespace-nowrap",
-                        selectedStatus.includes(status) 
-                          ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                          : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600",
+                        selectedStatus.includes(status)
+                          ? "bg-primary/10 text-primary"
+                          : "bg-muted text-muted-foreground border border-border",
                         selectedStatus.length >= 2 && !selectedStatus.includes(status) && "opacity-50 cursor-not-allowed"
                       )}
                       onClick={() => handleStatusChange(status)}

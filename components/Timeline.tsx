@@ -84,7 +84,7 @@ export default function Timeline({ initialMilestones = [] }: TimelineProps) {
   }, [filtered]);
 
   return (
-    <div className="relative overflow-hidden bg-white text-slate-900 dark:bg-black dark:text-white py-16 sm:py-20">
+    <div className="relative overflow-hidden bg-background text-foreground py-16 sm:py-20">
       <div className="pointer-events-none absolute inset-0 opacity-40">
         <div className="absolute left-1/4 top-20 h-64 w-64 rounded-full bg-blue-500/20 blur-3xl" />
         <div className="absolute right-1/4 bottom-20 h-64 w-64 rounded-full bg-purple-500/20 blur-3xl" />
@@ -93,7 +93,7 @@ export default function Timeline({ initialMilestones = [] }: TimelineProps) {
       <div className="relative mx-auto flex max-w-5xl flex-col gap-10 px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-4 text-center">
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">Timeline</h1>
-          <p className="text-base text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+          <p className="text-base text-muted-foreground max-w-2xl mx-auto">
             Key moments across life, career, and family
           </p>
           <div className="flex flex-wrap justify-center gap-2 mt-2">
@@ -107,8 +107,8 @@ export default function Timeline({ initialMilestones = [] }: TimelineProps) {
                   className={cn(
                     'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all',
                     active
-                      ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                      ? 'bg-foreground text-background'
+                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
                   )}
                 >
                   <Icon className="h-4 w-4" />
@@ -122,10 +122,10 @@ export default function Timeline({ initialMilestones = [] }: TimelineProps) {
         <div className="space-y-12 max-h-[70vh] overflow-y-auto">
           {grouped.map(([decade, items]) => (
             <div key={decade} className="space-y-4">
-              <div className="sticky top-0 z-10 bg-white/80 dark:bg-black/80 backdrop-blur-sm py-2">
+              <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm py-2">
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl font-bold text-slate-900 dark:text-white">{decade}</span>
-                  <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800" />
+                  <span className="text-2xl font-bold text-foreground">{decade}</span>
+                  <div className="h-px flex-1 bg-border" />
                 </div>
               </div>
               <div className="space-y-4">
@@ -148,7 +148,7 @@ export default function Timeline({ initialMilestones = [] }: TimelineProps) {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: idx * 0.05 }}
-                      className="group relative flex gap-4 rounded-xl border border-slate-200 bg-white p-5 transition-all hover:border-slate-300 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700"
+                      className="group relative flex gap-4 rounded-xl border border-border bg-card p-5 transition-all hover:border-border/80 hover:shadow-lg"
                     >
                       <div className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-lg transition-colors", iconColor)}>
                         <Icon className="h-6 w-6" />
@@ -156,9 +156,9 @@ export default function Timeline({ initialMilestones = [] }: TimelineProps) {
                       <div className="flex-1 space-y-2">
                         <div className="flex items-start justify-between gap-4">
                           <h3 className="text-lg font-semibold leading-tight">{m.event}</h3>
-                          <span className="shrink-0 text-sm font-medium text-slate-500 dark:text-slate-400">{m.year}</span>
+                          <span className="shrink-0 text-sm font-medium text-muted-foreground">{m.year}</span>
                         </div>
-                        <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                        <p className="text-sm leading-relaxed text-muted-foreground">
                           {m.summary}
                         </p>
                       </div>

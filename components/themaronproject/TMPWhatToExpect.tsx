@@ -1,15 +1,6 @@
 import React from 'react';
+import { X, Laptop, Clock, MessageCircle, Video, Share2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTheme } from '@/components/core/ThemeProvider';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faTimes,
-  faLaptop,
-  faClock,
-  faComments,
-  faVideo,
-  faShare
-} from '@fortawesome/free-solid-svg-icons';
 import { RemoveScroll } from 'react-remove-scroll';
 
 interface TMPWhatToExpectProps {
@@ -22,32 +13,31 @@ const TMPWhatToExpect: React.FC<TMPWhatToExpectProps> = ({
   onClose,
   onOpenQuestions
 }) => {
-  const { isDarkMode } = useTheme();
   const handleQuestionBankClick = (e: React.MouseEvent) => {
     e.preventDefault();
     onOpenQuestions();
   };
   const steps = [
     {
-      icon: faLaptop,
+      icon: Laptop,
       title: 'Scheduling and Descript Invite',
       description:
         "After we schedule your session, you'll receive an invite from Descript. Keep an eye on your inbox because the invite contains the link to the Descript virtual studio we'll use. It's similar to Zoom, but with extra features. You may need to download the app beforehand, so please follow any instructions provided."
     },
     {
-      icon: faClock,
+      icon: Clock,
       title: 'Session Duration & Preparation',
       description:
         "Each session lasts about an hour, and you'll be on camera, so wear whatever makes you comfortable - a T-shirt or hoodie is fine. The first 15 minutes will cover any questions you have, a quick technical check, and confirm any areas you might not want to discuss."
     },
     {
-      icon: faComments,
+      icon: MessageCircle,
       title: 'Recording Kickoff',
       description:
         "When we start recording, I'll do a brief welcome, introduce myself, and then introduce you. I'll ask you to share a bit about yourself, and from there, we'll keep things relaxed and conversational."
     },
     {
-      icon: faVideo,
+      icon: Video,
       title: 'Conversational Flow & Question Bank',
       description: (
         <>
@@ -66,7 +56,7 @@ const TMPWhatToExpect: React.FC<TMPWhatToExpectProps> = ({
       )
     },
     {
-      icon: faShare,
+      icon: Share2,
       title: 'Post-Recording & Distribution',
       description:
         "After recording, I'll work on editing, then the edited session will be posted to YouTube and my public social media pages (which may include Instagram, LinkedIn, TikTok, Facebook, and more). If you look back and notice a section of the session or a moment that you rather not be posted, please let me know and I'll edit it out."
@@ -110,9 +100,7 @@ const TMPWhatToExpect: React.FC<TMPWhatToExpectProps> = ({
               initial="hidden"
               animate="visible"
               exit="exit"
-              className={`relative w-full max-w-2xl mx-2 ${
-                isDarkMode ? 'bg-gray-900' : 'bg-white'
-              } rounded-xl shadow-2xl overflow-hidden`}
+              className="relative w-full max-w-2xl mx-2 bg-popover rounded-xl shadow-2xl overflow-hidden"
               role="dialog"
               aria-labelledby="what-to-expect-title"
               aria-modal="true"
@@ -123,10 +111,10 @@ const TMPWhatToExpect: React.FC<TMPWhatToExpectProps> = ({
                     whileHover={{ scale: 1.1, rotate: 90 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={onClose}
-                    className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800"
+                    className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted"
                     aria-label="Close what to expect dialog"
                   >
-                    <FontAwesomeIcon icon={faTimes} className="w-5 h-5" />
+                    <X className="w-5 h-5" />
                   </motion.button>
                                      <h2 id="what-to-expect-title" className="mb-8 pr-8">
                      What to Expect
@@ -138,22 +126,18 @@ const TMPWhatToExpect: React.FC<TMPWhatToExpectProps> = ({
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className={`p-4 rounded-lg ${
-                          isDarkMode ? 'bg-gray-800' : 'bg-gray-50'
-                        }`}
+                        className="p-4 rounded-lg bg-muted"
                       >
                         <div className="flex items-start gap-4">
                           <div
-                            className={`p-3 rounded-full flex-shrink-0 ${
-                              isDarkMode ? 'bg-gray-700' : 'bg-gray-200'
-                            }`}
+                            className="p-3 rounded-full flex-shrink-0 bg-muted"
                             aria-hidden="true"
                           >
-                            <FontAwesomeIcon icon={step.icon} className="text-purple-500 w-5 h-5" />
+                            <step.icon className="text-purple-500 w-5 h-5" />
                           </div>
                           <div>
                                                          <h3 className="mb-2 text-base font-medium">{step.title}</h3>
-                             <p className="text-gray-600 dark:text-gray-300">{step.description}</p>
+                             <p className="text-muted-foreground">{step.description}</p>
                           </div>
                         </div>
                       </motion.div>

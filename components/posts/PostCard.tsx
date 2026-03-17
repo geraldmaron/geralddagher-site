@@ -278,12 +278,12 @@ export default function PostCard({
       <>
         <Link
           href={postLink}
-          className="group block h-full focus:outline-none"
+          className="group block h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           role="article"
           aria-labelledby={`post-title-${post.id}`}
         >
-          <article className="bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-200/80 dark:border-neutral-800/80 hover:border-gray-300 dark:hover:border-neutral-700 transition-all duration-200 h-full flex shadow-sm hover:shadow-lg">
-            <div className="relative w-40 sm:w-48 flex-shrink-0 bg-gray-100 dark:bg-neutral-800">
+          <article className="bg-card/80 backdrop-blur-sm rounded-xl overflow-hidden border border-border/80 hover:border-border transition-all duration-200 h-full flex shadow-sm hover:shadow-lg">
+            <div className="relative w-40 sm:w-48 flex-shrink-0 bg-muted">
               <Image
                 src={imageUrl}
                 alt={post.title}
@@ -312,12 +312,12 @@ export default function PostCard({
 
             <div className="p-5 flex-1 flex flex-col min-w-0">
               <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 flex-wrap">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
                   <time dateTime={displayDate.toISOString()}>{formattedDate}</time>
                   <span>•</span>
                   <span>{readingTime} min read</span>
                   {categoryName && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200 text-[11px] font-medium border border-blue-200/70 dark:border-blue-800/70">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[11px] font-medium border border-primary/20">
                       {categoryName}
                     </span>
                   )}
@@ -331,13 +331,13 @@ export default function PostCard({
                         e.stopPropagation();
                         setShowAdminMenu(!showAdminMenu);
                       }}
-                      className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                      className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                     >
                       <MoreHorizontal className="w-4 h-4" />
                     </button>
 
                     {showAdminMenu && (
-                      <div className="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-neutral-900 rounded-lg shadow-lg border border-gray-200 dark:border-neutral-800 py-1 z-50">
+                      <div className="absolute right-0 top-full mt-1 w-40 bg-popover rounded-lg shadow-lg border border-border py-1 z-50">
                         <button
                           onClick={(e) => {
                             e.preventDefault();
@@ -346,7 +346,7 @@ export default function PostCard({
                             if (onEdit) onEdit();
                             else handleEdit(e);
                           }}
-                          className="w-full px-3 py-1.5 text-left text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-800 flex items-center gap-2"
+                          className="w-full px-3 py-1.5 text-left text-xs text-foreground hover:bg-muted flex items-center gap-2"
                         >
                           <Edit className="w-3.5 h-3.5" />
                           Edit
@@ -371,53 +371,53 @@ export default function PostCard({
 
               <h2
                 id={`post-title-${post.id}`}
-                className="text-base font-semibold text-gray-900 dark:text-white leading-tight line-clamp-1 mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"
+                className="text-base font-semibold text-foreground leading-tight line-clamp-1 mb-2 group-hover:text-primary transition-colors"
               >
                 {searchQuery ? highlightText(post.title, searchQuery) : post.title}
               </h2>
 
               <div className="relative mb-3">
                 {searchQuery.trim() ? (
-                  <div className="prose prose-sm prose-gray dark:prose-invert max-w-none text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-2">
+                  <div className="prose prose-sm prose-gray dark:prose-invert max-w-none text-sm text-muted-foreground leading-relaxed line-clamp-2">
                     {displayText}
                   </div>
                 ) : (
-                  <div className="prose prose-sm prose-gray dark:prose-invert max-w-none text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                  <div className="prose prose-sm prose-gray dark:prose-invert max-w-none text-sm text-muted-foreground leading-relaxed">
                     {post.excerpt ? (
                       <p className="line-clamp-2">{post.excerpt}</p>
                     ) : (
                       <div className="max-h-20 overflow-hidden">
                         <SlateRenderer content={previewContent as any} compact className="[&_p]:mb-2 [&_p]:text-sm [&_ul]:my-1 [&_ol]:my-1" />
-                        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white dark:from-neutral-900 to-transparent" />
+                        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-background to-transparent" />
                       </div>
                     )}
                   </div>
                 )}
               </div>
 
-              <div className="flex items-center justify-between gap-3 pt-4 border-t border-gray-100 dark:border-neutral-800 mt-auto">
+              <div className="flex items-center justify-between gap-3 pt-4 border-t border-border/60 mt-auto">
                 <div className="flex min-w-0 items-center gap-2 overflow-hidden flex-nowrap h-8">
                   {authorName && (
-                    <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200 shrink-0">
+                    <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary shrink-0">
                       {authorName}
                     </span>
                   )}
                   {tagNames.slice(0, 2).map((tagName, index) => (
                     <span
                       key={`${tagName}-${index}`}
-                      className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-50 dark:bg-neutral-800 text-gray-600 dark:text-gray-400 shrink-0"
+                      className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-muted text-muted-foreground shrink-0"
                     >
                       {tagName}
                     </span>
                   ))}
                   {tagNames.length > 2 && (
-                    <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">
+                    <span className="text-xs text-muted-foreground shrink-0">
                       +{tagNames.length - 2}
                     </span>
                   )}
                 </div>
 
-                <div className="flex items-center gap-1.5 text-sm font-medium text-gray-900 dark:text-white group-hover:gap-2 transition-all">
+                <div className="flex items-center gap-1.5 text-sm font-medium text-foreground group-hover:gap-2 transition-all">
                   <span>Read</span>
                   <ArrowRight className="w-4 h-4" />
                 </div>
@@ -429,11 +429,11 @@ export default function PostCard({
         <Dialog.Root open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
           <Dialog.Portal>
             <Dialog.Overlay className="fixed inset-0 bg-black/20 dark:bg-black/40 backdrop-blur-sm transition-opacity" />
-            <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white dark:bg-neutral-900 p-6 shadow-xl border border-gray-200 dark:border-neutral-800 w-full max-w-sm">
-              <Dialog.Title className="text-base font-semibold text-gray-900 dark:text-white mb-2">
+            <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-card p-6 shadow-xl border border-border w-full max-w-sm">
+              <Dialog.Title className="text-base font-semibold text-foreground mb-2">
                 Delete Post
               </Dialog.Title>
-              <Dialog.Description className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+              <Dialog.Description className="text-sm text-muted-foreground mb-6">
                 Are you sure you want to delete "{post.title}"? This action cannot be undone.
               </Dialog.Description>
               <div className="flex justify-end gap-3">
@@ -466,12 +466,12 @@ export default function PostCard({
     <>
       <Link
         href={postLink}
-        className="group block h-full focus:outline-none"
+        className="group block h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         role="article"
         aria-labelledby={`post-title-${post.id}`}
       >
-        <article className="bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-200/80 dark:border-neutral-800/80 hover:border-gray-300 dark:hover:border-neutral-700 transition-all duration-200 h-full flex flex-col shadow-sm hover:shadow-lg">
-          <div className="relative aspect-[16/9] overflow-hidden bg-gray-100 dark:bg-neutral-800">
+        <article className="bg-card/80 backdrop-blur-sm rounded-xl overflow-hidden border border-border/80 hover:border-border transition-all duration-200 h-full flex flex-col shadow-sm hover:shadow-lg">
+          <div className="relative aspect-[16/9] overflow-hidden bg-muted">
             <Image
               src={imageUrl}
               alt={post.title}
@@ -505,7 +505,7 @@ export default function PostCard({
                     if (onEdit) onEdit();
                     else handleEdit(e);
                   }}
-                  className="p-2 rounded-lg bg-white/90 dark:bg-neutral-900/90 backdrop-blur-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 shadow-sm transition-colors"
+                  className="p-2 rounded-lg bg-popover/90 backdrop-blur-sm text-muted-foreground hover:text-primary shadow-sm transition-colors"
                 >
                   <Edit className="w-4 h-4" />
                 </button>
@@ -515,7 +515,7 @@ export default function PostCard({
                     e.stopPropagation();
                     setIsDeleteDialogOpen(true);
                   }}
-                  className="p-2 rounded-lg bg-white/90 dark:bg-neutral-900/90 backdrop-blur-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 shadow-sm transition-colors"
+                  className="p-2 rounded-lg bg-popover/90 backdrop-blur-sm text-muted-foreground hover:text-red-600 dark:hover:text-red-400 shadow-sm transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -524,12 +524,12 @@ export default function PostCard({
           </div>
 
           <div className="p-5 flex-1 flex flex-col">
-            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-3 flex-wrap">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3 flex-wrap">
               <time dateTime={displayDate.toISOString()}>{formattedDate}</time>
               <span>•</span>
               <span>{readingTime} min read</span>
               {categoryName && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200 text-[11px] font-medium border border-blue-200/70 dark:border-blue-800/70">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[11px] font-medium border border-primary/20">
                   {categoryName}
                 </span>
               )}
@@ -537,53 +537,53 @@ export default function PostCard({
 
             <h2
               id={`post-title-${post.id}`}
-              className="text-lg font-semibold text-gray-900 dark:text-white leading-tight line-clamp-2 mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"
+              className="text-lg font-semibold text-foreground leading-tight line-clamp-2 mb-3 group-hover:text-primary transition-colors"
             >
               {searchQuery ? highlightText(post.title, searchQuery) : post.title}
             </h2>
 
             <div className="relative mb-4">
               {searchQuery.trim() ? (
-                <div className="prose prose-sm prose-gray dark:prose-invert max-w-none text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-3">
+                <div className="prose prose-sm prose-gray dark:prose-invert max-w-none text-sm text-muted-foreground leading-relaxed line-clamp-3">
                   {displayText}
                 </div>
               ) : (
-                <div className="prose prose-sm prose-gray dark:prose-invert max-w-none text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                <div className="prose prose-sm prose-gray dark:prose-invert max-w-none text-sm text-muted-foreground leading-relaxed">
                   {post.excerpt ? (
                     <p className="line-clamp-3">{post.excerpt}</p>
                   ) : (
                     <div className="max-h-24 overflow-hidden">
                       <SlateRenderer content={previewContent as any} compact className="[&_p]:mb-2 [&_p]:text-sm [&_ul]:my-1 [&_ol]:my-1" />
-                      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-white dark:from-neutral-900 to-transparent" />
+                      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-background to-transparent" />
                     </div>
                   )}
                 </div>
               )}
             </div>
 
-            <div className="flex items-center justify-between gap-3 pt-4 border-t border-gray-100 dark:border-neutral-800 mt-auto">
+            <div className="flex items-center justify-between gap-3 pt-4 border-t border-border/60 mt-auto">
               <div className="flex min-w-0 items-center gap-2 overflow-hidden flex-nowrap h-8">
                 {authorName && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200 shrink-0">
+                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary shrink-0">
                     {authorName}
                   </span>
                 )}
                 {tagNames.slice(0, 2).map((tagName, index) => (
                   <span
                     key={`${tagName}-${index}`}
-                    className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-50 dark:bg-neutral-800 text-gray-600 dark:text-gray-400 shrink-0"
+                    className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-muted text-muted-foreground shrink-0"
                   >
                     {tagName}
                   </span>
                 ))}
                 {tagNames.length > 2 && (
-                  <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">
+                  <span className="text-xs text-muted-foreground shrink-0">
                     +{tagNames.length - 2}
                   </span>
                 )}
               </div>
 
-              <div className="flex items-center gap-1.5 text-sm font-medium text-gray-900 dark:text-white group-hover:gap-2 transition-all">
+              <div className="flex items-center gap-1.5 text-sm font-medium text-foreground group-hover:gap-2 transition-all">
                 <span>Read</span>
                 <ArrowRight className="w-4 h-4" />
               </div>
@@ -595,11 +595,11 @@ export default function PostCard({
       <Dialog.Root open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/20 dark:bg-black/40 backdrop-blur-sm transition-opacity" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white dark:bg-neutral-900 p-6 shadow-xl border border-gray-200 dark:border-neutral-800 w-full max-w-sm">
-            <Dialog.Title className="text-base font-semibold text-gray-900 dark:text-white mb-2">
+          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-card p-6 shadow-xl border border-border w-full max-w-sm">
+            <Dialog.Title className="text-base font-semibold text-foreground mb-2">
               Delete Post
             </Dialog.Title>
-            <Dialog.Description className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+            <Dialog.Description className="text-sm text-muted-foreground mb-6">
               Are you sure you want to delete "{post.title}"? This action cannot be undone.
             </Dialog.Description>
             <div className="flex justify-end gap-3">
@@ -626,4 +626,4 @@ export default function PostCard({
       </Dialog.Root>
     </>
   );
-} 
+}

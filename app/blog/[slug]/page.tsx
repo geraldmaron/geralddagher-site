@@ -66,27 +66,27 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 function normalizeContent(content: any) {
   if (!content) return null
-  
+
   if (Array.isArray(content)) {
     return content.length > 0 ? content : null
   }
-  
+
   if (typeof content === 'object' && content !== null) {
     if (content?.content && Array.isArray(content.content)) {
       return content.content.length > 0 ? content.content : null
     }
     return null
   }
-  
+
   if (typeof content === 'string') {
     const trimmed = content.trim()
     if (!trimmed || trimmed.length === 0) return null
-    
+
     const firstChar = trimmed[0]
     if (firstChar !== '{' && firstChar !== '[') {
       return null
     }
-    
+
     try {
       const parsed = JSON.parse(trimmed)
       if (parsed && typeof parsed === 'object') {
@@ -102,7 +102,7 @@ function normalizeContent(content: any) {
       return null
     }
   }
-  
+
   return null
 }
 
@@ -179,7 +179,7 @@ export default async function BlogPostPage({ params }: PageProps) {
   const excerpt = hydratedPost.excerpt || ''
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 dark:bg-black dark:text-white">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="relative isolate overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(56,189,248,0.08),transparent_25%),radial-gradient(circle_at_80%_0%,rgba(167,139,250,0.08),transparent_20%),radial-gradient(circle_at_50%_80%,rgba(74,222,128,0.08),transparent_22%)]" />
         <div className="absolute inset-0 bg-gradient-to-b from-white via-white to-white dark:from-black dark:via-black dark:to-black opacity-95" />
@@ -291,26 +291,26 @@ export default async function BlogPostPage({ params }: PageProps) {
 
       <div className="relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 pb-20">
-            <div className="rounded-3xl border border-slate-200 bg-white shadow-[0_20px_80px_-30px_rgba(0,0,0,0.25)] p-6 sm:p-10 dark:border-slate-800 dark:bg-black/60">
+            <div className="rounded-3xl border border-border bg-card dark:bg-card/60 shadow-[0_20px_80px_-30px_rgba(0,0,0,0.25)] p-6 sm:p-10">
             {contentNodes ? (
               <SlateRenderer
                 content={contentNodes}
-                  className="prose prose-lg max-w-none text-slate-800 prose-headings:text-slate-900 prose-p:text-slate-700 prose-strong:text-slate-900 dark:prose-invert"
+                  className="prose prose-lg max-w-none text-foreground prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground dark:prose-invert"
               />
             ) : (
-              <div className="text-slate-500 dark:text-slate-400">No content available.</div>
+              <div className="text-muted-foreground">No content available.</div>
             )}
           </div>
 
           <div className="mt-16">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Up next</p>
-                <h2 className="text-3xl sm:text-4xl font-semibold text-slate-900 dark:text-white">Recent posts</h2>
+                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Up next</p>
+                <h2 className="text-3xl sm:text-4xl font-semibold text-foreground">Recent posts</h2>
               </div>
               <Link
                 href="/blog"
-                className="text-sm text-slate-700 hover:text-slate-900 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition-colors dark:text-slate-200 dark:hover:text-white dark:hover:bg-white/10"
+                className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-muted transition-colors"
               >
                 Browse all
                 <ArrowLeft className="h-4 w-4 rotate-180" />
@@ -326,7 +326,7 @@ export default async function BlogPostPage({ params }: PageProps) {
           <div className="mt-12 flex justify-center">
             <Link
               href="/blog"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-full border border-slate-200 bg-white text-slate-900 hover:border-slate-300 hover:bg-slate-50 transition-all shadow-sm dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:border-white/40 dark:hover:bg-white/15"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-full border border-border bg-background text-foreground hover:border-border/80 hover:bg-muted transition-all shadow-sm"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to blog

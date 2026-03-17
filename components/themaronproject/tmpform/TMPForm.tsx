@@ -5,7 +5,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
 import { cn } from '@/lib/utils';
-import { useTheme } from '@/components/core/ThemeProvider';
 import Button from '@/components/core/Button';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
@@ -66,7 +65,6 @@ interface TMPFormProps {
 const DatePickerAny = DatePicker as any;
 
 export function TMPForm({ onSuccess }: TMPFormProps) {
-  const { isDarkMode } = useTheme();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = React.useState(false);
   const [selectedDates, setSelectedDates] = React.useState<Date[]>([]);
@@ -219,12 +217,11 @@ export function TMPForm({ onSuccess }: TMPFormProps) {
     <div className="w-full max-w-5xl mx-auto">
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        <PersonalInfoSection form={form} shouldShowError={shouldShowError} isDarkMode={isDarkMode} />
-        <StorySection form={form} shouldShowError={shouldShowError} isDarkMode={isDarkMode} />
-        <ContactPreferencesSection 
-          form={form} 
-          shouldShowError={shouldShowError} 
-          isDarkMode={isDarkMode}
+        <PersonalInfoSection form={form} shouldShowError={shouldShowError} />
+        <StorySection form={form} shouldShowError={shouldShowError} />
+        <ContactPreferencesSection
+          form={form}
+          shouldShowError={shouldShowError}
           selectedDates={selectedDates}
           handleDateChange={handleDateChange}
         />
@@ -251,62 +248,42 @@ export function TMPForm({ onSuccess }: TMPFormProps) {
   );
 }
 
-function PersonalInfoSection({ form, shouldShowError, isDarkMode }: any) {
+function PersonalInfoSection({ form, shouldShowError }: any) {
   return (
     <motion.section
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0.1 }}
-      className={cn(
-        'p-6 rounded-xl border transition-all duration-300',
-        isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-200 bg-white/50'
-      )}
+      className="p-6 rounded-xl border border-border bg-background/50 transition-all duration-300"
     >
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className={cn(
-            'w-10 h-10 rounded-full flex items-center justify-center',
-            isDarkMode ? 'bg-blue-600/20 text-blue-400' : 'bg-blue-100 text-blue-600'
-          )}>
+          <div className="w-10 h-10 rounded-full flex items-center justify-center bg-blue-600/20 text-blue-600 dark:text-blue-400">
             <User className="w-5 h-5" />
           </div>
-          <h2 className={cn(
-            'text-2xl font-semibold',
-            isDarkMode ? 'text-white' : 'text-gray-900'
-          )}>
+          <h2 className="text-2xl font-semibold text-foreground">
             Personal Information
           </h2>
         </div>
-        <p className={cn(
-          'text-sm',
-          isDarkMode ? 'text-gray-400' : 'text-gray-600'
-        )}>
+        <p className="text-sm text-muted-foreground">
           Tell us about yourself so we can get to know you better.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className={cn(
-            'block text-sm font-medium',
-            isDarkMode ? 'text-gray-200' : 'text-gray-700'
-          )}>
+          <label className="block text-sm font-medium text-foreground">
             First Name <span className="text-red-500">*</span>
           </label>
           <div className="relative">
-            <User className={cn(
-              'absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4',
-              isDarkMode ? 'text-gray-400' : 'text-gray-500'
-            )} />
+            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="John"
               className={cn(
                 'w-full pl-10 pr-4 py-3 rounded-lg border transition-all duration-200',
                 'focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500',
-                isDarkMode
-                  ? 'bg-gray-900/50 border-gray-600 text-white placeholder-gray-400'
-                  : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                'bg-background border-input text-foreground placeholder:text-muted-foreground'
               )}
               {...form.register('first_name')}
             />
@@ -319,26 +296,18 @@ function PersonalInfoSection({ form, shouldShowError, isDarkMode }: any) {
         </div>
 
         <div className="space-y-2">
-          <label className={cn(
-            'block text-sm font-medium',
-            isDarkMode ? 'text-gray-200' : 'text-gray-700'
-          )}>
+          <label className="block text-sm font-medium text-foreground">
             Last Name <span className="text-red-500">*</span>
           </label>
           <div className="relative">
-            <User className={cn(
-              'absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4',
-              isDarkMode ? 'text-gray-400' : 'text-gray-500'
-            )} />
+            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Doe"
               className={cn(
                 'w-full pl-10 pr-4 py-3 rounded-lg border transition-all duration-200',
                 'focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500',
-                isDarkMode
-                  ? 'bg-gray-900/50 border-gray-600 text-white placeholder-gray-400'
-                  : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                'bg-background border-input text-foreground placeholder:text-muted-foreground'
               )}
               {...form.register('last_name')}
             />
@@ -352,26 +321,18 @@ function PersonalInfoSection({ form, shouldShowError, isDarkMode }: any) {
       </div>
 
       <div className="space-y-2 mt-6">
-        <label className={cn(
-          'block text-sm font-medium',
-          isDarkMode ? 'text-gray-200' : 'text-gray-700'
-        )}>
+        <label className="block text-sm font-medium text-foreground">
           Email Address <span className="text-red-500">*</span>
         </label>
         <div className="relative">
-          <Mail className={cn(
-            'absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4',
-            isDarkMode ? 'text-gray-400' : 'text-gray-500'
-          )} />
+          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="email"
             placeholder="john.doe@example.com"
             className={cn(
               'w-full pl-10 pr-4 py-3 rounded-lg border transition-all duration-200',
               'focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500',
-              isDarkMode
-                ? 'bg-gray-900/50 border-gray-600 text-white placeholder-gray-400'
-                : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+              'bg-background border-input text-foreground placeholder:text-muted-foreground'
             )}
             {...form.register('email')}
           />
@@ -384,26 +345,18 @@ function PersonalInfoSection({ form, shouldShowError, isDarkMode }: any) {
       </div>
 
       <div className="space-y-2 mt-6">
-        <label className={cn(
-          'block text-sm font-medium',
-          isDarkMode ? 'text-gray-200' : 'text-gray-700'
-        )}>
-          Phone Number <span className="text-gray-400">(Optional)</span>
+        <label className="block text-sm font-medium text-foreground">
+          Phone Number <span className="text-muted-foreground">(Optional)</span>
         </label>
         <div className="relative">
-          <Phone className={cn(
-            'absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4',
-            isDarkMode ? 'text-gray-400' : 'text-gray-500'
-          )} />
+          <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="tel"
             placeholder="+1 (555) 123-4567"
             className={cn(
               'w-full pl-10 pr-4 py-3 rounded-lg border transition-all duration-200',
               'focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500',
-              isDarkMode
-                ? 'bg-gray-900/50 border-gray-600 text-white placeholder-gray-400'
-                : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+              'bg-background border-input text-foreground placeholder:text-muted-foreground'
             )}
             {...form.register('phone')}
           />
@@ -412,26 +365,18 @@ function PersonalInfoSection({ form, shouldShowError, isDarkMode }: any) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
         <div className="space-y-2">
-          <label className={cn(
-            'block text-sm font-medium',
-            isDarkMode ? 'text-gray-200' : 'text-gray-700'
-          )}>
-            Job Title <span className="text-gray-400">(Optional)</span>
+          <label className="block text-sm font-medium text-foreground">
+            Job Title <span className="text-muted-foreground">(Optional)</span>
           </label>
           <div className="relative">
-            <MapPin className={cn(
-              'absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4',
-              isDarkMode ? 'text-gray-400' : 'text-gray-500'
-            )} />
+            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Software Engineer"
               className={cn(
                 'w-full pl-10 pr-4 py-3 rounded-lg border transition-all duration-200',
                 'focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500',
-                isDarkMode
-                  ? 'bg-gray-900/50 border-gray-600 text-white placeholder-gray-400'
-                  : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                'bg-background border-input text-foreground placeholder:text-muted-foreground'
               )}
               {...form.register('job_title')}
             />
@@ -439,11 +384,8 @@ function PersonalInfoSection({ form, shouldShowError, isDarkMode }: any) {
         </div>
 
         <div className="space-y-2">
-          <label className={cn(
-            'block text-sm font-medium',
-            isDarkMode ? 'text-gray-200' : 'text-gray-700'
-          )}>
-            Company <span className="text-gray-400">(Optional)</span>
+          <label className="block text-sm font-medium text-foreground">
+            Company <span className="text-muted-foreground">(Optional)</span>
           </label>
           <input
             type="text"
@@ -451,9 +393,7 @@ function PersonalInfoSection({ form, shouldShowError, isDarkMode }: any) {
             className={cn(
               'w-full px-4 py-3 rounded-lg border transition-all duration-200',
               'focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500',
-              isDarkMode
-                ? 'bg-gray-900/50 border-gray-600 text-white placeholder-gray-400'
-                : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+              'bg-background border-input text-foreground placeholder:text-muted-foreground'
             )}
             {...form.register('company')}
           />
@@ -462,11 +402,8 @@ function PersonalInfoSection({ form, shouldShowError, isDarkMode }: any) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
         <div className="space-y-2">
-          <label className={cn(
-            'block text-sm font-medium',
-            isDarkMode ? 'text-gray-200' : 'text-gray-700'
-          )}>
-            Name Pronunciation <span className="text-gray-400">(Optional)</span>
+          <label className="block text-sm font-medium text-foreground">
+            Name Pronunciation <span className="text-muted-foreground">(Optional)</span>
           </label>
           <input
             type="text"
@@ -474,20 +411,15 @@ function PersonalInfoSection({ form, shouldShowError, isDarkMode }: any) {
             className={cn(
               'w-full px-4 py-3 rounded-lg border transition-all duration-200',
               'focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500',
-              isDarkMode
-                ? 'bg-gray-900/50 border-gray-600 text-white placeholder-gray-400'
-                : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+              'bg-background border-input text-foreground placeholder:text-muted-foreground'
             )}
             {...form.register('phonetic_spelling')}
           />
         </div>
 
         <div className="space-y-2">
-          <label className={cn(
-            'block text-sm font-medium',
-            isDarkMode ? 'text-gray-200' : 'text-gray-700'
-          )}>
-            Pronouns <span className="text-gray-400">(Optional)</span>
+          <label className="block text-sm font-medium text-foreground">
+            Pronouns <span className="text-muted-foreground">(Optional)</span>
           </label>
           <input
             type="text"
@@ -495,9 +427,7 @@ function PersonalInfoSection({ form, shouldShowError, isDarkMode }: any) {
             className={cn(
               'w-full px-4 py-3 rounded-lg border transition-all duration-200',
               'focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500',
-              isDarkMode
-                ? 'bg-gray-900/50 border-gray-600 text-white placeholder-gray-400'
-                : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+              'bg-background border-input text-foreground placeholder:text-muted-foreground'
             )}
             {...form.register('pronouns')}
           />
@@ -505,26 +435,18 @@ function PersonalInfoSection({ form, shouldShowError, isDarkMode }: any) {
       </div>
 
       <div className="space-y-2 mt-6">
-        <label className={cn(
-          'block text-sm font-medium',
-          isDarkMode ? 'text-gray-200' : 'text-gray-700'
-        )}>
-          Website <span className="text-gray-400">(Optional)</span>
+        <label className="block text-sm font-medium text-foreground">
+          Website <span className="text-muted-foreground">(Optional)</span>
         </label>
         <div className="relative">
-          <Globe className={cn(
-            'absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4',
-            isDarkMode ? 'text-gray-400' : 'text-gray-500'
-          )} />
+          <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="url"
             placeholder="https://www.johndoe.com"
             className={cn(
               'w-full pl-10 pr-4 py-3 rounded-lg border transition-all duration-200',
               'focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500',
-              isDarkMode
-                ? 'bg-gray-900/50 border-gray-600 text-white placeholder-gray-400'
-                : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+              'bg-background border-input text-foreground placeholder:text-muted-foreground'
             )}
             {...form.register('website')}
           />
@@ -539,46 +461,31 @@ function PersonalInfoSection({ form, shouldShowError, isDarkMode }: any) {
   );
 }
 
-function StorySection({ form, shouldShowError, isDarkMode }: any) {
+function StorySection({ form, shouldShowError }: any) {
   return (
     <motion.section
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0.2 }}
-      className={cn(
-        'p-6 rounded-xl border transition-all duration-300',
-        isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-200 bg-white/50'
-      )}
+      className="p-6 rounded-xl border border-border bg-background/50 transition-all duration-300"
     >
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className={cn(
-            'w-10 h-10 rounded-full flex items-center justify-center',
-            isDarkMode ? 'bg-green-600/20 text-green-400' : 'bg-green-100 text-green-600'
-          )}>
+          <div className="w-10 h-10 rounded-full flex items-center justify-center bg-green-600/20 text-green-600 dark:text-green-400">
             <MessageSquare className="w-5 h-5" />
           </div>
-          <h2 className={cn(
-            'text-2xl font-semibold',
-            isDarkMode ? 'text-white' : 'text-gray-900'
-          )}>
+          <h2 className="text-2xl font-semibold text-foreground">
             Your Story
           </h2>
         </div>
-        <p className={cn(
-          'text-sm',
-          isDarkMode ? 'text-gray-400' : 'text-gray-600'
-        )}>
+        <p className="text-sm text-muted-foreground">
           Share your experience and what brings you here today.
         </p>
       </div>
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <label className={cn(
-            'block text-sm font-medium',
-            isDarkMode ? 'text-gray-200' : 'text-gray-700'
-          )}>
+          <label className="block text-sm font-medium text-foreground">
             Tell us about yourself <span className="text-red-500">*</span>
           </label>
           <textarea
@@ -586,9 +493,7 @@ function StorySection({ form, shouldShowError, isDarkMode }: any) {
             className={cn(
               'w-full px-4 py-3 rounded-lg border transition-all duration-200 min-h-[200px] resize-y',
               'focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500',
-              isDarkMode
-                ? 'bg-gray-900/50 border-gray-600 text-white placeholder-gray-400'
-                : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+              'bg-background border-input text-foreground placeholder:text-muted-foreground'
             )}
             {...form.register('about_you')}
           />
@@ -600,19 +505,13 @@ function StorySection({ form, shouldShowError, isDarkMode }: any) {
         </div>
 
         <div className="space-y-4">
-          <h3 className={cn(
-            'text-lg font-medium',
-            isDarkMode ? 'text-white' : 'text-gray-900'
-          )}>
-            Social Media Links <span className="text-gray-400">(Optional)</span>
+          <h3 className="text-lg font-medium text-foreground">
+            Social Media Links <span className="text-muted-foreground">(Optional)</span>
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {socialPlatforms.map((platform) => (
               <div key={platform.value} className="space-y-2">
-                <label className={cn(
-                  'block text-sm font-medium',
-                  isDarkMode ? 'text-gray-300' : 'text-gray-600'
-                )}>
+                <label className="block text-sm font-medium text-muted-foreground">
                   {platform.label}
                 </label>
                 <input
@@ -621,9 +520,7 @@ function StorySection({ form, shouldShowError, isDarkMode }: any) {
                   className={cn(
                     'w-full px-4 py-3 rounded-lg border transition-all duration-200',
                     'focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500',
-                    isDarkMode
-                      ? 'bg-gray-900/50 border-gray-600 text-white placeholder-gray-400'
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                    'bg-background border-input text-foreground placeholder:text-muted-foreground'
                   )}
                   onChange={(e) => {
                     const value = e.target.value;
@@ -648,46 +545,31 @@ function StorySection({ form, shouldShowError, isDarkMode }: any) {
   );
 }
 
-function ContactPreferencesSection({ form, shouldShowError, isDarkMode, selectedDates, handleDateChange }: any) {
+function ContactPreferencesSection({ form, shouldShowError, selectedDates, handleDateChange }: any) {
   return (
     <motion.section
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0.3 }}
-      className={cn(
-        'p-6 rounded-xl border transition-all duration-300',
-        isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-200 bg-white/50'
-      )}
+      className="p-6 rounded-xl border border-border bg-background/50 transition-all duration-300"
     >
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className={cn(
-            'w-10 h-10 rounded-full flex items-center justify-center',
-            isDarkMode ? 'bg-purple-600/20 text-purple-400' : 'bg-purple-100 text-purple-600'
-          )}>
+          <div className="w-10 h-10 rounded-full flex items-center justify-center bg-purple-600/20 text-purple-600 dark:text-purple-400">
             <Contact className="w-5 h-5" />
           </div>
-          <h2 className={cn(
-            'text-2xl font-semibold',
-            isDarkMode ? 'text-white' : 'text-gray-900'
-          )}>
+          <h2 className="text-2xl font-semibold text-foreground">
             Contact Preferences
           </h2>
         </div>
-        <p className={cn(
-          'text-sm',
-          isDarkMode ? 'text-gray-400' : 'text-gray-600'
-        )}>
+        <p className="text-sm text-muted-foreground">
           How and when would you like us to reach out to you?
         </p>
       </div>
 
       <div className="space-y-6">
         <div className="space-y-4">
-          <label className={cn(
-            'block text-sm font-medium',
-            isDarkMode ? 'text-gray-200' : 'text-gray-700'
-          )}>
+          <label className="block text-sm font-medium text-foreground">
             Preferred Contact Methods <span className="text-red-500">*</span>
           </label>
           <div className="flex flex-wrap gap-3">
@@ -699,10 +581,10 @@ function ContactPreferencesSection({ form, shouldShowError, isDarkMode, selected
                   key={method.value}
                   type="button"
                   onClick={() => {
-                                         const current = form.getValues('contact_preferences.selected_contact_methods');
-                     const newValue = current.includes(method.value)
-                       ? current.filter((v: string) => v !== method.value)
-                       : [...current, method.value];
+                    const current = form.getValues('contact_preferences.selected_contact_methods');
+                    const newValue = current.includes(method.value)
+                      ? current.filter((v: string) => v !== method.value)
+                      : [...current, method.value];
                     form.setValue('contact_preferences.selected_contact_methods', newValue);
                   }}
                   className={cn(
@@ -710,9 +592,7 @@ function ContactPreferencesSection({ form, shouldShowError, isDarkMode, selected
                     'focus:outline-none focus:ring-2 focus:ring-blue-500/20',
                     isSelected
                       ? 'bg-blue-600 text-white shadow-lg'
-                      : isDarkMode
-                        ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
                   )}
                 >
                   <Icon className="w-4 h-4" />
@@ -729,10 +609,7 @@ function ContactPreferencesSection({ form, shouldShowError, isDarkMode, selected
         </div>
 
         <div className="space-y-4">
-          <label className={cn(
-            'block text-sm font-medium',
-            isDarkMode ? 'text-gray-200' : 'text-gray-700'
-          )}>
+          <label className="block text-sm font-medium text-foreground">
             Preferred Dates <span className="text-red-500">*</span>
           </label>
           <div className="mt-2">
@@ -742,52 +619,35 @@ function ContactPreferencesSection({ form, shouldShowError, isDarkMode, selected
               inline
               minDate={new Date()}
               monthsShown={1}
-              className={cn(
-                'w-full rounded-lg border transition-colors duration-200',
-                isDarkMode
-                  ? 'bg-gray-900/50 border-gray-600 text-white'
-                  : 'bg-white border-gray-300 text-gray-900'
-              )}
-              calendarClassName={cn(
-                'rounded-lg border shadow-lg',
-                isDarkMode
-                  ? 'bg-gray-900/50 border-gray-600 text-white'
-                  : 'bg-white border-gray-300 text-gray-900'
-              )}
+              className="w-full rounded-lg border border-input bg-background text-foreground transition-colors duration-200"
+              calendarClassName="rounded-lg border border-input shadow-lg bg-background text-foreground"
               dayClassName={(date: Date) => cn(
-                'hover:bg-blue-100 rounded-md transition-colors duration-200',
-                isDarkMode ? 'hover:bg-blue-900' : 'hover:bg-blue-100',
-                                 selectedDates.some(
-                   (selectedDate: Date) => selectedDate.getTime() === date.getTime()
-                 ) && 'bg-blue-600 text-white'
+                'hover:bg-blue-100 dark:hover:bg-blue-900 rounded-md transition-colors duration-200',
+                selectedDates.some(
+                  (selectedDate: Date) => selectedDate.getTime() === date.getTime()
+                ) && 'bg-blue-600 text-white'
               )}
             />
             {selectedDates.length > 0 && (
               <div className="mt-4 flex flex-wrap gap-2">
-                            {selectedDates.map((date: Date) => (
-              <div
-                key={date.getTime()}
-                className={cn(
-                  'group flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-colors',
-                  'bg-blue-600 text-white'
-                )}
-              >
+                {selectedDates.map((date: Date) => (
+                  <div
+                    key={date.getTime()}
+                    className="group flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-colors bg-blue-600 text-white"
+                  >
                     <Calendar className="w-4 h-4" />
                     <span>{format(date, 'MMM d, yyyy')}</span>
                     <button
                       type="button"
                       onClick={() => {
-                                                 const newSelectedDates = selectedDates.filter(
-                           (d: Date) => d.getTime() !== date.getTime()
-                         );
-                         handleDateChange(null);
-                         selectedDates.forEach((d: Date) => {
-                           if (d.getTime() !== date.getTime()) {
-                             handleDateChange(d);
-                           }
-                         });
+                        handleDateChange(null);
+                        selectedDates.forEach((d: Date) => {
+                          if (d.getTime() !== date.getTime()) {
+                            handleDateChange(d);
+                          }
+                        });
                       }}
-                      className="ml-1 rounded-full p-0.5 transition-colors hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50"
+                      className="ml-1 rounded-full p-0.5 transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                       aria-label={`Remove ${format(date, 'MMMM d, yyyy')}`}
                     >
                       <svg
@@ -817,10 +677,7 @@ function ContactPreferencesSection({ form, shouldShowError, isDarkMode, selected
         </div>
 
         <div className="space-y-4">
-          <label className={cn(
-            'block text-sm font-medium',
-            isDarkMode ? 'text-gray-200' : 'text-gray-700'
-          )}>
+          <label className="block text-sm font-medium text-foreground">
             Preferred Times <span className="text-red-500">*</span>
           </label>
           <div className="flex flex-wrap gap-3">
@@ -831,10 +688,10 @@ function ContactPreferencesSection({ form, shouldShowError, isDarkMode, selected
                   key={slot.value}
                   type="button"
                   onClick={() => {
-                                         const current = form.getValues('contact_preferences.selected_times');
-                     const newValue = current.includes(slot.value)
-                       ? current.filter((v: string) => v !== slot.value)
-                       : [...current, slot.value];
+                    const current = form.getValues('contact_preferences.selected_times');
+                    const newValue = current.includes(slot.value)
+                      ? current.filter((v: string) => v !== slot.value)
+                      : [...current, slot.value];
                     form.setValue('contact_preferences.selected_times', newValue);
                   }}
                   className={cn(
@@ -842,9 +699,7 @@ function ContactPreferencesSection({ form, shouldShowError, isDarkMode, selected
                     'focus:outline-none focus:ring-2 focus:ring-blue-500/20',
                     isSelected
                       ? 'bg-blue-600 text-white shadow-lg'
-                      : isDarkMode
-                        ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
                   )}
                 >
                   <Clock className="w-4 h-4" />

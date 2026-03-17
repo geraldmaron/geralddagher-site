@@ -15,7 +15,6 @@ import {
   Award,
   DollarSign
 } from 'lucide-react';
-import { useTheme } from '@/components/core/ThemeProvider';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import * as Sheet from '@radix-ui/react-dialog';
@@ -306,7 +305,6 @@ const ACCENT_COLORS = {
 };
 
 const AboutSection: React.FC = () => {
-  const { isDarkMode } = useTheme();
   const [personalInfo, setPersonalInfo] = useState<any>(null);
   const [currentKeyword, setCurrentKeyword] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
@@ -484,10 +482,7 @@ const AboutSection: React.FC = () => {
       role="region"
       aria-label="About me"
       data-section="about"
-      className={cn(
-        "relative w-full py-16 md:py-24 px-4",
-        isDarkMode ? "bg-black" : "bg-white"
-      )}
+      className="relative w-full py-16 md:py-24 px-4 bg-background"
     >
       <div className="max-w-5xl mx-auto">
         <motion.div
@@ -499,7 +494,7 @@ const AboutSection: React.FC = () => {
           {/* Header Section */}
           <motion.div variants={itemVariants} className="space-y-6">
             <motion.div
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm bg-gray-100 dark:bg-neutral-900 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-neutral-800"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm bg-muted text-muted-foreground border border-border"
               variants={itemVariants}
             >
               <MapPin className="w-3.5 h-3.5" />
@@ -508,14 +503,14 @@ const AboutSection: React.FC = () => {
 
             <div className="space-y-3">
               <motion.h1
-                className="text-4xl md:text-5xl font-semibold tracking-tight text-gray-900 dark:text-white"
+                className="text-4xl md:text-5xl font-semibold tracking-tight text-foreground"
                 variants={itemVariants}
               >
                 About Me
               </motion.h1>
 
               <motion.div
-                className="flex items-center gap-2 text-lg text-gray-600 dark:text-gray-400"
+                className="flex items-center gap-2 text-lg text-muted-foreground"
                 variants={itemVariants}
               >
                 <span>I'm {keywords[currentKeyword] && ['A', 'E', 'I', 'O', 'U'].includes(keywords[currentKeyword][0]) ? 'an' : 'a'}</span>
@@ -526,7 +521,7 @@ const AboutSection: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
                     transition={{ duration: 0.3 }}
-                    className="font-semibold text-gray-900 dark:text-white"
+                    className="font-semibold text-foreground"
                   >
                     {keywords[currentKeyword] === 'Ally' ? (
                       <span className="inline-flex">
@@ -545,7 +540,7 @@ const AboutSection: React.FC = () => {
 
             <motion.p
               variants={itemVariants}
-              className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed max-w-5xl"
+              className="text-sm text-muted-foreground leading-relaxed max-w-5xl"
             >
               {personalInfo?.profile?.about?.businessCard || ''}
             </motion.p>
@@ -557,8 +552,8 @@ const AboutSection: React.FC = () => {
             <motion.div
               className={cn(
                 'p-6 rounded-2xl border transition-all duration-300',
-                'bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm',
-                'border-gray-200/50 dark:border-gray-700/50',
+                'bg-card/60 backdrop-blur-sm',
+                'border-border/50',
                 'hover:shadow-lg hover:border-gray-300/50 dark:hover:border-gray-600/50'
               )}
               whileHover={{ scale: 1.05 }}
@@ -568,8 +563,8 @@ const AboutSection: React.FC = () => {
                   <Clock className={cn('w-6 h-6', ACCENT_COLORS.purple.icon)} />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">8+ Years</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Product & Leadership Experience</div>
+                  <div className="text-2xl font-bold text-foreground">8+ Years</div>
+                  <div className="text-sm text-muted-foreground">Product & Leadership Experience</div>
                 </div>
               </div>
             </motion.div>
@@ -578,8 +573,8 @@ const AboutSection: React.FC = () => {
             <motion.div
               className={cn(
                 'p-6 rounded-2xl border transition-all duration-300',
-                'bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm',
-                'border-gray-200/50 dark:border-gray-700/50',
+                'bg-card/60 backdrop-blur-sm',
+                'border-border/50',
                 'hover:shadow-lg hover:border-gray-300/50 dark:hover:border-gray-600/50'
               )}
               whileHover={{ scale: 1.05 }}
@@ -589,8 +584,8 @@ const AboutSection: React.FC = () => {
                   <DollarSign className={cn('w-6 h-6', ACCENT_COLORS.green.icon)} />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">~$30 Million</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">ARR influenced across portfolio</div>
+                  <div className="text-2xl font-bold text-foreground">~$30 Million</div>
+                  <div className="text-sm text-muted-foreground">ARR influenced across portfolio</div>
                 </div>
               </div>
             </motion.div>
@@ -599,8 +594,8 @@ const AboutSection: React.FC = () => {
             <motion.div
               className={cn(
                 'p-6 rounded-2xl border transition-all duration-300',
-                'bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm',
-                'border-gray-200/50 dark:border-gray-700/50',
+                'bg-card/60 backdrop-blur-sm',
+                'border-border/50',
                 'hover:shadow-lg hover:border-gray-300/50 dark:hover:border-gray-600/50'
               )}
               whileHover={{ scale: 1.05 }}
@@ -610,8 +605,8 @@ const AboutSection: React.FC = () => {
                   <Award className={cn('w-6 h-6', ACCENT_COLORS.green.icon)} />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">15 Domains</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Reliability · Platform · Risk · Product</div>
+                  <div className="text-2xl font-bold text-foreground">15 Domains</div>
+                  <div className="text-sm text-muted-foreground">Reliability · Platform · Risk · Product</div>
                 </div>
               </div>
             </motion.div>
@@ -620,8 +615,8 @@ const AboutSection: React.FC = () => {
             <motion.div
               className={cn(
                 'p-6 rounded-2xl border transition-all duration-300',
-                'bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm',
-                'border-gray-200/50 dark:border-gray-700/50',
+                'bg-card/60 backdrop-blur-sm',
+                'border-border/50',
                 'hover:shadow-lg hover:border-gray-300/50 dark:hover:border-gray-600/50'
               )}
               whileHover={{ scale: 1.05 }}
@@ -631,8 +626,8 @@ const AboutSection: React.FC = () => {
                   <Heart className={cn('w-6 h-6', ACCENT_COLORS.amber.icon)} />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">Father of 2</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Based in South Florida</div>
+                  <div className="text-2xl font-bold text-foreground">Father of 2</div>
+                  <div className="text-sm text-muted-foreground">Based in South Florida</div>
                 </div>
               </div>
             </motion.div>
@@ -645,8 +640,8 @@ const AboutSection: React.FC = () => {
               onClick={() => setIsProfessionalOpen(true)}
               className={cn(
                 "group relative rounded-2xl p-6 border transition-all duration-300 text-left",
-                "bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm",
-                "border-gray-200/50 dark:border-gray-700/50",
+                "bg-card/60 backdrop-blur-sm",
+                "border-border/50",
                 "hover:shadow-lg hover:border-blue-300/50 dark:hover:border-blue-700/50",
                 "flex flex-col h-full"
               )}
@@ -659,13 +654,13 @@ const AboutSection: React.FC = () => {
                     <Briefcase className={cn('w-5 h-5', ACCENT_COLORS.blue.icon)} />
                   </div>
                   <div>
-                    <h3 className="text-base font-semibold text-gray-900 dark:text-white">Professional Journey</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-500">From burgers to cloud platforms</p>
+                    <h3 className="text-base font-semibold text-foreground">Professional Journey</h3>
+                    <p className="text-sm text-muted-foreground">From burgers to cloud platforms</p>
                   </div>
                 </div>
 
                 <div className="flex-1 flex flex-col min-h-[120px]">
-                  <div className="flex flex-wrap gap-2 px-3 py-2 rounded-lg bg-white/80 dark:bg-gray-900/80 border border-gray-100 dark:border-gray-700">
+                  <div className="flex flex-wrap gap-2 px-3 py-2 rounded-lg bg-background/80 border border-border">
                     {[
                       { label: 'Reliability & DR', color: ACCENT_COLORS.blue },
                       { label: 'Platform Delivery', color: ACCENT_COLORS.green },
@@ -686,7 +681,7 @@ const AboutSection: React.FC = () => {
                     ))}
                   </div>
 
-                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-2 mt-4">
+                  <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 mt-4">
                     {personalInfo?.roles?.[0]?.abbreviatedSummary}
                   </p>
                 </div>
@@ -696,7 +691,7 @@ const AboutSection: React.FC = () => {
                     <Award className="w-3 h-3" />
                     <span>15 Core Domains</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-sm font-medium text-gray-900 dark:text-white group-hover:gap-2 transition-all">
+                  <div className="flex items-center gap-1.5 text-sm font-medium text-foreground group-hover:gap-2 transition-all">
                     <span>View journey</span>
                     <ArrowRight className="w-4 h-4" />
                   </div>
@@ -709,8 +704,8 @@ const AboutSection: React.FC = () => {
               onClick={() => setIsPersonalOpen(true)}
               className={cn(
                 "group relative rounded-2xl p-6 border transition-all duration-300 text-left",
-                "bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm",
-                "border-gray-200/50 dark:border-gray-700/50",
+                "bg-card/60 backdrop-blur-sm",
+                "border-border/50",
                 "hover:shadow-lg hover:border-amber-300/50 dark:hover:border-amber-700/50",
                 "flex flex-col h-full"
               )}
@@ -723,32 +718,32 @@ const AboutSection: React.FC = () => {
                     <Heart className={cn('w-5 h-5', ACCENT_COLORS.amber.icon)} />
                   </div>
                   <div>
-                    <h3 className="text-base font-semibold text-gray-900 dark:text-white">Personal Story</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-500">From the Bronx to South Florida</p>
+                    <h3 className="text-base font-semibold text-foreground">Personal Story</h3>
+                    <p className="text-sm text-muted-foreground">From the Bronx to South Florida</p>
                   </div>
                 </div>
 
                 <div className="flex-1 flex flex-col min-h-[120px]">
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="px-3 py-2 rounded-lg bg-white/80 dark:bg-gray-900/80 border border-gray-100 dark:border-gray-700">
-                      <div className="text-xs font-medium text-gray-500 dark:text-gray-500">Family</div>
-                      <div className="text-xs text-gray-900 dark:text-white mt-0.5">Married, 2 boys</div>
+                    <div className="px-3 py-2 rounded-lg bg-background/80 border border-border">
+                      <div className="text-xs font-medium text-muted-foreground">Family</div>
+                      <div className="text-xs text-foreground mt-0.5">Married, 2 boys</div>
                     </div>
-                    <div className="px-3 py-2 rounded-lg bg-white/80 dark:bg-gray-900/80 border border-gray-100 dark:border-gray-700">
-                      <div className="text-xs font-medium text-gray-500 dark:text-gray-500">Hometown</div>
-                      <div className="text-xs text-gray-900 dark:text-white mt-0.5">Bronx, NY</div>
+                    <div className="px-3 py-2 rounded-lg bg-background/80 border border-border">
+                      <div className="text-xs font-medium text-muted-foreground">Hometown</div>
+                      <div className="text-xs text-foreground mt-0.5">Bronx, NY</div>
                     </div>
-                    <div className="px-3 py-2 rounded-lg bg-white/80 dark:bg-gray-900/80 border border-gray-100 dark:border-gray-700">
-                      <div className="text-xs font-medium text-gray-500 dark:text-gray-500">Location</div>
-                      <div className="text-xs text-gray-900 dark:text-white mt-0.5">{personalInfo?.profile?.location}</div>
+                    <div className="px-3 py-2 rounded-lg bg-background/80 border border-border">
+                      <div className="text-xs font-medium text-muted-foreground">Location</div>
+                      <div className="text-xs text-foreground mt-0.5">{personalInfo?.profile?.location}</div>
                     </div>
-                    <div className="px-3 py-2 rounded-lg bg-white/80 dark:bg-gray-900/80 border border-gray-100 dark:border-gray-700">
-                      <div className="text-xs font-medium text-gray-500 dark:text-gray-500">Pets</div>
-                      <div className="text-xs text-gray-900 dark:text-white mt-0.5">{personalInfo?.profile?.pets}</div>
+                    <div className="px-3 py-2 rounded-lg bg-background/80 border border-border">
+                      <div className="text-xs font-medium text-muted-foreground">Pets</div>
+                      <div className="text-xs text-foreground mt-0.5">{personalInfo?.profile?.pets}</div>
                     </div>
                   </div>
 
-                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-2 mt-4">
+                  <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 mt-4">
                     {personalInfo?.profile?.about?.personal?.[0]?.substring(0, 120) || personalInfo?.profile?.about?.businessCard?.substring(0, 120) || 'Learn more about my personal journey'}...
                   </p>
                 </div>
@@ -758,7 +753,7 @@ const AboutSection: React.FC = () => {
                     <Heart className="w-3 h-3" />
                     <span>Family First</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-sm font-medium text-gray-900 dark:text-white group-hover:gap-2 transition-all">
+                  <div className="flex items-center gap-1.5 text-sm font-medium text-foreground group-hover:gap-2 transition-all">
                     <span>Read story</span>
                     <ArrowRight className="w-4 h-4" />
                   </div>
@@ -770,10 +765,10 @@ const AboutSection: React.FC = () => {
           {/* Professional Domains & Expertise */}
           <motion.div variants={itemVariants} className="space-y-6">
             <div>
-              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+              <h2 className="text-2xl font-semibold text-foreground mb-2">
                 Professional Domains & Expertise
               </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 Capabilities across reliability, platform, product leadership, and risk
               </p>
             </div>
@@ -798,7 +793,7 @@ const AboutSection: React.FC = () => {
                               'bg-amber-600 dark:bg-amber-400': cluster.color === 'amber'
                             })
                           : 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
-                        : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
                     )}
                   >
                     {cluster.label}
@@ -861,24 +856,24 @@ const AboutSection: React.FC = () => {
                     animate={{ x: 0 }}
                     exit={{ x: '100%' }}
                     transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                    className="fixed right-0 top-0 z-50 h-screen w-full sm:max-w-2xl bg-white dark:bg-neutral-950 border-l border-gray-200 dark:border-neutral-800 shadow-2xl focus:outline-none flex flex-col"
+                    className="fixed right-0 top-0 z-50 h-screen w-full sm:max-w-2xl bg-background border-l border-border shadow-2xl focus:outline-none flex flex-col"
                   >
                     <Sheet.Title className="sr-only">Professional Journey</Sheet.Title>
                     <Sheet.Description className="sr-only">
                       Detailed information about professional experience and career journey
                     </Sheet.Description>
 
-                    <div className="flex-shrink-0 px-6 py-6 border-b border-gray-100 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-md sticky top-0 z-10">
+                    <div className="flex-shrink-0 px-6 py-6 border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-10">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-4">
-                          <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center border border-gray-200 dark:border-neutral-800', ACCENT_COLORS.blue.bg)}>
+                          <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center border border-border', ACCENT_COLORS.blue.bg)}>
                             <Briefcase className={cn('w-6 h-6', ACCENT_COLORS.blue.icon)} />
                           </div>
                           <div>
-                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                            <h2 className="text-xl font-semibold text-foreground">
                               Professional Journey
                             </h2>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                            <p className="text-sm text-muted-foreground">
                               From burgers to cloud platforms
                             </p>
                           </div>
@@ -895,13 +890,13 @@ const AboutSection: React.FC = () => {
                       <div className="space-y-10">
                         {/* My Story */}
                         <div className="space-y-4">
-                          <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">My Story</h3>
+                          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">My Story</h3>
                           {personalInfo?.profile?.about?.professional?.split('\n\n').map((paragraph: string, index: number) => (
-                            <p key={index} className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                            <p key={index} className="text-sm text-muted-foreground leading-relaxed">
                               {paragraph}
                             </p>
                           )) || (
-                            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                            <p className="text-sm text-muted-foreground leading-relaxed">
                               {personalInfo?.profile?.about?.businessCard || 'My professional story'}
                             </p>
                           )}
@@ -909,14 +904,14 @@ const AboutSection: React.FC = () => {
 
                         {/* Experience Timeline */}
                         <div className="space-y-6">
-                          <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Experience</h3>
-                          <div className="space-y-4 relative pl-8 border-l border-gray-200 dark:border-neutral-800 ml-3">
+                          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">Experience</h3>
+                          <div className="space-y-4 relative pl-8 border-l border-border ml-3">
                             {personalInfo?.roles?.map((role: RoleInfo, index: number) => (
                               <div key={index} className="relative">
-                                <div className="absolute -left-[37px] top-4 w-3 h-3 rounded-full bg-white dark:bg-neutral-950 border-2 border-gray-300 dark:border-neutral-700" />
-                                <div className="rounded-xl p-5 border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/50 hover:border-gray-300 dark:hover:border-neutral-700 transition-all">
+                                <div className="absolute -left-[37px] top-4 w-3 h-3 rounded-full bg-background border-2 border-border" />
+                                <div className="rounded-xl p-5 border border-border bg-card/50 hover:border-border transition-all">
                                   <div className="flex items-start gap-4 mb-4">
-                                    <div className="w-10 h-10 bg-white dark:bg-neutral-800 rounded-lg flex items-center justify-center border border-gray-100 dark:border-neutral-700 flex-shrink-0">
+                                    <div className="w-10 h-10 bg-card rounded-lg flex items-center justify-center border border-border flex-shrink-0">
                                       <Image
                                         src={companyLogos[role.company] || role.imageUrl}
                                         alt={role.company}
@@ -927,10 +922,10 @@ const AboutSection: React.FC = () => {
                                       />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                      <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
+                                      <h4 className="font-semibold text-foreground text-sm">
                                         {role.title}
                                       </h4>
-                                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                                      <p className="text-sm text-muted-foreground">
                                         {role.company} • {role.years}
                                       </p>
                                       {ROLE_FOCUS[role.company] && (
@@ -938,7 +933,7 @@ const AboutSection: React.FC = () => {
                                           {ROLE_FOCUS[role.company].slice(0, 3).map((focus) => (
                                             <span
                                               key={focus}
-                                              className="px-2 py-1 rounded-full text-[11px] font-medium bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200"
+                                              className="px-2 py-1 rounded-full text-[11px] font-medium bg-muted border border-border text-foreground"
                                             >
                                               {focus}
                                             </span>
@@ -947,16 +942,16 @@ const AboutSection: React.FC = () => {
                                       )}
                                     </div>
                                   </div>
-                                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
+                                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">
                                     {role.summary}
                                   </p>
                                   <div className="space-y-3">
-                                    <h5 className="text-xs font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
+                                    <h5 className="text-xs font-semibold text-foreground uppercase tracking-wider">
                                       Key Achievements
                                     </h5>
                                     <ul className="space-y-2">
                                       {role.highlights.map((highlight, idx) => (
-                                        <li key={idx} className="flex items-start gap-2.5 text-sm text-gray-600 dark:text-gray-400">
+                                        <li key={idx} className="flex items-start gap-2.5 text-sm text-muted-foreground">
                                           <div className="w-1 h-1 rounded-full bg-gray-400 dark:bg-gray-600 mt-2 flex-shrink-0" />
                                           <span className="leading-relaxed">{highlight}</span>
                                         </li>
@@ -964,12 +959,12 @@ const AboutSection: React.FC = () => {
                                     </ul>
                                   </div>
                                   {COMPANY_CAREER_URLS[role.company] && (
-                                    <div className="mt-4 pt-4 border-t border-gray-100 dark:border-neutral-800">
+                                    <div className="mt-4 pt-4 border-t border-border">
                                       <a
                                         href={COMPANY_CAREER_URLS[role.company]}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                        className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                                       >
                                         <span>Explore {role.company} careers</span>
                                         <ExternalLink className="w-3.5 h-3.5" />
@@ -984,7 +979,7 @@ const AboutSection: React.FC = () => {
 
                         {/* Core Competencies */}
                         <div className="space-y-4">
-                          <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
+                          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
                             Core Competencies
                           </h3>
                           <div className="grid gap-4 sm:grid-cols-2">
@@ -1001,7 +996,7 @@ const AboutSection: React.FC = () => {
                                   key={theme.id}
                                   className={cn(
                                     'rounded-xl border p-4 transition-all h-full flex flex-col gap-3',
-                                    'bg-white/70 dark:bg-gray-900/70 border-gray-200/60 dark:border-gray-800/60',
+                                    'bg-card/70 border-border/60',
                                     'hover:border-gray-300 dark:hover:border-gray-700'
                                   )}
                                 >
@@ -1009,10 +1004,10 @@ const AboutSection: React.FC = () => {
                                     <div className="flex items-start gap-3">
                                       <span className={cn('mt-1 h-2 w-2 rounded-full', color.bg)} />
                                       <div>
-                                        <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                                        <p className="text-sm font-semibold text-foreground">
                                           {theme.title}
                                         </p>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">{theme.summary}</p>
+                                        <p className="text-xs text-muted-foreground">{theme.summary}</p>
                                       </div>
                                     </div>
                                     <span
@@ -1020,7 +1015,7 @@ const AboutSection: React.FC = () => {
                                         'text-[11px] font-semibold px-2 py-1 rounded-full uppercase tracking-wide',
                                         color.bg,
                                         color.text,
-                                        'border border-white/30 dark:border-gray-800'
+                                        'border border-border/30'
                                       )}
                                     >
                                       {theme.id}
@@ -1029,12 +1024,12 @@ const AboutSection: React.FC = () => {
 
                                   <div className="space-y-1">
                                     {domainPreview.map((domain) => (
-                                      <p key={domain} className="text-xs text-gray-600 dark:text-gray-400">
+                                      <p key={domain} className="text-xs text-muted-foreground">
                                         • {domain}
                                       </p>
                                     ))}
                                     {domainRemainder > 0 && (
-                                      <p className="text-xs text-gray-500 dark:text-gray-500">+{domainRemainder} more focus areas</p>
+                                      <p className="text-xs text-muted-foreground">+{domainRemainder} more focus areas</p>
                                     )}
                                   </div>
 
@@ -1042,7 +1037,7 @@ const AboutSection: React.FC = () => {
                                     {visibleSkills.map((skill) => (
                                       <span
                                         key={skill}
-                                        className="px-3 py-1.5 rounded-full text-xs font-medium bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200"
+                                        className="px-3 py-1.5 rounded-full text-xs font-medium bg-muted border border-border text-foreground"
                                       >
                                         {skill}
                                       </span>
@@ -1058,7 +1053,7 @@ const AboutSection: React.FC = () => {
                                           [theme.id]: !isExpanded
                                         }))
                                       }
-                                      className="text-sm font-semibold text-gray-800 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white inline-flex items-center gap-2"
+                                      className="text-sm font-semibold text-foreground hover:text-foreground inline-flex items-center gap-2"
                                     >
                                       {isExpanded ? 'Show fewer' : `Show all (${theme.skills.length})`}
                                     </button>
@@ -1071,14 +1066,14 @@ const AboutSection: React.FC = () => {
 
                         {/* Key Methodologies */}
                         <div className="space-y-4">
-                          <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
+                          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
                             Key Methodologies
                           </h3>
                           <div className="flex flex-wrap gap-2">
                             {['Agile/Scrum', 'Lean Product', 'Systems Thinking', 'Design Thinking', 'Servant Leadership', 'Risk-First Approach'].map((method) => (
                               <div
                                 key={method}
-                                className="px-3 py-1.5 rounded-full text-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
+                                className="px-3 py-1.5 rounded-full text-sm bg-muted text-foreground border border-border"
                               >
                                 {method}
                               </div>
@@ -1117,24 +1112,24 @@ const AboutSection: React.FC = () => {
                     animate={{ x: 0 }}
                     exit={{ x: '100%' }}
                     transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                    className="fixed right-0 top-0 z-50 h-screen w-full sm:max-w-2xl bg-white dark:bg-neutral-950 border-l border-gray-200 dark:border-neutral-800 shadow-2xl focus:outline-none flex flex-col"
+                    className="fixed right-0 top-0 z-50 h-screen w-full sm:max-w-2xl bg-background border-l border-border shadow-2xl focus:outline-none flex flex-col"
                   >
                     <Sheet.Title className="sr-only">Personal Story</Sheet.Title>
                     <Sheet.Description className="sr-only">
                       Detailed information about personal story, values, and background
                     </Sheet.Description>
 
-                    <div className="flex-shrink-0 px-6 py-6 border-b border-gray-100 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-md sticky top-0 z-10">
+                    <div className="flex-shrink-0 px-6 py-6 border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-10">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-4">
-                          <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center border border-gray-200 dark:border-neutral-800', ACCENT_COLORS.amber.bg)}>
+                          <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center border border-border', ACCENT_COLORS.amber.bg)}>
                             <Heart className={cn('w-6 h-6', ACCENT_COLORS.amber.icon)} />
                           </div>
                           <div>
-                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                            <h2 className="text-xl font-semibold text-foreground">
                               Personal Story
                             </h2>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                            <p className="text-sm text-muted-foreground">
                               The person behind the professional
                             </p>
                           </div>
@@ -1151,7 +1146,7 @@ const AboutSection: React.FC = () => {
                       <div className="space-y-8">
                         {/* At a Glance */}
                         <div className="space-y-4">
-                          <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">At a Glance</h3>
+                          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">At a Glance</h3>
                           <div className="grid grid-cols-2 gap-3">
                             {[
                               { label: 'Location', value: personalInfo?.profile?.location, icon: MapPin },
@@ -1163,17 +1158,17 @@ const AboutSection: React.FC = () => {
                                 key={item.label}
                                 className={cn(
                                   'rounded-xl p-4 border transition-all',
-                                  'bg-white/60 dark:bg-gray-800/60',
-                                  'border-gray-200/50 dark:border-gray-700/50'
+                                  'bg-card/60',
+                                  'border-border/50'
                                 )}
                               >
                                 <div className="flex items-center gap-2 mb-2">
                                   <item.icon className="w-4 h-4 text-gray-400" />
-                                  <span className="text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">
+                                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                                     {item.label}
                                   </span>
                                 </div>
-                                <div className="text-sm text-gray-900 dark:text-white font-medium">
+                                <div className="text-sm text-foreground font-medium">
                                   {item.value}
                                 </div>
                               </div>
@@ -1183,7 +1178,7 @@ const AboutSection: React.FC = () => {
 
                         {/* Roots & Values */}
                         <div className="space-y-4">
-                          <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
+                          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
                             Roots & Values
                           </h3>
                           <div className={cn(
@@ -1191,7 +1186,7 @@ const AboutSection: React.FC = () => {
                             'bg-amber-500/5 dark:bg-amber-500/10',
                             'border-amber-500/20 dark:border-amber-500/30'
                           )}>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                            <p className="text-sm text-muted-foreground leading-relaxed">
                               Born and raised in the Bronx as a child of Caribbean immigrants. My heritage taught me 
                               the value of hard work, community, and never forgetting where you came from. These roots 
                               ground everything I do—from how I lead teams to how I raise my children.
@@ -1201,16 +1196,16 @@ const AboutSection: React.FC = () => {
 
                         {/* My Journey */}
                         <div className="space-y-4">
-                          <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">My Journey</h3>
+                          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">My Journey</h3>
                           <div className="space-y-4">
                             {personalInfo?.profile?.about?.personal && personalInfo.profile.about.personal.length > 0 ? (
                               personalInfo.profile.about.personal.map((paragraph: string, index: number) => (
-                                <p key={index} className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                                <p key={index} className="text-sm text-muted-foreground leading-relaxed">
                                   {paragraph}
                                 </p>
                               ))
                             ) : (
-                              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                              <p className="text-sm text-muted-foreground leading-relaxed">
                                 {personalInfo?.profile?.about?.businessCard || 'My personal journey and story'}
                               </p>
                             )}
@@ -1219,44 +1214,44 @@ const AboutSection: React.FC = () => {
 
                         {/* Passions */}
                         <div className="space-y-4">
-                          <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
+                          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
                             Passions & Interests
                           </h3>
                           <div className="space-y-3">
                             <div className={cn(
                               'rounded-xl p-4 border',
-                              'bg-white/60 dark:bg-gray-800/60',
-                              'border-gray-200/50 dark:border-gray-700/50'
+                              'bg-card/60',
+                              'border-border/50'
                             )}>
                               <div className="flex items-center gap-2 mb-2">
                                 <span className="text-2xl">🎤</span>
-                                <span className="text-sm font-semibold text-gray-900 dark:text-white">Spoken Word Poetry</span>
+                                <span className="text-sm font-semibold text-foreground">Spoken Word Poetry</span>
                               </div>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                              <p className="text-sm text-muted-foreground">
                                 Writing and performing since high school. A craft that influences everything I create
                               </p>
                             </div>
                             <div className={cn(
                               'rounded-xl p-4 border',
-                              'bg-white/60 dark:bg-gray-800/60',
-                              'border-gray-200/50 dark:border-gray-700/50'
+                              'bg-card/60',
+                              'border-border/50'
                             )}>
                               <div className="flex items-center gap-2 mb-2">
                                 <span className="text-2xl">🏀⚾🏈</span>
-                                <span className="text-sm font-semibold text-gray-900 dark:text-white">NYC Sports</span>
+                                <span className="text-sm font-semibold text-foreground">NYC Sports</span>
                               </div>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                              <p className="text-sm text-muted-foreground">
                                 Knicks, Yankees, and Giants. Die-hard fan representing NYC wherever I go
                               </p>
                             </div>
                             <div className={cn(
                               'rounded-xl p-4 border',
-                              'bg-white/60 dark:bg-gray-800/60',
-                              'border-gray-200/50 dark:border-gray-700/50'
+                              'bg-card/60',
+                              'border-border/50'
                             )}>
                               <div className="flex items-center gap-2 mb-2">
                                 <span className="text-2xl">✊</span>
-                                <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                                <span className="text-sm font-semibold text-foreground">
                                   Advocacy & <span className="inline-flex">
                                     <span className="animate-pulse text-red-500 dark:text-red-400">A</span>
                                     <span className="animate-pulse text-orange-500 dark:text-orange-400" style={{ animationDelay: '0.1s' }}>l</span>
@@ -1265,33 +1260,33 @@ const AboutSection: React.FC = () => {
                                   </span>ship
                                 </span>
                               </div>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                              <p className="text-sm text-muted-foreground">
                                 Using my platform to amplify voices and create opportunities for underrepresented communities
                               </p>
                             </div>
                             <div className={cn(
                               'rounded-xl p-4 border',
-                              'bg-white/60 dark:bg-gray-800/60',
-                              'border-gray-200/50 dark:border-gray-700/50'
+                              'bg-card/60',
+                              'border-border/50'
                             )}>
                               <div className="flex items-center gap-2 mb-2">
                                 <span className="text-2xl">🧠</span>
-                                <span className="text-sm font-semibold text-gray-900 dark:text-white">Mental Health & Neurodiversity</span>
+                                <span className="text-sm font-semibold text-foreground">Mental Health & Neurodiversity</span>
                               </div>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                              <p className="text-sm text-muted-foreground">
                                 Living as AuDHD and raising two boys, one on the spectrum. Building understanding, breaking stigmas, and learning daily lessons about attention, presence, and what it means to truly see and be seen
                               </p>
                             </div>
                             <div className={cn(
                               'rounded-xl p-4 border',
-                              'bg-white/60 dark:bg-gray-800/60',
-                              'border-gray-200/50 dark:border-gray-700/50'
+                              'bg-card/60',
+                              'border-border/50'
                             )}>
                               <div className="flex items-center gap-2 mb-2">
                                 <span className="text-2xl">🌍</span>
-                                <span className="text-sm font-semibold text-gray-900 dark:text-white">Culture & Community</span>
+                                <span className="text-sm font-semibold text-foreground">Culture & Community</span>
                               </div>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                              <p className="text-sm text-muted-foreground">
                                 Understanding how culture shapes belonging, exclusion, and collective identity. From organizational systems to social movements, culture drives what communities become
                               </p>
                             </div>

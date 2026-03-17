@@ -12,7 +12,6 @@ import {
   Menu,
   X,
   Mic,
-  User,
   Mail,
   LayoutDashboard,
   FileText,
@@ -39,7 +38,6 @@ import { cn } from '@/lib/utils';
 import { zIndex } from '@/lib/utils/z-index';
 import SubscriptionModal from '@/components/SubscriptionModal';
 
-// Navigation configuration
 type NavItem = {
   name: string;
   href: string;
@@ -98,8 +96,8 @@ const NavItemComponent: React.FC<{
             className={cn(
               'w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200',
               isChildActive
-                ? 'bg-blue-500 text-white shadow-lg'
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                ? 'bg-primary text-primary-foreground shadow-lg'
+                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             )}
           >
             <div className="flex items-center space-x-3">
@@ -107,8 +105,8 @@ const NavItemComponent: React.FC<{
               <span className="font-medium">{item.name}</span>
             </div>
             <ChevronDown className={cn(
-              "w-4 h-4 transition-transform duration-200",
-              isDropdownOpen && "rotate-180"
+              'w-4 h-4 transition-transform duration-200',
+              isDropdownOpen && 'rotate-180'
             )} />
           </button>
           <AnimatePresence>
@@ -130,8 +128,8 @@ const NavItemComponent: React.FC<{
                       className={cn(
                         'flex items-center space-x-3 px-4 py-2 rounded-lg transition-all duration-200',
                         childActive
-                          ? 'bg-blue-400 text-white'
-                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                          ? 'bg-primary/80 text-primary-foreground'
+                          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                       )}
                     >
                       <ChildIcon className="w-4 h-4" />
@@ -153,8 +151,8 @@ const NavItemComponent: React.FC<{
         className={cn(
           'flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200',
           isActive
-            ? 'bg-blue-500 text-white shadow-lg'
-            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+            ? 'bg-primary text-primary-foreground shadow-lg'
+            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
         )}
       >
         <Icon className="w-5 h-5" />
@@ -175,10 +173,10 @@ const NavItemComponent: React.FC<{
           whileTap={{ scale: 0.98 }}
           className={cn(
             'relative flex items-center space-x-2 px-3 py-2 rounded-xl transition-all duration-200',
-            'group focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+            'group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
             isChildActive
-              ? 'bg-white/80 dark:bg-gray-800/80 shadow-lg border border-gray-200/50 dark:border-gray-700/50 text-gray-900 dark:text-gray-100'
-              : 'hover:bg-white/50 dark:hover:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+              ? 'bg-background/80 shadow-lg border border-border/50 text-foreground'
+              : 'hover:bg-muted/50 text-muted-foreground hover:text-foreground'
           )}
         >
           <Icon className="w-4 h-4" />
@@ -195,8 +193,8 @@ const NavItemComponent: React.FC<{
               transition={{ duration: 0.15 }}
               className={cn(
                 'absolute top-full left-0 mt-1 min-w-[180px] rounded-xl shadow-xl',
-                'bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl',
-                'border border-gray-200/50 dark:border-gray-700/50',
+                'bg-popover/95 backdrop-blur-xl',
+                'border border-border/50',
                 'py-2 z-50'
               )}
             >
@@ -211,8 +209,8 @@ const NavItemComponent: React.FC<{
                     className={cn(
                       'flex items-center space-x-2 px-4 py-2 text-sm transition-colors',
                       childActive
-                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-muted-foreground hover:bg-muted/70 hover:text-foreground'
                     )}
                   >
                     <ChildIcon className="w-4 h-4" />
@@ -234,10 +232,10 @@ const NavItemComponent: React.FC<{
         onClick={onClick}
         className={cn(
           'relative flex items-center space-x-2 px-3 py-2 rounded-xl transition-all duration-200',
-          'group focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+          'group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
           isActive
-            ? 'bg-white/80 dark:bg-gray-800/80 shadow-lg border border-gray-200/50 dark:border-gray-700/50 text-gray-900 dark:text-gray-100'
-            : 'hover:bg-white/50 dark:hover:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+            ? 'bg-background/80 shadow-lg border border-border/50 text-foreground'
+            : 'hover:bg-muted/50 text-muted-foreground hover:text-foreground'
         )}
       >
         <Icon className="w-4 h-4" />
@@ -245,8 +243,8 @@ const NavItemComponent: React.FC<{
         {isActive && (
           <motion.div
             layoutId="nav-indicator"
-            className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl"
-            transition={{ type: "spring", stiffness: 380, damping: 30 }}
+            className="absolute inset-0 bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl"
+            transition={{ type: 'spring', stiffness: 380, damping: 30 }}
           />
         )}
       </Link>
@@ -266,18 +264,23 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Determine if we're in admin area
   const isAdminArea = pathname.startsWith('/admin');
   const isAuthenticated = !!user;
   const hasAdmin = user && hasAdminAccess(user);
 
-  // Logo source based on theme
   const [logoSrc, setLogoSrc] = useState('/Dagher_Logo_2024.png');
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    let rafId: number;
+    const handleScroll = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => setIsScrolled(window.scrollY > 10));
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   useEffect(() => {
@@ -325,26 +328,27 @@ export default function Navbar() {
     { value: 'system', label: 'System', icon: Monitor },
   ];
 
+  const mobileMenuHeadingId = 'mobile-menu-heading';
+
   return (
     <>
-      {/* Main Navigation Header */}
       <motion.header
         role="banner"
         className={cn(
-          'fixed top-0 w-full transition-all duration-500 ease-out z-50',
-          'border-b border-gray-200/50 dark:border-gray-800/50'
+          'fixed top-0 w-full z-50',
+          'border-b border-border/50'
         )}
         style={{ zIndex: zIndex.navbar }}
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 100, damping: 20 }}
+        transition={{ type: 'spring', stiffness: 100, damping: 20 }}
       >
         <motion.div
           className={cn(
-            'w-full transition-all duration-500 ease-out',
+            'w-full transition-[background-color,box-shadow] duration-300 ease-out',
             isScrolled
-              ? 'bg-white/95 dark:bg-black/95 shadow-lg shadow-gray-900/5 dark:shadow-gray-900/20'
-              : 'bg-white/90 dark:bg-black/90'
+              ? 'bg-background/95 shadow-lg shadow-black/5'
+              : 'bg-background/90'
           )}
           style={{
             backdropFilter: 'blur(20px)',
@@ -358,15 +362,12 @@ export default function Navbar() {
               <motion.div
                 className="flex items-center"
                 whileHover={{ scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
               >
                 <Link
                   href="/"
                   aria-label="Home"
-                  className={cn(
-                    'flex items-center space-x-3 group focus:outline-none focus:ring-2',
-                    'focus:ring-blue-500 rounded-lg p-1 transition-all duration-200'
-                  )}
+                  className="flex items-center space-x-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg p-1 transition-all duration-200"
                 >
                   <div className="relative w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16">
                     <Image
@@ -379,7 +380,6 @@ export default function Navbar() {
                       className="transition-transform duration-200 group-hover:scale-105"
                     />
                   </div>
-
                 </Link>
               </motion.div>
 
@@ -400,7 +400,7 @@ export default function Navbar() {
                 {/* Admin Search Bar - Desktop only */}
                 {isAdminArea && (
                   <div className="relative hidden lg:block">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input
                       type="text"
                       placeholder="Search..."
@@ -408,16 +408,16 @@ export default function Navbar() {
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className={cn(
                         'pl-10 pr-4 py-2 w-48 rounded-xl text-sm',
-                        'bg-white/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
-                        'backdrop-blur-sm placeholder-gray-400 dark:placeholder-gray-500',
-                        'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                        'bg-muted/50 border border-border/50',
+                        'backdrop-blur-sm placeholder:text-muted-foreground',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent',
                         'transition-all duration-200'
                       )}
                     />
                   </div>
                 )}
 
-                {/* Theme Toggle - Desktop only, available for all users */}
+                {/* Theme Toggle - Desktop only */}
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -427,15 +427,15 @@ export default function Navbar() {
                   }}
                   className={cn(
                     'hidden md:flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200',
-                    'bg-white/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
-                    'hover:bg-white/70 dark:hover:bg-gray-800/70',
-                    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+                    'bg-muted/50 border border-border/50',
+                    'hover:bg-muted/70',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                   )}
                   aria-label={`Current theme: ${themeMode}. Click to cycle between themes.`}
                 >
                   {themeMode === 'light' && <Sun className="w-5 h-5 text-amber-500" />}
                   {themeMode === 'dark' && <Moon className="w-5 h-5 text-blue-400" />}
-                  {themeMode === 'system' && <Monitor className="w-5 h-5 text-gray-500 dark:text-gray-400" />}
+                  {themeMode === 'system' && <Monitor className="w-5 h-5 text-muted-foreground" />}
                 </motion.button>
 
                 {/* Quick Actions - Desktop only */}
@@ -446,10 +446,10 @@ export default function Navbar() {
                     onClick={() => router.push('/admin/posts/new')}
                     className={cn(
                       'hidden md:flex items-center space-x-2 px-3 py-2 rounded-xl',
-                      'bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 dark:hover:bg-gray-200',
-                      'text-white dark:text-gray-900 font-medium text-sm',
+                      'bg-foreground hover:bg-foreground/90',
+                      'text-background font-medium text-sm',
                       'transition-all duration-200',
-                      'focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2'
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                     )}
                   >
                     <Plus className="w-4 h-4" />
@@ -467,9 +467,9 @@ export default function Navbar() {
                         onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                         className={cn(
                           'flex items-center space-x-2 px-3 py-2 rounded-xl',
-                          'bg-white/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
-                          'hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all duration-200',
-                          'focus:outline-none focus:ring-2 focus:ring-blue-500'
+                          'bg-muted/50 border border-border/50',
+                          'hover:bg-muted/70 transition-all duration-200',
+                          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
                         )}
                       >
                         {user?.avatar_url ? (
@@ -487,7 +487,7 @@ export default function Navbar() {
                             </span>
                           </div>
                         )}
-                        <ChevronDown className="w-4 h-4 text-gray-400" />
+                        <ChevronDown className="w-4 h-4 text-muted-foreground" />
                       </motion.button>
 
                       <AnimatePresence>
@@ -498,23 +498,23 @@ export default function Navbar() {
                             exit={{ opacity: 0, scale: 0.95, y: -10 }}
                             className={cn(
                               'absolute right-0 top-full mt-2 w-64 rounded-2xl shadow-xl',
-                              'bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl',
-                              'border border-gray-200/50 dark:border-gray-700/50',
+                              'bg-popover/90 backdrop-blur-xl',
+                              'border border-border/50',
                               'py-2 z-50'
                             )}
                           >
-                            <div className="px-4 py-3 border-b border-gray-200/50 dark:border-gray-700/50">
-                              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            <div className="px-4 py-3 border-b border-border/50">
+                              <p className="text-sm font-medium text-foreground">
                                 Signed in as
                               </p>
-                              <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                              <p className="text-sm text-muted-foreground truncate">
                                 {user?.email}
                               </p>
                             </div>
 
                             <div className="py-2">
                               <div className="px-4 py-2">
-                                <p className="text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wide">
+                                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                                   Theme
                                 </p>
                               </div>
@@ -529,10 +529,10 @@ export default function Navbar() {
                                     }}
                                     className={cn(
                                       'w-full flex items-center space-x-3 px-4 py-2 text-sm',
-                                      'hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors',
+                                      'hover:bg-muted/70 transition-colors',
                                       themeMode === option.value
-                                        ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
-                                        : 'text-gray-700 dark:text-gray-300'
+                                        ? 'text-primary bg-primary/10'
+                                        : 'text-muted-foreground hover:text-foreground'
                                     )}
                                   >
                                     <Icon className="w-4 h-4" />
@@ -542,11 +542,11 @@ export default function Navbar() {
                               })}
                             </div>
 
-                            <div className="border-t border-gray-200/50 dark:border-gray-700/50 pt-2">
+                            <div className="border-t border-border/50 pt-2">
                               {user?.has_argus_access && (
                                 <Link
                                   href="/argus/settings"
-                                  className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
+                                  className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-muted-foreground hover:bg-muted/70 hover:text-foreground transition-colors"
                                   onClick={() => setIsUserMenuOpen(false)}
                                 >
                                   <Settings className="w-4 h-4" />
@@ -556,7 +556,7 @@ export default function Navbar() {
                               {!isAdminArea && hasAdmin && (
                                 <Link
                                   href="/admin"
-                                  className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
+                                  className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-muted-foreground hover:bg-muted/70 hover:text-foreground transition-colors"
                                   onClick={() => setIsUserMenuOpen(false)}
                                 >
                                   <LayoutDashboard className="w-4 h-4" />
@@ -566,7 +566,7 @@ export default function Navbar() {
                               {isAdminArea && (
                                 <Link
                                   href="/"
-                                  className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
+                                  className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-muted-foreground hover:bg-muted/70 hover:text-foreground transition-colors"
                                   onClick={() => setIsUserMenuOpen(false)}
                                 >
                                   <Home className="w-4 h-4" />
@@ -591,9 +591,9 @@ export default function Navbar() {
                         onClick={() => router.push('/login')}
                         className={cn(
                           'flex items-center px-4 py-2 rounded-xl transition-all duration-200',
-                          'hover:bg-white/50 dark:hover:bg-gray-800/50',
-                          'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
-                          'text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white',
+                          'hover:bg-muted/50',
+                          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                          'text-muted-foreground hover:text-foreground',
                           'font-medium text-sm'
                         )}
                         aria-label="Sign in"
@@ -609,9 +609,9 @@ export default function Navbar() {
                           onClick={() => setSubscriptionModalOpen(true)}
                           className={cn(
                             'flex items-center px-3 py-2 rounded-xl transition-all duration-200',
-                            'hover:bg-white/50 dark:hover:bg-gray-800/50',
-                            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
-                            'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400',
+                            'hover:bg-muted/50',
+                            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                            'text-muted-foreground hover:text-primary',
                             'font-medium text-sm'
                           )}
                           aria-label="Subscribe to updates"
@@ -623,18 +623,20 @@ export default function Navbar() {
                   )}
                 </div>
 
-                {/* Mobile Menu Button - Always visible on small screens */}
+                {/* Mobile Menu Button */}
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                   className={cn(
                     'lg:hidden flex items-center justify-center w-10 h-10 rounded-xl',
-                    'bg-white/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
-                    'hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all duration-200',
-                    'focus:outline-none focus:ring-2 focus:ring-blue-500'
+                    'bg-muted/50 border border-border/50',
+                    'hover:bg-muted/70 transition-all duration-200',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
                   )}
                   aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+                  aria-expanded={isMenuOpen}
+                  aria-controls="mobile-nav-drawer"
                 >
                   {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                 </motion.button>
@@ -654,27 +656,32 @@ export default function Navbar() {
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
               onClick={() => setIsMenuOpen(false)}
+              aria-hidden="true"
             />
             <motion.div
+              id="mobile-nav-drawer"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={mobileMenuHeadingId}
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 120 }}
               className={cn(
                 'fixed top-16 lg:top-20 right-0 bottom-0 z-50 w-full sm:w-96 lg:hidden',
-                'bg-white/95 dark:bg-black/95 backdrop-blur-xl',
-                'border-l border-gray-200/50 dark:border-gray-800/50',
+                'bg-background/95 backdrop-blur-xl',
+                'border-l border-border/50',
                 'flex flex-col'
               )}
             >
-              <div className="p-6 border-b border-gray-200/50 dark:border-gray-800/50">
+              <div className="p-6 border-b border-border/50">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  <h2 id={mobileMenuHeadingId} className="text-lg font-semibold text-foreground">
                     {isAdminArea ? 'Admin Menu' : 'Menu'}
                   </h2>
                   <button
                     onClick={() => setIsMenuOpen(false)}
-                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    className="p-2 rounded-lg hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     aria-label="Close menu"
                   >
                     <X className="w-5 h-5" />
@@ -683,7 +690,6 @@ export default function Navbar() {
               </div>
 
               <div className="flex-1 overflow-y-auto p-6">
-                {/* Navigation Links */}
                 <div className="space-y-2">
                   {navigationItems.map((item) => (
                     <NavItemComponent
@@ -699,8 +705,8 @@ export default function Navbar() {
 
                 {/* Admin Quick Actions in Mobile */}
                 {isAdminArea && hasAdmin && (
-                  <div className="mt-6 pt-6 border-t border-gray-200/50 dark:border-gray-800/50">
-                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-3 px-4">
+                  <div className="mt-6 pt-6 border-t border-border/50">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3 px-4">
                       Quick Actions
                     </p>
                     <button
@@ -710,8 +716,8 @@ export default function Navbar() {
                       }}
                       className={cn(
                         'w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200',
-                        'bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 dark:hover:bg-gray-200',
-                        'text-white dark:text-gray-900 font-medium'
+                        'bg-foreground hover:bg-foreground/90',
+                        'text-background font-medium'
                       )}
                     >
                       <Plus className="w-5 h-5" />
@@ -721,8 +727,8 @@ export default function Navbar() {
                 )}
 
                 {/* Theme Options */}
-                <div className="mt-6 pt-6 border-t border-gray-200/50 dark:border-gray-800/50">
-                  <p className="text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-3 px-4">
+                <div className="mt-6 pt-6 border-t border-border/50">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3 px-4">
                     Theme
                   </p>
                   <div className="space-y-1">
@@ -735,8 +741,8 @@ export default function Navbar() {
                           className={cn(
                             'w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200',
                             themeMode === option.value
-                              ? 'bg-blue-500 text-white shadow-lg'
-                              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                              ? 'bg-primary text-primary-foreground shadow-lg'
+                              : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                           )}
                         >
                           <Icon className="w-5 h-5" />
@@ -750,7 +756,7 @@ export default function Navbar() {
 
               {/* Footer section - Auth-dependent */}
               {isAuthenticated ? (
-                <div className="p-6 border-t border-gray-200/50 dark:border-gray-800/50">
+                <div className="p-6 border-t border-border/50">
                   <div className="flex items-center space-x-3 mb-4">
                     {user?.avatar_url ? (
                       <div className="relative w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
@@ -768,18 +774,17 @@ export default function Navbar() {
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                      <p className="text-sm font-medium text-foreground truncate">
                         {user?.email}
                       </p>
                     </div>
                   </div>
 
-                  {/* Admin/Site toggle for mobile */}
                   {hasAdmin && (
                     <Link
                       href={isAdminArea ? '/' : '/admin'}
                       onClick={() => setIsMenuOpen(false)}
-                      className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-2"
+                      className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-colors mb-2"
                     >
                       {isAdminArea ? <Home className="w-5 h-5" /> : <LayoutDashboard className="w-5 h-5" />}
                       <span className="font-medium">{isAdminArea ? 'Visit Site' : 'Admin Dashboard'}</span>
@@ -798,7 +803,7 @@ export default function Navbar() {
                   </button>
                 </div>
               ) : !loading && (
-                <div className="p-6 border-t border-gray-200/50 dark:border-gray-800/50 space-y-2">
+                <div className="p-6 border-t border-border/50 space-y-2">
                   <button
                     onClick={() => {
                       router.push('/login');
@@ -806,8 +811,8 @@ export default function Navbar() {
                     }}
                     className={cn(
                       'w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200',
-                      'bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 dark:hover:bg-gray-200',
-                      'text-white dark:text-gray-900 font-medium'
+                      'bg-foreground hover:bg-foreground/90',
+                      'text-background font-medium'
                     )}
                   >
                     <LogIn className="w-5 h-5" />
@@ -822,8 +827,8 @@ export default function Navbar() {
                       }}
                       className={cn(
                         'w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200',
-                        'border border-gray-200 dark:border-gray-700',
-                        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800',
+                        'border border-border',
+                        'text-muted-foreground hover:bg-muted hover:text-foreground',
                         'font-medium'
                       )}
                     >
@@ -843,10 +848,10 @@ export default function Navbar() {
         <div
           className="fixed inset-0 z-30"
           onClick={() => setIsUserMenuOpen(false)}
+          aria-hidden="true"
         />
       )}
 
-      {/* Subscription Modal */}
       <SubscriptionModal
         isOpen={subscriptionModalOpen}
         onClose={() => setSubscriptionModalOpen(false)}

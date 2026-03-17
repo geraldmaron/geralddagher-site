@@ -10,6 +10,10 @@ import Footer from '@/components/core/Footer';
 const toastStyle = {
   background: 'var(--toast-bg)',
   color: 'var(--toast-color)',
+  border: '1px solid hsl(var(--border))',
+  borderRadius: '0.75rem',
+  fontSize: '0.875rem',
+  padding: '12px 16px',
 };
 
 const toastOptions = {

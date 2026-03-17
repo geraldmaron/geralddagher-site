@@ -2,6 +2,7 @@
 import * as React from 'react';
 import { useTheme } from '@/components/core/ThemeProvider';
 import { Sun, Moon, Monitor } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export function ThemeToggle() {
   const { themeMode, setThemeMode } = useTheme();
@@ -16,9 +17,9 @@ export function ThemeToggle() {
 
   const getIcon = () => {
     switch (themeMode) {
-      case 'light': return <Sun className="h-5 w-5" />;
-      case 'dark': return <Moon className="h-5 w-5" />;
-      default: return <Monitor className="h-5 w-5" />;
+      case 'light': return <Sun className="h-4 w-4 text-amber-500" />;
+      case 'dark': return <Moon className="h-4 w-4 text-blue-400" />;
+      default: return <Monitor className="h-4 w-4 text-muted-foreground" />;
     }
   };
 
@@ -33,7 +34,12 @@ export function ThemeToggle() {
   return (
     <button
       onClick={cycleTheme}
-      className="inline-flex items-center justify-center rounded-md p-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+      className={cn(
+        'inline-flex items-center justify-center w-9 h-9 rounded-lg',
+        'bg-muted/60 border border-border/60',
+        'hover:bg-muted transition-all duration-200',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+      )}
       aria-label={getAriaLabel()}
     >
       {getIcon()}

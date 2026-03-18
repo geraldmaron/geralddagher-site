@@ -1,26 +1,24 @@
 'use client';
-import { useTheme } from '@/components/core/ThemeProvider';
 import Image from 'next/image';
 import { motion, useReducedMotion } from 'framer-motion';
-import { Suspense, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const highlights = [
   {
-    title: 'Story-first',
+    label: 'Story-first',
     description: 'Every conversation starts with what matters most to you, not a checklist.'
   },
   {
-    title: 'Dignity in focus',
-    description: 'We keep context, consent, and clarity at the core of how your story is shared.'
+    label: 'Dignity in focus',
+    description: 'Context, consent, and clarity at the core of how your story is shared.'
   },
   {
-    title: 'Crafted delivery',
-    description: 'Thoughtful pacing, visual polish, and editing that amplifies—not alters—your voice.'
+    label: 'Crafted delivery',
+    description: 'Thoughtful pacing and editing that amplifies, not alters, your voice.'
   }
 ];
 
 const TMPAbout = () => {
-  const { isDarkMode } = useTheme();
   const prefersReducedMotion = useReducedMotion();
   const [tmpContent, setTmpContent] = useState<string>('');
 
@@ -28,9 +26,7 @@ const TMPAbout = () => {
     const fetchProfile = async () => {
       try {
         const response = await fetch('/api/profile');
-        if (!response.ok) {
-          throw new Error('Failed to fetch profile');
-        }
+        if (!response.ok) throw new Error('Failed to fetch profile');
         const data = await response.json();
         setTmpContent(data.profile?.about?.tmp || '');
       } catch (error) {
@@ -44,10 +40,7 @@ const TMPAbout = () => {
     hidden: prefersReducedMotion ? { opacity: 1 } : { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.18,
-        delayChildren: 0.15
-      }
+      transition: { staggerChildren: 0.18, delayChildren: 0.15 }
     }
   };
 
@@ -73,9 +66,9 @@ const TMPAbout = () => {
     <section
       role="banner"
       aria-label="About The Maron Project"
-      className="relative isolate overflow-hidden px-4 py-12 sm:px-6 sm:py-16 lg:px-10 lg:py-20"
+      className="relative flex items-start bg-gray-950"
     >
-      <div className="pointer-events-none absolute inset-0 -z-10">
+      <div className="pointer-events-none absolute inset-0">
         <Image
           src="/api/assets/site-assets/230e167.png"
           alt="The Maron Project background"
@@ -84,86 +77,46 @@ const TMPAbout = () => {
           sizes="100vw"
           className="object-cover opacity-70"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/80 via-slate-900/75 to-black/85" />
+        <div className="absolute inset-0 bg-gradient-to-b from-gray-950/80 via-gray-950/75 to-gray-950/95" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.25),transparent_25%),radial-gradient(circle_at_80%_0%,rgba(236,72,153,0.25),transparent_20%),radial-gradient(circle_at_50%_80%,rgba(34,197,94,0.2),transparent_25%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_40%,rgba(255,255,255,0.08),transparent_35%)]" />
       </div>
 
       <motion.div
         initial="hidden"
         animate="visible"
         variants={containerVariants}
-        className="mx-auto flex max-w-6xl flex-col gap-12"
+        className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-14 sm:pt-14 sm:pb-16 flex flex-col gap-8 w-full"
       >
-        <motion.div variants={titleVariants} className="max-w-3xl space-y-4">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white/90 shadow-sm backdrop-blur">
-            The Maron Project
-          </span>
-          <h1 className="text-balance text-3xl leading-tight text-white sm:text-4xl lg:text-5xl">
-            What is{' '}
-            <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-300 bg-clip-text font-semibold text-transparent">
-              The Maron Project
+        <motion.div variants={titleVariants} className="max-w-3xl space-y-5">
+          <p className="text-xs font-mono uppercase tracking-widest text-rose-400/80">The Maron Project</p>
+          <h1 className="text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl">
+            Real people.{' '}
+            <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-300 bg-clip-text text-transparent">
+              Real stories.
             </span>
-            ?
           </h1>
-          <p className="max-w-2xl text-base leading-relaxed text-slate-100/90">
-            Real people. Real stories. Crafted with care and shared with intention.
+          <p className="max-w-2xl text-base leading-relaxed text-white/70">
+            Crafted with care and shared with intention. We hold the mic with you, not for you, so your lived experience lands with honesty, nuance, and respect.
           </p>
         </motion.div>
 
-        <motion.div
-          variants={itemVariants}
-          className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/10 p-6 shadow-xl shadow-blue-500/5 backdrop-blur"
-          role="article"
-        >
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-blue-500/8 via-purple-500/8 to-emerald-400/10" />
-          <div className="relative space-y-6">
-            {tmpContent && tmpContent.split('\n').map((paragraph: string, index: number) => (
-              <p key={index} className="text-base leading-relaxed text-slate-100/90">
+        {tmpContent && (
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }} className="max-w-2xl space-y-4">
+            <div className="w-8 h-px bg-rose-500/60" />
+            {tmpContent.split('\n').filter(p => p.trim()).slice(0, 2).map((paragraph: string, index: number) => (
+              <p key={index} className="text-base leading-relaxed text-white/75">
                 {paragraph}
               </p>
             ))}
-          </div>
-        </motion.div>
+          </motion.div>
+        )}
 
-        <motion.div
-          variants={itemVariants}
-          className="relative space-y-6"
-        >
-          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/10 p-6 shadow-xl shadow-blue-500/5 backdrop-blur">
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-blue-500/8 via-purple-500/8 to-emerald-400/10" />
-            <div className="relative flex flex-col gap-4">
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white/90 backdrop-blur w-fit">
-                A safe place to speak plainly
-              </span>
-              <p className="text-base leading-relaxed text-slate-100/90">
-                We hold the mic with you—not for you—so your lived experience lands with honesty, nuance, and respect.
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-white/90 backdrop-blur">
-                  Human stories over headlines
-                </span>
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-white/90 backdrop-blur">
-                  Recorded with care
-                </span>
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-white/90 backdrop-blur">
-                  Clarity & consent first
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            {highlights.map((highlight) => (
-              <div
-                key={highlight.title}
-                className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/10 p-5 shadow-md shadow-blue-500/5 backdrop-blur"
-              >
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-blue-500/8 via-purple-500/6 to-emerald-400/8" />
-                <div className="relative space-y-2">
-                  <p className="text-sm font-semibold text-white">{highlight.title}</p>
-                  <p className="text-sm text-slate-100/90">{highlight.description}</p>
-                </div>
+        <motion.div variants={itemVariants} className="border-t border-white/10 pt-8">
+          <div className="grid gap-6 sm:grid-cols-3">
+            {highlights.map((h) => (
+              <div key={h.label} className="flex flex-col gap-2 border-l border-white/20 pl-4">
+                <p className="text-sm font-semibold text-white">{h.label}</p>
+                <p className="text-sm text-white/60">{h.description}</p>
               </div>
             ))}
           </div>

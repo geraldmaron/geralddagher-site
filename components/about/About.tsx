@@ -1,24 +1,9 @@
 'use client';
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  ArrowRight,
-  MapPin,
-  ExternalLink,
-  Briefcase,
-  X,
-  Heart,
-  User,
-  Home,
-  Users,
-  Clock,
-  Award,
-  DollarSign
-} from 'lucide-react';
+import { MapPin, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import * as Sheet from '@radix-ui/react-dialog';
-import Button from '@/components/core/Button';
 
 interface DomainSection {
   id: string;
@@ -265,13 +250,6 @@ const CLUSTER_META: Record<
   }
 };
 
-const DOMAIN_CLUSTERS: Record<string, { label: string; color: keyof typeof ACCENT_COLORS | 'neutral' }> = {
-  reliability: { label: 'Reliability & Ops', color: 'blue' },
-  platform: { label: 'Platform & Delivery', color: 'green' },
-  leadership: { label: 'Product & Leadership', color: 'purple' },
-  compliance: { label: 'Risk & Compliance', color: 'amber' },
-  all: { label: 'All', color: 'neutral' }
-};
 
 const ACCENT_COLORS = {
   blue: {
@@ -279,52 +257,83 @@ const ACCENT_COLORS = {
     bg: 'bg-blue-500/10',
     border: 'border-blue-500/40',
     hover: 'hover:border-blue-500',
-    text: 'text-blue-600 dark:text-blue-400'
+    text: 'text-blue-700 dark:text-blue-300',
+    leftBorder: 'border-s-2 border-blue-500'
   },
   green: {
     icon: 'text-green-600 dark:text-green-400',
     bg: 'bg-green-500/10',
     border: 'border-green-500/40',
     hover: 'hover:border-green-500',
-    text: 'text-green-600 dark:text-green-400'
+    text: 'text-green-700 dark:text-green-300',
+    leftBorder: 'border-s-2 border-green-500'
   },
   purple: {
     icon: 'text-purple-600 dark:text-purple-400',
     bg: 'bg-purple-500/10',
     border: 'border-purple-500/40',
     hover: 'hover:border-purple-500',
-    text: 'text-purple-600 dark:text-purple-400'
+    text: 'text-purple-700 dark:text-purple-300',
+    leftBorder: 'border-s-2 border-purple-500'
   },
   amber: {
     icon: 'text-amber-600 dark:text-amber-400',
     bg: 'bg-amber-500/10',
     border: 'border-amber-500/40',
     hover: 'hover:border-amber-500',
-    text: 'text-amber-600 dark:text-amber-400'
+    text: 'text-amber-700 dark:text-amber-300',
+    leftBorder: 'border-s-2 border-amber-500'
   }
+};
+
+const COMPANY_CAREER_URLS: Record<string, string> = {
+  'IBM': 'https://www.ibm.com/careers',
+  'HashiCorp': 'https://www.hashicorp.com/careers',
+  'The Craneware Group (formerly Sentry Data Systems)': 'https://www.craneware.com/careers',
+  'AT&T': 'https://www.att.jobs',
+  'Verizon': 'https://www.verizon.com/about/careers',
+  'Mount Sinai': 'https://careers.mountsinai.org',
+  'McDonald\'s': 'https://careers.mcdonalds.com',
+  'Verizon Wireless': 'https://www.verizon.com/about/careers',
+  'Mount Sinai Health System': 'https://careers.mountsinai.org'
+};
+
+const PASSIONS = [
+  { emoji: '🎤', label: 'Spoken Word', desc: 'Writing and performing since high school' },
+  { emoji: '✊', label: 'Advocacy', desc: 'Amplifying underrepresented voices' },
+  { emoji: '🏀', label: 'NYC Sports', desc: 'Knicks, Yankees, Giants. Die-hard.' },
+  { emoji: '🧠', label: 'Neurodiversity', desc: 'AuDHD, raising a neurodiverse family' },
+  { emoji: '🌍', label: 'Culture', desc: 'Caribbean roots, Bronx upbringing' },
+  { emoji: '❤️', label: 'Family First', desc: 'Father of 2, husband, present partner' }
+];
+
+const containerVariants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.08 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.45 } }
 };
 
 const AboutSection: React.FC = () => {
   const [personalInfo, setPersonalInfo] = useState<any>(null);
   const [currentKeyword, setCurrentKeyword] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
-  const [isProfessionalOpen, setIsProfessionalOpen] = useState(false);
-  const [isPersonalOpen, setIsPersonalOpen] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState<string>('reliability');
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+  const [selectedRole, setSelectedRole] = useState(0);
   const [domainSections, setDomainSections] = useState<DomainSection[]>(DOMAIN_SECTIONS);
-  const [isLoadingSkills, setIsLoadingSkills] = useState(true);
   const [companyLogos, setCompanyLogos] = useState<Record<string, string>>({});
+  const [expandedQuadrants, setExpandedQuadrants] = useState<Record<string, boolean>>({});
 
-  const keywords = personalInfo?.profile?.keywords || [];
+  const keywords: string[] = personalInfo?.profile?.keywords || [];
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const response = await fetch('/api/profile');
-        if (!response.ok) {
-          throw new Error('Failed to fetch profile');
-        }
+        if (!response.ok) throw new Error('Failed to fetch profile');
         const data = await response.json();
         setPersonalInfo(data);
       } catch (error) {
@@ -338,9 +347,7 @@ const AboutSection: React.FC = () => {
     const fetchLogos = async () => {
       try {
         const response = await fetch('/api/company-logos');
-        if (!response.ok) {
-          throw new Error('Failed to fetch company logos');
-        }
+        if (!response.ok) throw new Error('Failed to fetch company logos');
         const data = await response.json();
         setCompanyLogos(data.data || {});
       } catch (error) {
@@ -354,20 +361,13 @@ const AboutSection: React.FC = () => {
     const fetchSkills = async () => {
       try {
         const response = await fetch('/api/users/skills');
-        if (!response.ok) {
-          throw new Error('Failed to fetch skills');
-        }
+        if (!response.ok) throw new Error('Failed to fetch skills');
         const { data } = await response.json();
-        if (data && data.length > 0) {
-          setDomainSections(data);
-        }
+        if (data && data.length > 0) setDomainSections(data);
       } catch (error) {
         console.error('Error fetching skills:', error);
-      } finally {
-        setIsLoadingSkills(false);
       }
     };
-
     fetchSkills();
   }, []);
 
@@ -400,22 +400,14 @@ const AboutSection: React.FC = () => {
       }
 
       const group = groups.get(section.cluster)!;
-
       section.skills.forEach((skill) => {
-        if (!group.skills.includes(skill)) {
-          group.skills.push(skill);
-        }
+        if (!group.skills.includes(skill)) group.skills.push(skill);
       });
-
       group.domains.push(section.title);
     });
 
     return Array.from(groups.values());
   }, [domainSections]);
-
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
 
   useEffect(() => {
     if (keywords.length < 2) return;
@@ -425,882 +417,518 @@ const AboutSection: React.FC = () => {
     return () => clearInterval(interval);
   }, [keywords.length]);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        duration: 0.4,
-        staggerChildren: 0.08
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 12 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.4 }
-    }
-  };
-
-
-  const COMPANY_CAREER_URLS: Record<string, string> = {
-    'IBM': 'https://www.ibm.com/careers',
-    'HashiCorp': 'https://www.hashicorp.com/careers',
-    'The Craneware Group (formerly Sentry Data Systems)': 'https://www.craneware.com/careers',
-    'AT&T': 'https://www.att.jobs',
-    'Verizon': 'https://www.verizon.com/about/careers',
-    'Mount Sinai': 'https://careers.mountsinai.org',
-    'McDonald\'s': 'https://careers.mcdonalds.com',
-    'Verizon Wireless': 'https://www.verizon.com/about/careers',
-    'Mount Sinai Health System': 'https://careers.mountsinai.org'
-  };
-
-  const ROLE_FOCUS: Record<string, string[]> = {
-    IBM: ['Reliability & DR', 'Platform Strategy', 'Risk & Compliance'],
-    HashiCorp: ['Cloud Reliability', 'Platform Delivery', 'Customer Trust'],
-    'The Craneware Group (formerly Sentry Data Systems)': ['Compliance SaaS', 'Product Delivery', 'Data Integrity'],
-    'AT&T': ['Field Ops', 'Training & Coaching', 'Service Quality']
-  };
-
-  const MAX_VISIBLE_MAIN = 3;
-  const MAX_VISIBLE_DRAWER = 8;
-
-  const getFilteredDomains = () => {
-    if (selectedFilter === 'all') {
-      return domainSections;
-    }
-    return domainSections.filter((section) => section.cluster === selectedFilter);
-  };
-
-  const getVisibleSkills = (skills: string[], limit: number) => skills.slice(0, limit);
+  const roles: RoleInfo[] = personalInfo?.roles || [];
+  const activeRole = roles[selectedRole] ?? null;
 
   return (
     <section
       role="region"
       aria-label="About me"
       data-section="about"
-      className="relative w-full py-16 md:py-24 px-4 bg-background"
+      className="section-wrapper bg-background"
     >
-      <div className="max-w-5xl mx-auto">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate={isVisible ? "visible" : "hidden"}
-          className="space-y-16"
-        >
-          {/* Header Section */}
-          <motion.div variants={itemVariants} className="space-y-6">
-            <motion.div
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm bg-muted text-muted-foreground border border-border"
-              variants={itemVariants}
-            >
-              <MapPin className="w-3.5 h-3.5" />
-              {personalInfo?.profile?.location}
-            </motion.div>
+      <div className="section-inner">
+        <div className="space-y-20 sm:space-y-24">
 
-            <div className="space-y-3">
-              <motion.h1
-                className="text-4xl md:text-5xl font-semibold tracking-tight text-foreground"
-                variants={itemVariants}
-              >
-                About Me
-              </motion.h1>
-
-              <motion.div
-                className="flex items-center gap-2 text-lg text-muted-foreground"
-                variants={itemVariants}
-              >
-                <span>I'm {keywords[currentKeyword] && ['A', 'E', 'I', 'O', 'U'].includes(keywords[currentKeyword][0]) ? 'an' : 'a'}</span>
-                <AnimatePresence mode="wait">
-                  <motion.span
-                    key={currentKeyword}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.3 }}
-                    className="font-semibold text-foreground"
-                  >
-                    {keywords[currentKeyword] === 'Ally' ? (
-                      <span className="inline-flex">
-                        <span className="animate-pulse text-red-500 dark:text-red-400">A</span>
-                        <span className="animate-pulse text-orange-500 dark:text-orange-400" style={{ animationDelay: '0.1s' }}>l</span>
-                        <span className="animate-pulse text-green-500 dark:text-green-400" style={{ animationDelay: '0.2s' }}>l</span>
-                        <span className="animate-pulse text-blue-500 dark:text-blue-400" style={{ animationDelay: '0.3s' }}>y</span>
-                      </span>
-                    ) : (
-                      keywords[currentKeyword]
-                    )}
-                  </motion.span>
-                </AnimatePresence>
-              </motion.div>
-            </div>
-
-            <motion.p
-              variants={itemVariants}
-              className="text-sm text-muted-foreground leading-relaxed max-w-5xl"
-            >
-              {personalInfo?.profile?.about?.businessCard || ''}
-            </motion.p>
-          </motion.div>
-
-          {/* Quick Stats Grid */}
-          <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {/* Experience Card */}
-            <motion.div
-              className={cn(
-                'p-6 rounded-2xl border transition-all duration-300',
-                'bg-card/60 backdrop-blur-sm',
-                'border-border/50',
-                'hover:shadow-lg hover:border-gray-300/50 dark:hover:border-gray-600/50'
-              )}
-              whileHover={{ scale: 1.05 }}
-            >
-              <div className="space-y-3">
-                <div className={cn('w-12 h-12 rounded-full flex items-center justify-center', ACCENT_COLORS.purple.bg)}>
-                  <Clock className={cn('w-6 h-6', ACCENT_COLORS.purple.icon)} />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-foreground">8+ Years</div>
-                  <div className="text-sm text-muted-foreground">Product & Leadership Experience</div>
-                </div>
+          {/* ── SECTION 1 — Header ─────────────────────────────── */}
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-80px' }}
+            className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20"
+          >
+            {/* Left: sticky label + heading + animated keyword */}
+            <motion.div variants={itemVariants} className="flex flex-col gap-6 lg:pt-2">
+              <div className="section-label self-start">
+                <MapPin className="w-3.5 h-3.5" />
+                {personalInfo?.profile?.location || 'South Florida'}
               </div>
-            </motion.div>
 
-            {/* ARR Impact Card */}
-            <motion.div
-              className={cn(
-                'p-6 rounded-2xl border transition-all duration-300',
-                'bg-card/60 backdrop-blur-sm',
-                'border-border/50',
-                'hover:shadow-lg hover:border-gray-300/50 dark:hover:border-gray-600/50'
-              )}
-              whileHover={{ scale: 1.05 }}
-            >
-              <div className="space-y-3">
-                <div className={cn('w-12 h-12 rounded-full flex items-center justify-center', ACCENT_COLORS.green.bg)}>
-                  <DollarSign className={cn('w-6 h-6', ACCENT_COLORS.green.icon)} />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-foreground">~$30 Million</div>
-                  <div className="text-sm text-muted-foreground">ARR influenced across portfolio</div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Domains Card */}
-            <motion.div
-              className={cn(
-                'p-6 rounded-2xl border transition-all duration-300',
-                'bg-card/60 backdrop-blur-sm',
-                'border-border/50',
-                'hover:shadow-lg hover:border-gray-300/50 dark:hover:border-gray-600/50'
-              )}
-              whileHover={{ scale: 1.05 }}
-            >
-              <div className="space-y-3">
-                <div className={cn('w-12 h-12 rounded-full flex items-center justify-center', ACCENT_COLORS.green.bg)}>
-                  <Award className={cn('w-6 h-6', ACCENT_COLORS.green.icon)} />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-foreground">15 Domains</div>
-                  <div className="text-sm text-muted-foreground">Reliability · Platform · Risk · Product</div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Personal Card */}
-            <motion.div
-              className={cn(
-                'p-6 rounded-2xl border transition-all duration-300',
-                'bg-card/60 backdrop-blur-sm',
-                'border-border/50',
-                'hover:shadow-lg hover:border-gray-300/50 dark:hover:border-gray-600/50'
-              )}
-              whileHover={{ scale: 1.05 }}
-            >
-              <div className="space-y-3">
-                <div className={cn('w-12 h-12 rounded-full flex items-center justify-center', ACCENT_COLORS.amber.bg)}>
-                  <Heart className={cn('w-6 h-6', ACCENT_COLORS.amber.icon)} />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-foreground">Father of 2</div>
-                  <div className="text-sm text-muted-foreground">Based in South Florida</div>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-
-          {/* Journey Cards */}
-          <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
-            {/* Professional Card */}
-            <motion.button
-              onClick={() => setIsProfessionalOpen(true)}
-              className={cn(
-                "group relative rounded-2xl p-6 border transition-all duration-300 text-left",
-                "bg-card/60 backdrop-blur-sm",
-                "border-border/50",
-                "hover:shadow-lg hover:border-blue-300/50 dark:hover:border-blue-700/50",
-                "flex flex-col h-full"
-              )}
-              whileHover={{ y: -2 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <div className="space-y-4 flex-1 flex flex-col">
-                <div className="flex items-center gap-3">
-                  <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center', ACCENT_COLORS.blue.bg)}>
-                    <Briefcase className={cn('w-5 h-5', ACCENT_COLORS.blue.icon)} />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-semibold text-foreground">Professional Journey</h3>
-                    <p className="text-sm text-muted-foreground">From burgers to cloud platforms</p>
-                  </div>
-                </div>
-
-                <div className="flex-1 flex flex-col min-h-[120px]">
-                  <div className="flex flex-wrap gap-2 px-3 py-2 rounded-lg bg-background/80 border border-border">
-                    {[
-                      { label: 'Reliability & DR', color: ACCENT_COLORS.blue },
-                      { label: 'Platform Delivery', color: ACCENT_COLORS.green },
-                      { label: 'Risk & Compliance', color: ACCENT_COLORS.amber },
-                      { label: 'Product Leadership', color: ACCENT_COLORS.purple }
-                    ].map((item) => (
-                      <span
-                        key={item.label}
-                        className={cn(
-                          'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border',
-                          item.color.border,
-                          item.color.bg,
-                          item.color.text
-                        )}
+              <div className="flex flex-col gap-1">
+                <h1 className="text-sm font-mono text-muted-foreground tracking-widest uppercase">
+                  About Me
+                </h1>
+                <div className="flex items-baseline gap-2 flex-wrap">
+                  <span className="text-4xl sm:text-5xl font-bold text-foreground leading-tight">
+                    I&apos;m a
+                  </span>
+                  <div className="overflow-hidden">
+                    <AnimatePresence mode="wait">
+                      <motion.span
+                        key={currentKeyword}
+                        initial={{ y: '100%', opacity: 0 }}
+                        animate={{ y: '0%', opacity: 1 }}
+                        exit={{ y: '-100%', opacity: 0 }}
+                        transition={{ duration: 0.38, ease: [0.32, 0, 0.67, 0] }}
+                        className="block text-4xl sm:text-5xl font-bold text-primary leading-tight"
                       >
-                        {item.label}
-                      </span>
+                        {keywords[currentKeyword] === 'Ally' ? (
+                          <span className="inline-flex">
+                            <span className="animate-pulse text-red-500">A</span>
+                            <span className="animate-pulse text-orange-500" style={{ animationDelay: '0.1s' }}>l</span>
+                            <span className="animate-pulse text-green-500" style={{ animationDelay: '0.2s' }}>l</span>
+                            <span className="animate-pulse text-blue-500" style={{ animationDelay: '0.3s' }}>y</span>
+                          </span>
+                        ) : (
+                          keywords[currentKeyword] || 'Leader'
+                        )}
+                      </motion.span>
+                    </AnimatePresence>
+                  </div>
+                </div>
+              </div>
+
+              {/* Role tags — quick visual scan of what Gerald does */}
+              <div className="flex flex-wrap gap-2 pt-2">
+                {[
+                  'Platform Engineering',
+                  'Site Reliability',
+                  'Product Leadership',
+                  'Risk & Compliance',
+                  'Team Building',
+                ].map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-muted text-muted-foreground border border-border/60"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+
+              {/* Quick stats row */}
+              <div className="flex items-center gap-6 pt-2 border-t border-border/30">
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-lg font-bold tabular-nums text-foreground">8+</span>
+                  <span className="text-[11px] text-muted-foreground">Years exp.</span>
+                </div>
+                <div className="w-px h-8 bg-border/40" />
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-lg font-bold tabular-nums text-foreground">15</span>
+                  <span className="text-[11px] text-muted-foreground">Domains</span>
+                </div>
+                <div className="w-px h-8 bg-border/40" />
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-lg font-bold tabular-nums text-foreground">4+</span>
+                  <span className="text-[11px] text-muted-foreground">Companies</span>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Right: bio + pull-quote */}
+            <motion.div variants={itemVariants} className="flex flex-col gap-6 justify-center">
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {personalInfo?.profile?.about?.businessCard || ''}
+              </p>
+
+              <blockquote className="text-base font-medium text-foreground/80 border-s-4 border-primary/40 ps-4 not-italic">
+                I work at the intersection of reliability and product, where trust is built one deployment at a time.
+              </blockquote>
+
+              {/* Tech/tool context chips */}
+              <div className="space-y-2">
+                <p className="text-[11px] font-mono text-muted-foreground/50 uppercase tracking-widest">Core stack</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {['Terraform · IaC', 'AWS · GCP', 'Platform Engineering', 'Internal Dev Platforms', 'Observability · SRE', 'LLMOps · MLOps', 'AIOps'].map((tech) => (
+                    <span
+                      key={tech}
+                      className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono bg-primary/5 text-primary/70 border border-primary/10"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* ── SECTION 2 — Career Rail ────────────────────────── */}
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-80px' }}
+            className="space-y-6"
+          >
+            <motion.h2 variants={itemVariants} className="text-2xl font-semibold text-foreground tracking-tight">
+              Career
+            </motion.h2>
+
+            {/* Horizontal scrollable rail */}
+            <motion.div variants={itemVariants} className="relative">
+              <div
+                className="overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              >
+
+                {roles.length > 0 ? (
+                  <div className="flex items-start gap-0 min-w-max">
+                    {roles.map((role, index) => {
+                      const isSelected = selectedRole === index;
+                      const logoSrc = companyLogos[role.company] || role.imageUrl;
+                      const yearStart = role.years.split('–')[0]?.trim() ?? '';
+                      const yearEnd = role.years.split('–')[1]?.trim() ?? '';
+
+                      return (
+                        <div key={index} className="flex items-start">
+                          {/* Node */}
+                          <div className="flex flex-col items-center gap-2">
+                            <button
+                              onClick={() => setSelectedRole(index)}
+                              aria-pressed={isSelected}
+                              aria-label={`${role.company}: ${role.title}`}
+                              className={cn(
+                                'w-10 h-10 rounded-full border-2 relative overflow-hidden transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex-shrink-0',
+                                isSelected
+                                  ? 'border-primary'
+                                  : 'bg-muted border-border hover:border-primary/60'
+                              )}
+                            >
+                              {logoSrc && logoSrc !== '/images/company-placeholder.png' ? (
+                                <Image
+                                  src={logoSrc}
+                                  alt={role.company}
+                                  fill
+                                  className="object-contain p-1.5"
+                                  unoptimized={logoSrc.endsWith('.svg')}
+                                  sizes="40px"
+                                />
+                              ) : (
+                                <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-muted-foreground">
+                                  {role.company.slice(0, 2).toUpperCase()}
+                                </span>
+                              )}
+                            </button>
+
+                            <div className="flex flex-col items-center gap-0.5 w-24 text-center">
+                              <span
+                                className={cn(
+                                  'text-xs font-mono leading-tight transition-colors',
+                                  isSelected ? 'text-foreground font-semibold' : 'text-muted-foreground'
+                                )}
+                              >
+                                {role.company.length > 14 ? `${role.company.slice(0, 13)}…` : role.company}
+                              </span>
+                              <span className="text-[10px] text-muted-foreground leading-tight">
+                                {yearStart}{yearEnd ? `–${yearEnd}` : ''}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Connector line (except after last) */}
+                          {index < roles.length - 1 && (
+                            <div className="h-px w-10 bg-border/60 mt-4 flex-shrink-0" />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-4">
+                    {[...Array(4)].map((_, i) => (
+                      <div key={i} className="flex items-center gap-0">
+                        <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
+                        {i < 3 && <div className="w-10 h-px bg-muted animate-pulse mx-0" />}
+                      </div>
                     ))}
                   </div>
-
-                  <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 mt-4">
-                    {personalInfo?.roles?.[0]?.abbreviatedSummary}
-                  </p>
-                </div>
-
-                <div className="flex items-center justify-between pt-2">
-                  <div className={cn('inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border', ACCENT_COLORS.blue.border, ACCENT_COLORS.blue.text, ACCENT_COLORS.blue.bg)}>
-                    <Award className="w-3 h-3" />
-                    <span>15 Core Domains</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-sm font-medium text-foreground group-hover:gap-2 transition-all">
-                    <span>View journey</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </div>
-                </div>
+                )}
               </div>
-            </motion.button>
+            </motion.div>
 
-            {/* Personal Card */}
-            <motion.button
-              onClick={() => setIsPersonalOpen(true)}
-              className={cn(
-                "group relative rounded-2xl p-6 border transition-all duration-300 text-left",
-                "bg-card/60 backdrop-blur-sm",
-                "border-border/50",
-                "hover:shadow-lg hover:border-amber-300/50 dark:hover:border-amber-700/50",
-                "flex flex-col h-full"
+            {/* Role detail panel */}
+            <AnimatePresence mode="wait">
+              {activeRole && (
+                <motion.div
+                  key={selectedRole}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.28, ease: 'easeOut' }}
+                  className="bg-muted/40 border border-border/40 rounded-xl p-6 space-y-3"
+                >
+                  <div className="flex items-start justify-between gap-4 flex-wrap">
+                    <p className="text-base font-semibold text-foreground">
+                      {activeRole.company}
+                      <span className="text-muted-foreground font-normal mx-2">·</span>
+                      {activeRole.title}
+                      <span className="text-muted-foreground font-normal mx-2">·</span>
+                      <span className="font-mono text-sm text-muted-foreground">{activeRole.years}</span>
+                    </p>
+                  </div>
+
+                  <div className="h-px bg-border/40" />
+
+                  {activeRole.summary && (
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {activeRole.summary}
+                    </p>
+                  )}
+
+                  {activeRole.highlights && activeRole.highlights.length > 0 && (
+                    <div className="flex flex-wrap gap-x-6 gap-y-1 pt-1">
+                      {activeRole.highlights.map((highlight, idx) => (
+                        <span key={idx} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <span className="w-1 h-1 rounded-full bg-primary/60 flex-shrink-0" />
+                          {highlight}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {COMPANY_CAREER_URLS[activeRole.company] && (
+                    <div className="flex justify-end pt-2">
+                      <a
+                        href={COMPANY_CAREER_URLS[activeRole.company]}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline transition-colors"
+                      >
+                        {activeRole.company} Careers
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  )}
+                </motion.div>
               )}
-              whileHover={{ y: -2 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <div className="space-y-4 flex-1 flex flex-col">
-                <div className="flex items-center gap-3">
-                  <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center', ACCENT_COLORS.amber.bg)}>
-                    <Heart className={cn('w-5 h-5', ACCENT_COLORS.amber.icon)} />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-semibold text-foreground">Personal Story</h3>
-                    <p className="text-sm text-muted-foreground">From the Bronx to South Florida</p>
-                  </div>
-                </div>
-
-                <div className="flex-1 flex flex-col min-h-[120px]">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="px-3 py-2 rounded-lg bg-background/80 border border-border">
-                      <div className="text-xs font-medium text-muted-foreground">Family</div>
-                      <div className="text-xs text-foreground mt-0.5">Married, 2 boys</div>
-                    </div>
-                    <div className="px-3 py-2 rounded-lg bg-background/80 border border-border">
-                      <div className="text-xs font-medium text-muted-foreground">Hometown</div>
-                      <div className="text-xs text-foreground mt-0.5">Bronx, NY</div>
-                    </div>
-                    <div className="px-3 py-2 rounded-lg bg-background/80 border border-border">
-                      <div className="text-xs font-medium text-muted-foreground">Location</div>
-                      <div className="text-xs text-foreground mt-0.5">{personalInfo?.profile?.location}</div>
-                    </div>
-                    <div className="px-3 py-2 rounded-lg bg-background/80 border border-border">
-                      <div className="text-xs font-medium text-muted-foreground">Pets</div>
-                      <div className="text-xs text-foreground mt-0.5">{personalInfo?.profile?.pets}</div>
-                    </div>
-                  </div>
-
-                  <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 mt-4">
-                    {personalInfo?.profile?.about?.personal?.[0]?.substring(0, 120) || personalInfo?.profile?.about?.businessCard?.substring(0, 120) || 'Learn more about my personal journey'}...
-                  </p>
-                </div>
-
-                <div className="flex items-center justify-between pt-2">
-                  <div className={cn('inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border', ACCENT_COLORS.amber.border, ACCENT_COLORS.amber.text, ACCENT_COLORS.amber.bg)}>
-                    <Heart className="w-3 h-3" />
-                    <span>Family First</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-sm font-medium text-foreground group-hover:gap-2 transition-all">
-                    <span>Read story</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </div>
-                </div>
-              </div>
-            </motion.button>
+            </AnimatePresence>
           </motion.div>
 
-          {/* Professional Domains & Expertise */}
-          <motion.div variants={itemVariants} className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-semibold text-foreground mb-2">
-                Professional Domains & Expertise
+          {/* ── SECTION 3 — Areas of Expertise (2×2 quadrant grid) ── */}
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-80px' }}
+            className="space-y-6"
+          >
+            <motion.div variants={itemVariants}>
+              <h2 className="text-2xl font-semibold text-foreground tracking-tight mb-1">
+                Areas of Expertise
               </h2>
               <p className="text-sm text-muted-foreground">
                 Capabilities across reliability, platform, product leadership, and risk
               </p>
-            </div>
+            </motion.div>
 
-            {/* Filter Pills */}
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(DOMAIN_CLUSTERS).map(([key, cluster]) => {
-                const isActive = selectedFilter === key;
-                const color = cluster.color !== 'neutral' ? ACCENT_COLORS[cluster.color as keyof typeof ACCENT_COLORS] : undefined;
+            <motion.div
+              variants={itemVariants}
+              className="border border-border/40 rounded-xl overflow-hidden grid grid-cols-1 sm:grid-cols-2 divide-y divide-border/40 sm:divide-x sm:divide-y-0"
+            >
+              {/* Row 1 */}
+              {aggregatedThemes.slice(0, 2).map((theme) => {
+                const color = ACCENT_COLORS[theme.color];
+                const isExpanded = expandedQuadrants[theme.id];
+                const visibleSkills = isExpanded ? theme.skills : theme.skills.slice(0, 6);
+                const remaining = theme.skills.length - 6;
                 return (
-                  <button
-                    key={key}
-                    onClick={() => setSelectedFilter(key)}
-                    className={cn(
-                      'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2',
-                      isActive
-                        ? color
-                          ? cn('text-white dark:text-gray-900', {
-                              'bg-blue-600 dark:bg-blue-400': cluster.color === 'blue',
-                              'bg-green-600 dark:bg-green-400': cluster.color === 'green',
-                              'bg-purple-600 dark:bg-purple-400': cluster.color === 'purple',
-                              'bg-amber-600 dark:bg-amber-400': cluster.color === 'amber'
-                            })
-                          : 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
-                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  <div key={theme.id} className="p-6 flex flex-col gap-3">
+                    <div className={cn('ps-3', color.leftBorder)}>
+                      <p className="text-sm font-semibold text-foreground">{theme.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{theme.summary}</p>
+                    </div>
+
+                    <div className="h-px bg-border/40" />
+
+                    <ul className="space-y-1">
+                      {visibleSkills.map((skill) => (
+                        <li key={skill} className="flex items-center gap-2 text-sm text-foreground">
+                          <span className="text-muted-foreground/60">·</span>
+                          {skill}
+                        </li>
+                      ))}
+                    </ul>
+
+                    {remaining > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setExpandedQuadrants((prev) => ({ ...prev, [theme.id]: !isExpanded }))}
+                        className="text-xs font-medium text-primary hover:underline self-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
+                      >
+                        {isExpanded ? 'Show fewer' : `Show all (${theme.skills.length})`}
+                      </button>
                     )}
-                  >
-                    {cluster.label}
-                  </button>
+
+                    <p className="text-[10px] font-mono text-muted-foreground/60 leading-snug mt-auto">
+                      {theme.domains.slice(0, 3).join(' · ')}{theme.domains.length > 3 ? ` · +${theme.domains.length - 3}` : ''}
+                    </p>
+                  </div>
                 );
               })}
-            </div>
+            </motion.div>
 
-            {/* Unified Skill Pill Cloud */}
+            {/* Row 2 — separate grid row to handle divide properly */}
             <motion.div
-              className="flex flex-wrap gap-2"
-              initial="hidden"
-              animate="visible"
-              variants={containerVariants}
+              variants={itemVariants}
+              className="border border-border/40 rounded-xl overflow-hidden grid grid-cols-1 sm:grid-cols-2 divide-y divide-border/40 sm:divide-x sm:divide-y-0"
             >
-              {domainSections.filter((section) =>
-                selectedFilter === 'all' ? true : section.cluster === selectedFilter
-              ).flatMap((section) => {
-                const color = ACCENT_COLORS[section.color as keyof typeof ACCENT_COLORS];
-                return section.skills.map((skill) => (
-                  <motion.span
-                    key={`${section.id}-${skill}`}
-                    variants={itemVariants}
-                    className={cn(
-                      'px-3 py-1.5 rounded-full text-sm border transition-colors',
-                      color.border,
-                      color.bg,
-                      color.text,
-                      'hover:shadow-sm hover:border-current'
+              {aggregatedThemes.slice(2, 4).map((theme) => {
+                const color = ACCENT_COLORS[theme.color];
+                const isExpanded = expandedQuadrants[theme.id];
+                const visibleSkills = isExpanded ? theme.skills : theme.skills.slice(0, 6);
+                const remaining = theme.skills.length - 6;
+
+                return (
+                  <div key={theme.id} className="p-6 flex flex-col gap-3">
+                    <div className={cn('ps-3', color.leftBorder)}>
+                      <p className="text-sm font-semibold text-foreground">{theme.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{theme.summary}</p>
+                    </div>
+
+                    <div className="h-px bg-border/40" />
+
+                    <ul className="space-y-1">
+                      {visibleSkills.map((skill) => (
+                        <li key={skill} className="flex items-center gap-2 text-sm text-foreground">
+                          <span className="text-muted-foreground/60">·</span>
+                          {skill}
+                        </li>
+                      ))}
+                    </ul>
+
+                    {remaining > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setExpandedQuadrants((prev) => ({ ...prev, [theme.id]: !isExpanded }))}
+                        className="text-xs font-medium text-primary hover:underline self-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
+                      >
+                        {isExpanded ? 'Show fewer' : `Show all (${theme.skills.length})`}
+                      </button>
                     )}
-                  >
-                    {skill}
-                  </motion.span>
-                ));
+
+                    <p className="text-[10px] font-mono text-muted-foreground/60 leading-snug mt-auto">
+                      {theme.domains.slice(0, 3).join(' · ')}{theme.domains.length > 3 ? ` · +${theme.domains.length - 3}` : ''}
+                    </p>
+                  </div>
+                );
               })}
             </motion.div>
           </motion.div>
-        </motion.div>
+
+        </div>
       </div>
 
-      {/* Professional Drawer */}
-      <Sheet.Root open={isProfessionalOpen} onOpenChange={setIsProfessionalOpen}>
-        <Sheet.Portal>
-          <AnimatePresence>
-            {isProfessionalOpen && (
-              <>
-                <Sheet.Overlay asChild>
-                  <motion.div
-                    className="fixed inset-0 z-50 bg-black/20 dark:bg-black/40 backdrop-blur-sm"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  />
-                </Sheet.Overlay>
+      {/* ── SECTION 4 — Personal Story — full viewport width ──── */}
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-80px' }}
+        className="relative w-full border-t border-border/40"
+      >
+        {/* Full-viewport-width mosaic background */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+          <div className="absolute inset-0 grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 auto-rows-fr">
+            {Array.from({ length: 48 }).map((_, i) => {
+              const photos = [
+                '/polaroids/LittleMe.jpg',
+                '/polaroids/ThrowbackFamily.jpg',
+                '/polaroids/MomAndI.jpg',
+                '/polaroids/WeddingBelt.jpg',
+                '/polaroids/Family.jpg',
+                '/polaroids/BabyG.jpg',
+                '/polaroids/JamieAndI.jpg',
+                '/polaroids/Fro.jpg',
+                '/polaroids/Deuces.jpg',
+                '/polaroids/reInvent.jpg',
+                '/polaroids/MomAndI2.jpg',
+                '/polaroids/BrokenFace.jpg',
+              ];
+              return (
+                <div key={i} className="relative overflow-hidden">
+                  <Image src={photos[i % photos.length]} alt="" fill className="object-cover" sizes="12vw" />
+                </div>
+              );
+            })}
+          </div>
+          <div className="absolute inset-0 bg-background/85" />
+        </div>
 
-                <Sheet.Content asChild>
-                  <motion.div
-                    initial={{ x: '100%' }}
-                    animate={{ x: 0 }}
-                    exit={{ x: '100%' }}
-                    transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                    className="fixed right-0 top-0 z-50 h-screen w-full sm:max-w-2xl bg-background border-l border-border shadow-2xl focus:outline-none flex flex-col"
-                  >
-                    <Sheet.Title className="sr-only">Professional Journey</Sheet.Title>
-                    <Sheet.Description className="sr-only">
-                      Detailed information about professional experience and career journey
-                    </Sheet.Description>
+        <div className="section-inner relative z-10 py-10 sm:py-14">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
+            {/* Left: identity narrative */}
+            <motion.div variants={itemVariants} className="flex flex-col gap-6">
+              <div className="section-label self-start">Personal</div>
 
-                    <div className="flex-shrink-0 px-6 py-6 border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-10">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center border border-border', ACCENT_COLORS.blue.bg)}>
-                            <Briefcase className={cn('w-6 h-6', ACCENT_COLORS.blue.icon)} />
-                          </div>
-                          <div>
-                            <h2 className="text-xl font-semibold text-foreground">
-                              Professional Journey
-                            </h2>
-                            <p className="text-sm text-muted-foreground">
-                              From burgers to cloud platforms
-                            </p>
-                          </div>
-                        </div>
-                        <Sheet.Close asChild>
-                          <Button variant="ghost" size="sm" className="rounded-full w-8 h-8 p-0">
-                            <X className="w-5 h-5" />
-                          </Button>
-                        </Sheet.Close>
-                      </div>
-                    </div>
+              <div className="space-y-4">
+                <p className="text-2xl font-bold text-foreground leading-snug">
+                  Bronx kid.<br />
+                  Caribbean roots.<br />
+                  South Florida now.
+                </p>
+                <p className="text-sm text-muted-foreground leading-relaxed border-s-2 border-primary/30 ps-4">
+                  {personalInfo?.profile?.about?.personal?.[0] || 'Son of Caribbean immigrants. Built by the Bronx. Shaped by community, culture, and an unshakeable belief that people matter more than systems.'}
+                </p>
+              </div>
 
-                    <div className="flex-1 overflow-y-auto px-6 py-8">
-                      <div className="space-y-10">
-                        {/* My Story */}
-                        <div className="space-y-4">
-                          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">My Story</h3>
-                          {personalInfo?.profile?.about?.professional?.split('\n\n').map((paragraph: string, index: number) => (
-                            <p key={index} className="text-sm text-muted-foreground leading-relaxed">
-                              {paragraph}
-                            </p>
-                          )) || (
-                            <p className="text-sm text-muted-foreground leading-relaxed">
-                              {personalInfo?.profile?.about?.businessCard || 'My professional story'}
-                            </p>
-                          )}
-                        </div>
+              <div className="space-y-2 pt-2 border-t border-border/30">
+                {[
+                  { label: 'Hometown', value: 'Bronx, NY' },
+                  { label: 'Based in', value: personalInfo?.profile?.location || 'South Florida' },
+                  { label: 'Family', value: 'Married · Father of 2' },
+                  { label: 'Pets', value: personalInfo?.profile?.pets || '' },
+                ].filter(f => f.value).map(({ label, value }) => (
+                  <div key={label} className="flex items-baseline gap-3">
+                    <span className="text-[10px] font-mono text-muted-foreground/50 uppercase tracking-widest w-16 flex-shrink-0">{label}</span>
+                    <span className="text-sm text-foreground">{value}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
 
-                        {/* Experience Timeline */}
-                        <div className="space-y-6">
-                          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">Experience</h3>
-                          <div className="space-y-4 relative pl-8 border-l border-border ml-3">
-                            {personalInfo?.roles?.map((role: RoleInfo, index: number) => (
-                              <div key={index} className="relative">
-                                <div className="absolute -left-[37px] top-4 w-3 h-3 rounded-full bg-background border-2 border-border" />
-                                <div className="rounded-xl p-5 border border-border bg-card/50 hover:border-border transition-all">
-                                  <div className="flex items-start gap-4 mb-4">
-                                    <div className="w-10 h-10 bg-card rounded-lg flex items-center justify-center border border-border flex-shrink-0">
-                                      <Image
-                                        src={companyLogos[role.company] || role.imageUrl}
-                                        alt={role.company}
-                                        width={32}
-                                        height={32}
-                                        className="object-contain p-1"
-                                        unoptimized={(companyLogos[role.company] || role.imageUrl).endsWith('.svg')}
-                                      />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                      <h4 className="font-semibold text-foreground text-sm">
-                                        {role.title}
-                                      </h4>
-                                      <p className="text-sm text-muted-foreground">
-                                        {role.company} • {role.years}
-                                      </p>
-                                      {ROLE_FOCUS[role.company] && (
-                                        <div className="flex flex-wrap gap-1.5 mt-2">
-                                          {ROLE_FOCUS[role.company].slice(0, 3).map((focus) => (
-                                            <span
-                                              key={focus}
-                                              className="px-2 py-1 rounded-full text-[11px] font-medium bg-muted border border-border text-foreground"
-                                            >
-                                              {focus}
-                                            </span>
-                                          ))}
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                                    {role.summary}
-                                  </p>
-                                  <div className="space-y-3">
-                                    <h5 className="text-xs font-semibold text-foreground uppercase tracking-wider">
-                                      Key Achievements
-                                    </h5>
-                                    <ul className="space-y-2">
-                                      {role.highlights.map((highlight, idx) => (
-                                        <li key={idx} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                                          <div className="w-1 h-1 rounded-full bg-gray-400 dark:bg-gray-600 mt-2 flex-shrink-0" />
-                                          <span className="leading-relaxed">{highlight}</span>
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                  {COMPANY_CAREER_URLS[role.company] && (
-                                    <div className="mt-4 pt-4 border-t border-border">
-                                      <a
-                                        href={COMPANY_CAREER_URLS[role.company]}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                                      >
-                                        <span>Explore {role.company} careers</span>
-                                        <ExternalLink className="w-3.5 h-3.5" />
-                                      </a>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
+            {/* Right: passion layout */}
+            <motion.div variants={itemVariants} className="flex flex-col gap-3">
+              <p className="text-[11px] font-mono text-muted-foreground/50 uppercase tracking-widest">What drives me</p>
 
-                        {/* Core Competencies */}
-                        <div className="space-y-4">
-                          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
-                            Core Competencies
-                          </h3>
-                          <div className="grid gap-4 sm:grid-cols-2">
-                            {aggregatedThemes.map((theme) => {
-                              const color = ACCENT_COLORS[theme.color];
-                              const isExpanded = expandedSections[theme.id];
-                              const visibleSkills = isExpanded ? theme.skills : getVisibleSkills(theme.skills, 6);
-                              const remaining = theme.skills.length - visibleSkills.length;
-                              const domainPreview = theme.domains.slice(0, 3);
-                              const domainRemainder = theme.domains.length - domainPreview.length;
+              {/* Spoken Word */}
+              <div className="relative overflow-hidden rounded-xl p-5 bg-purple-500/20 border border-purple-500/30">
+                <p className="text-xs font-mono text-purple-400/70 uppercase tracking-widest mb-1">🎤 Spoken Word</p>
+                <p className="text-base font-semibold text-foreground leading-snug">
+                  &ldquo;Words before platforms.<br />Stages before standups.&rdquo;
+                </p>
+                <p className="text-xs text-muted-foreground mt-2">Writing and performing since high school, the craft that shapes how I communicate everything</p>
+              </div>
 
-                              return (
-                                <div
-                                  key={theme.id}
-                                  className={cn(
-                                    'rounded-xl border p-4 transition-all h-full flex flex-col gap-3',
-                                    'bg-card/70 border-border/60',
-                                    'hover:border-gray-300 dark:hover:border-gray-700'
-                                  )}
-                                >
-                                  <div className="flex items-start justify-between gap-3">
-                                    <div className="flex items-start gap-3">
-                                      <span className={cn('mt-1 h-2 w-2 rounded-full', color.bg)} />
-                                      <div>
-                                        <p className="text-sm font-semibold text-foreground">
-                                          {theme.title}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">{theme.summary}</p>
-                                      </div>
-                                    </div>
-                                    <span
-                                      className={cn(
-                                        'text-[11px] font-semibold px-2 py-1 rounded-full uppercase tracking-wide',
-                                        color.bg,
-                                        color.text,
-                                        'border border-border/30'
-                                      )}
-                                    >
-                                      {theme.id}
-                                    </span>
-                                  </div>
+              {/* Advocacy + NYC Sports */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl p-4 bg-gradient-to-br from-violet-500/20 via-blue-500/15 to-amber-400/15 border border-violet-500/30">
+                  <p className="text-base mb-1 mt-1">✊</p>
+                  <p className="text-xs font-semibold text-foreground">Advocacy</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">Using my platform to amplify underrepresented voices</p>
+                </div>
+                <div className="rounded-xl p-4 bg-blue-500/20 border border-blue-500/30">
+                  <p className="text-base mb-1">🏀</p>
+                  <p className="text-xs font-semibold text-foreground">NYC Sports</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">Knicks. Yankees. Giants. Die-hard, always.</p>
+                </div>
+              </div>
 
-                                  <div className="space-y-1">
-                                    {domainPreview.map((domain) => (
-                                      <p key={domain} className="text-xs text-muted-foreground">
-                                        • {domain}
-                                      </p>
-                                    ))}
-                                    {domainRemainder > 0 && (
-                                      <p className="text-xs text-muted-foreground">+{domainRemainder} more focus areas</p>
-                                    )}
-                                  </div>
+              {/* Neurodiversity + Culture */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl p-4 bg-amber-500/20 border border-amber-500/30">
+                  <p className="text-base mb-1">🧠</p>
+                  <p className="text-xs font-semibold text-foreground">Neurodiversity</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">AuDHD. Raising a neurodiverse family. Breaking stigmas daily.</p>
+                </div>
+                <div className="rounded-xl p-4 bg-muted/60 border border-border/60">
+                  <p className="text-base mb-1">🌍</p>
+                  <p className="text-xs font-semibold text-foreground">Culture</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">Caribbean roots. Bronx upbringing. Culture shapes everything.</p>
+                </div>
+              </div>
 
-                                  <div className="flex flex-wrap gap-2">
-                                    {visibleSkills.map((skill) => (
-                                      <span
-                                        key={skill}
-                                        className="px-3 py-1.5 rounded-full text-xs font-medium bg-muted border border-border text-foreground"
-                                      >
-                                        {skill}
-                                      </span>
-                                    ))}
-                                  </div>
-
-                                  {remaining > 0 && (
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        setExpandedSections((prev) => ({
-                                          ...prev,
-                                          [theme.id]: !isExpanded
-                                        }))
-                                      }
-                                      className="text-sm font-semibold text-foreground hover:text-foreground inline-flex items-center gap-2"
-                                    >
-                                      {isExpanded ? 'Show fewer' : `Show all (${theme.skills.length})`}
-                                    </button>
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-
-                        {/* Key Methodologies */}
-                        <div className="space-y-4">
-                          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
-                            Key Methodologies
-                          </h3>
-                          <div className="flex flex-wrap gap-2">
-                            {['Agile/Scrum', 'Lean Product', 'Systems Thinking', 'Design Thinking', 'Servant Leadership', 'Risk-First Approach'].map((method) => (
-                              <div
-                                key={method}
-                                className="px-3 py-1.5 rounded-full text-sm bg-muted text-foreground border border-border"
-                              >
-                                {method}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                </Sheet.Content>
-              </>
-            )}
-          </AnimatePresence>
-        </Sheet.Portal>
-      </Sheet.Root>
-
-      {/* Personal Drawer */}
-      <Sheet.Root open={isPersonalOpen} onOpenChange={setIsPersonalOpen}>
-        <Sheet.Portal>
-          <AnimatePresence>
-            {isPersonalOpen && (
-              <>
-                <Sheet.Overlay asChild>
-                  <motion.div
-                    className="fixed inset-0 z-50 bg-black/20 dark:bg-black/40 backdrop-blur-sm"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  />
-                </Sheet.Overlay>
-
-                <Sheet.Content asChild>
-                  <motion.div
-                    initial={{ x: '100%' }}
-                    animate={{ x: 0 }}
-                    exit={{ x: '100%' }}
-                    transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                    className="fixed right-0 top-0 z-50 h-screen w-full sm:max-w-2xl bg-background border-l border-border shadow-2xl focus:outline-none flex flex-col"
-                  >
-                    <Sheet.Title className="sr-only">Personal Story</Sheet.Title>
-                    <Sheet.Description className="sr-only">
-                      Detailed information about personal story, values, and background
-                    </Sheet.Description>
-
-                    <div className="flex-shrink-0 px-6 py-6 border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-10">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center border border-border', ACCENT_COLORS.amber.bg)}>
-                            <Heart className={cn('w-6 h-6', ACCENT_COLORS.amber.icon)} />
-                          </div>
-                          <div>
-                            <h2 className="text-xl font-semibold text-foreground">
-                              Personal Story
-                            </h2>
-                            <p className="text-sm text-muted-foreground">
-                              The person behind the professional
-                            </p>
-                          </div>
-                        </div>
-                        <Sheet.Close asChild>
-                          <Button variant="ghost" size="sm" className="rounded-full w-8 h-8 p-0">
-                            <X className="w-5 h-5" />
-                          </Button>
-                        </Sheet.Close>
-                      </div>
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto px-6 py-8">
-                      <div className="space-y-8">
-                        {/* At a Glance */}
-                        <div className="space-y-4">
-                          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">At a Glance</h3>
-                          <div className="grid grid-cols-2 gap-3">
-                            {[
-                              { label: 'Location', value: personalInfo?.profile?.location, icon: MapPin },
-                              { label: 'Family', value: 'Married, 2 boys', icon: User },
-                              { label: 'Hometown', value: personalInfo?.profile?.hometown, icon: Home },
-                              { label: 'Pets', value: personalInfo?.profile?.pets, icon: Heart }
-                            ].map((item) => (
-                              <div
-                                key={item.label}
-                                className={cn(
-                                  'rounded-xl p-4 border transition-all',
-                                  'bg-card/60',
-                                  'border-border/50'
-                                )}
-                              >
-                                <div className="flex items-center gap-2 mb-2">
-                                  <item.icon className="w-4 h-4 text-gray-400" />
-                                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                    {item.label}
-                                  </span>
-                                </div>
-                                <div className="text-sm text-foreground font-medium">
-                                  {item.value}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Roots & Values */}
-                        <div className="space-y-4">
-                          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
-                            Roots & Values
-                          </h3>
-                          <div className={cn(
-                            'rounded-xl p-4 border',
-                            'bg-amber-500/5 dark:bg-amber-500/10',
-                            'border-amber-500/20 dark:border-amber-500/30'
-                          )}>
-                            <p className="text-sm text-muted-foreground leading-relaxed">
-                              Born and raised in the Bronx as a child of Caribbean immigrants. My heritage taught me 
-                              the value of hard work, community, and never forgetting where you came from. These roots 
-                              ground everything I do—from how I lead teams to how I raise my children.
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* My Journey */}
-                        <div className="space-y-4">
-                          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">My Journey</h3>
-                          <div className="space-y-4">
-                            {personalInfo?.profile?.about?.personal && personalInfo.profile.about.personal.length > 0 ? (
-                              personalInfo.profile.about.personal.map((paragraph: string, index: number) => (
-                                <p key={index} className="text-sm text-muted-foreground leading-relaxed">
-                                  {paragraph}
-                                </p>
-                              ))
-                            ) : (
-                              <p className="text-sm text-muted-foreground leading-relaxed">
-                                {personalInfo?.profile?.about?.businessCard || 'My personal journey and story'}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Passions */}
-                        <div className="space-y-4">
-                          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
-                            Passions & Interests
-                          </h3>
-                          <div className="space-y-3">
-                            <div className={cn(
-                              'rounded-xl p-4 border',
-                              'bg-card/60',
-                              'border-border/50'
-                            )}>
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="text-2xl">🎤</span>
-                                <span className="text-sm font-semibold text-foreground">Spoken Word Poetry</span>
-                              </div>
-                              <p className="text-sm text-muted-foreground">
-                                Writing and performing since high school. A craft that influences everything I create
-                              </p>
-                            </div>
-                            <div className={cn(
-                              'rounded-xl p-4 border',
-                              'bg-card/60',
-                              'border-border/50'
-                            )}>
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="text-2xl">🏀⚾🏈</span>
-                                <span className="text-sm font-semibold text-foreground">NYC Sports</span>
-                              </div>
-                              <p className="text-sm text-muted-foreground">
-                                Knicks, Yankees, and Giants. Die-hard fan representing NYC wherever I go
-                              </p>
-                            </div>
-                            <div className={cn(
-                              'rounded-xl p-4 border',
-                              'bg-card/60',
-                              'border-border/50'
-                            )}>
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="text-2xl">✊</span>
-                                <span className="text-sm font-semibold text-foreground">
-                                  Advocacy & <span className="inline-flex">
-                                    <span className="animate-pulse text-red-500 dark:text-red-400">A</span>
-                                    <span className="animate-pulse text-orange-500 dark:text-orange-400" style={{ animationDelay: '0.1s' }}>l</span>
-                                    <span className="animate-pulse text-green-500 dark:text-green-400" style={{ animationDelay: '0.2s' }}>l</span>
-                                    <span className="animate-pulse text-blue-500 dark:text-blue-400" style={{ animationDelay: '0.3s' }}>y</span>
-                                  </span>ship
-                                </span>
-                              </div>
-                              <p className="text-sm text-muted-foreground">
-                                Using my platform to amplify voices and create opportunities for underrepresented communities
-                              </p>
-                            </div>
-                            <div className={cn(
-                              'rounded-xl p-4 border',
-                              'bg-card/60',
-                              'border-border/50'
-                            )}>
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="text-2xl">🧠</span>
-                                <span className="text-sm font-semibold text-foreground">Mental Health & Neurodiversity</span>
-                              </div>
-                              <p className="text-sm text-muted-foreground">
-                                Living as AuDHD and raising two boys, one on the spectrum. Building understanding, breaking stigmas, and learning daily lessons about attention, presence, and what it means to truly see and be seen
-                              </p>
-                            </div>
-                            <div className={cn(
-                              'rounded-xl p-4 border',
-                              'bg-card/60',
-                              'border-border/50'
-                            )}>
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="text-2xl">🌍</span>
-                                <span className="text-sm font-semibold text-foreground">Culture & Community</span>
-                              </div>
-                              <p className="text-sm text-muted-foreground">
-                                Understanding how culture shapes belonging, exclusion, and collective identity. From organizational systems to social movements, culture drives what communities become
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                </Sheet.Content>
-              </>
-            )}
-          </AnimatePresence>
-        </Sheet.Portal>
-      </Sheet.Root>
+              {/* Family First */}
+              <div className="rounded-xl p-4 bg-green-500/20 border border-green-500/30 flex items-center gap-4">
+                <span className="text-2xl flex-shrink-0">❤️</span>
+                <div>
+                  <p className="text-xs font-semibold text-foreground">Family First</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">Father of 2. Husband. Present partner. Everything else flows from this.</p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </motion.div>
     </section>
   );
 };

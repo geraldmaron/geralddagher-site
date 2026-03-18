@@ -3,6 +3,8 @@ import Hero from '@/components/hero/Hero';
 import AboutMe from '@/components/about/About';
 import Timeline from '@/components/Timeline';
 import BlogWrapper from '@/components/posts/BlogWrapper';
+import SectionDivider from '@/components/core/SectionDivider';
+import MetricStrip from '@/components/core/MetricStrip';
 
 export default async function Home() {
   try {
@@ -25,20 +27,34 @@ export default async function Home() {
     return (
       <>
         <Hero />
-        <main className="w-full mx-auto px-3 sm:px-4 lg:px-6 max-w-7xl">
-          <AboutMe />
+        <MetricStrip />
+
+        <main id="main-content">
+          <div className="w-full bg-background">
+            <AboutMe />
+          </div>
+
+          <SectionDivider />
+
           <Timeline initialMilestones={milestones as any} />
-          <section className="w-full py-12 sm:py-16 lg:py-20">
-            <div className="mb-8 sm:mb-10 lg:mb-12">
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-gray-900 dark:text-white mb-2">Latest Posts</h2>
-            </div>
-            <BlogWrapper
-              initialPosts={posts as any}
-              initialTotal={total}
-              categories={categories as any}
-              tags={tags as any}
-            />
-          </section>
+
+          <SectionDivider />
+
+          <div className="w-full bg-background">
+            <section className="section-inner-wide py-12 sm:py-20 lg:py-28">
+              <div className="flex flex-col gap-3 mb-8 sm:mb-12">
+                <span className="section-label">Writing</span>
+                <h2 className="section-heading">Latest Posts</h2>
+                <p className="section-subheading max-w-xl">Thoughts on platform engineering, product leadership, and building with intention.</p>
+              </div>
+              <BlogWrapper
+                initialPosts={posts as any}
+                initialTotal={total}
+                categories={categories as any}
+                tags={tags as any}
+              />
+            </section>
+          </div>
         </main>
       </>
     );
@@ -46,21 +62,35 @@ export default async function Home() {
     return (
       <>
         <Hero />
-        <main className="w-full mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-          <AboutMe />
+        <MetricStrip />
+
+        <main id="main-content">
+          <div className="w-full bg-background">
+            <AboutMe />
+          </div>
+
+          <SectionDivider />
+
           <Timeline initialMilestones={[]} />
-          <section className="w-full py-12 sm:py-16 lg:py-20">
-            <div className="mb-8 sm:mb-10 lg:mb-12">
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-gray-900 dark:text-white mb-2">Latest Posts</h2>
-            </div>
-            <div className="text-center py-12">
-              <div className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-gray-50/80 dark:bg-gray-900/80 border border-gray-200/60 dark:border-gray-800/60 backdrop-blur-sm">
-                <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">
-                  Unable to load posts at the moment. Please try again later.
-                </p>
+
+          <SectionDivider />
+
+          <div className="w-full bg-background">
+            <section className="section-inner-wide py-12 sm:py-20 lg:py-28">
+              <div className="flex flex-col gap-3 mb-8 sm:mb-12">
+                <span className="section-label">Writing</span>
+                <h2 className="section-heading">Latest Posts</h2>
+                <p className="section-subheading max-w-xl">Thoughts on platform engineering, product leadership, and building with intention.</p>
               </div>
-            </div>
-          </section>
+              <div className="text-center py-12">
+                <div className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-muted border border-border/60">
+                  <p className="text-foreground text-sm font-medium">
+                    Unable to load posts at the moment. Please try again later.
+                  </p>
+                </div>
+              </div>
+            </section>
+          </div>
         </main>
       </>
     );

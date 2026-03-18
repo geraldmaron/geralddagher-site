@@ -2,10 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Button from '@/components/core/Button';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ChevronDown } from 'lucide-react';
 import { motion, useReducedMotion, useScroll, useTransform, Variants } from 'framer-motion';
 import BusinessCard from '@/components/core/BusinessCard';
-import ResumeModal from '@/components/core/ResumeModal';
 import TypingText from './TypingText';
 import { name } from '@/lib/constants';
 import Image from 'next/image';
@@ -27,15 +26,8 @@ const itemVariants: Variants = {
   }
 };
 
-const highlightPills = [
-  'Reliability & platform',
-  'Product leadership',
-  'Mentor & coach'
-];
-
 const Hero: React.FC = () => {
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
-  const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [personalInfo, setPersonalInfo] = useState<any>(null);
   const prefersReducedMotion = useReducedMotion();
@@ -163,14 +155,6 @@ const Hero: React.FC = () => {
             initial="initial"
             animate="animate"
           >
-            <motion.div
-              variants={itemVariants}
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-xs font-medium text-white/90 shadow-sm backdrop-blur"
-            >
-              <span className="h-2 w-2 rounded-full bg-gradient-to-r from-blue-400 to-emerald-300 shadow-[0_0_0_4px_rgba(59,130,246,0.25)]" />
-              Building resilient platforms & teams with intent
-            </motion.div>
-
             <TypingText />
 
             <motion.p
@@ -179,21 +163,6 @@ const Hero: React.FC = () => {
             >
               Product and platform leader translating reliability, risk, and delivery discipline into durable business outcomes. I help teams ship fast without breaking trust.
             </motion.p>
-
-            <motion.div
-              variants={itemVariants}
-              className="flex flex-wrap gap-3"
-            >
-              {highlightPills.map((pill) => (
-                <span
-                  key={pill}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-sm font-medium text-white/90 shadow-sm backdrop-blur"
-                >
-                  <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-blue-500 to-emerald-500" />
-                  {pill}
-                </span>
-              ))}
-            </motion.div>
 
             <motion.div
               variants={itemVariants}
@@ -212,22 +181,33 @@ const Hero: React.FC = () => {
                 variant="outline"
                 size="md"
                 className="border-white/25 bg-white/10 text-white hover:border-white/40 hover:bg-white/20"
-                onClick={() => setIsResumeModalOpen(true)}
+                onClick={() => {
+                  const about = document.querySelector('[data-section="about"]');
+                  if (about) about.scrollIntoView({ behavior: 'smooth' });
+                }}
               >
-                View Résumé
+                See my work <ChevronDown className="h-4 w-4" />
               </Button>
             </motion.div>
           </motion.div>
         </div>
 
+        <motion.div
+          className="absolute bottom-8 left-1/2 -translate-x-1/2"
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.5, duration: 0.5 }}
+        >
+          <motion.div
+            animate={{ y: [0, 6, 0] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+            className="flex flex-col items-center gap-1 text-white/40"
+          >
+            <ChevronDown className="h-5 w-5" />
+          </motion.div>
+        </motion.div>
+
         {isMounted && isConnectModalOpen && createPortal(modal, document.body)}
-        {isMounted && isResumeModalOpen && createPortal(
-          <ResumeModal
-            isOpen={isResumeModalOpen}
-            onClose={() => setIsResumeModalOpen(false)}
-          />,
-          document.body
-        )}
       </section>
     </>
   );

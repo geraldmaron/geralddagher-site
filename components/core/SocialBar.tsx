@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { motion } from 'framer-motion';
 import { Mail, Globe } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const ThreadsIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 192 192" fill="currentColor" aria-hidden="true">
@@ -72,45 +73,43 @@ const SocialMediaBar: React.FC<SocialMediaBarProps> = ({
     setMounted(true);
   }, []);
 
-  const containerClass = variant === 'default'
-    ? `flex justify-center gap-4 p-2 sm:p-4 w-full ${className}`
-    : `flex flex-wrap justify-center gap-4 mb-6 ${className}`;
-
-  const linkClass = variant === 'default'
-    ? `inline-flex items-center justify-center p-2 rounded-md transition-colors duration-300 text-foreground hover:text-muted-foreground ${mounted ? '' : 'opacity-0'}`
-    : `w-12 h-12 flex items-center justify-center rounded-full bg-muted text-foreground hover:bg-muted/80 transition-colors ${mounted ? '' : 'opacity-0'}`;
-
   return (
-    <Tooltip.Provider>
-      <div className={containerClass}>
+    <Tooltip.Provider delayDuration={300}>
+      <div className={cn(
+        'flex flex-wrap items-center gap-1',
+        variant === 'default' ? `justify-center p-2 sm:p-3 w-full ${className}` : `justify-center gap-3 mb-6 ${className}`
+      )}>
         {socialLinks.map((link) => {
           const Icon = link.icon;
           return (
             <Tooltip.Root key={link.name}>
               <Tooltip.Trigger asChild>
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
+                <motion.a
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Visit ${link.name}`}
+                  whileHover={{ scale: 1.1, y: -1 }}
                   whileTap={{ scale: 0.95 }}
-                  className="transition-all duration-300"
+                  className={cn(
+                    'inline-flex items-center justify-center rounded-lg transition-all duration-200',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                    variant === 'default'
+                      ? 'w-9 h-9 text-muted-foreground hover:text-foreground hover:bg-muted'
+                      : 'w-10 h-10 bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground',
+                    !mounted && 'opacity-0'
+                  )}
                 >
-                  <a
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`Visit ${link.name}`}
-                    className={linkClass}
-                  >
-                    <Icon className="w-5 h-5" />
-                  </a>
-                </motion.div>
+                  <Icon className="w-4 h-4" />
+                </motion.a>
               </Tooltip.Trigger>
               <Tooltip.Portal>
                 <Tooltip.Content
-                  className="z-50 overflow-hidden rounded-md bg-popover px-3 py-1.5 text-sm text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
-                  sideOffset={5}
+                  className="z-50 overflow-hidden rounded-lg bg-foreground px-2.5 py-1.5 text-xs font-medium text-background shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
+                  sideOffset={6}
                 >
                   {link.name}
-                  <Tooltip.Arrow className="fill-popover" />
+                  <Tooltip.Arrow className="fill-foreground" />
                 </Tooltip.Content>
               </Tooltip.Portal>
             </Tooltip.Root>

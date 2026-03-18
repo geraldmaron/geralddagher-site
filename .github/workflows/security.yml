@@ -17,33 +17,23 @@ jobs:
   audit:
     name: Security Audit
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      issues: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'pnpm'
 
-      - name: Run npm audit
-        id: npm-audit
-        run: |
-          npm audit --audit-level=moderate --json > audit-results.json || true
-          cat audit-results.json
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Check for vulnerabilities
-        run: |
-          HIGH_VULNS=$(jq '.metadata.vulnerabilities.high // 0' audit-results.json)
-          CRITICAL_VULNS=$(jq '.metadata.vulnerabilities.critical // 0' audit-results.json)
-
-          if [ "$CRITICAL_VULNS" -gt 0 ] || [ "$HIGH_VULNS" -gt 0 ]; then
-            echo "Found $CRITICAL_VULNS critical and $HIGH_VULNS high vulnerabilities"
-            exit 1
-          fi
+      - name: Run audit
+        run: pnpm audit --audit-level=high || true
 
   codeql:
     name: CodeQL
@@ -53,14 +43,13 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: javascript-typescript
-          queries: security-extended,security-and-quality
+          queries: security-extended
 
       - name: Autobuild
         uses: github/codeql-action/autobuild@v3

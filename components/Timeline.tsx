@@ -123,72 +123,65 @@ export default function Timeline({ initialMilestones = [] }: TimelineProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="max-w-2xl mx-auto"
+              className="max-w-2xl mx-auto relative"
             >
-              {grouped.map(([decade, items]) => (
-                <div key={decade}>
-                  <motion.div
-                    className="flex items-center gap-4 py-4"
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true, margin: '-40px' }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <div className="flex-1 h-px bg-border/30" />
-                    <span className="font-mono text-xs font-bold text-muted-foreground/40 uppercase tracking-[0.2em]">
-                      {decade}
-                    </span>
-                    <div className="flex-1 h-px bg-border/30" />
-                  </motion.div>
+              <div className="max-h-[520px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pr-1">
+                {grouped.map(([decade, items]) => (
+                  <div key={decade}>
+                    <div className="flex items-center gap-4 py-4 sticky top-0 bg-background/90 backdrop-blur-sm z-10">
+                      <div className="flex-1 h-px bg-border/30" />
+                      <span className="font-mono text-xs font-bold text-muted-foreground/40 uppercase tracking-[0.2em]">
+                        {decade}
+                      </span>
+                      <div className="flex-1 h-px bg-border/30" />
+                    </div>
 
-                  {items.map((m, idx) => {
-                    const category = detectCategory(m);
-                    const styles = CATEGORY_STYLES[category] ?? CATEGORY_STYLES.default;
+                    {items.map((m, idx) => {
+                      const category = detectCategory(m);
+                      const styles = CATEGORY_STYLES[category] ?? CATEGORY_STYLES.default;
 
-                    return (
-                      <motion.div
-                        key={`${m.event}-${m.year}-${idx}`}
-                        className="flex items-start gap-5 py-3 group"
-                        initial={{ opacity: 0, x: -12 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true, margin: '-40px' }}
-                        transition={{ duration: 0.3, delay: idx * 0.04 }}
-                      >
-                        <div className="flex flex-col items-center gap-1 pt-1 flex-shrink-0 w-12">
-                          <span className="font-mono text-xs text-muted-foreground/60 tabular-nums leading-none">
-                            {m.year}
-                          </span>
-                          <div className="w-px flex-1 min-h-[20px] bg-border/20" />
-                        </div>
+                      return (
+                        <div
+                          key={`${m.event}-${m.year}-${idx}`}
+                          className="flex items-start gap-5 py-3"
+                        >
+                          <div className="flex flex-col items-center gap-1 pt-1 flex-shrink-0 w-12">
+                            <span className="font-mono text-xs text-muted-foreground/60 tabular-nums leading-none">
+                              {m.year}
+                            </span>
+                            <div className="w-px flex-1 min-h-[20px] bg-border/20" />
+                          </div>
 
-                        <div className="flex-shrink-0 pt-[3px]">
-                          <span
-                            className={cn(
-                              'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide border',
-                              styles.border,
-                              styles.bg,
-                              styles.text
-                            )}
-                          >
-                            {category}
-                          </span>
-                        </div>
+                          <div className="flex-shrink-0 pt-[3px]">
+                            <span
+                              className={cn(
+                                'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide border',
+                                styles.border,
+                                styles.bg,
+                                styles.text
+                              )}
+                            >
+                              {category}
+                            </span>
+                          </div>
 
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-foreground leading-snug">
-                            {m.event}
-                          </p>
-                          {m.summary && (
-                            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                              {m.summary}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground leading-snug">
+                              {m.event}
                             </p>
-                          )}
+                            {m.summary && (
+                              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                                {m.summary}
+                              </p>
+                            )}
+                          </div>
                         </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              ))}
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+              <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background to-transparent" aria-hidden="true" />
             </motion.div>
           )}
         </AnimatePresence>

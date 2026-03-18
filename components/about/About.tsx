@@ -530,7 +530,7 @@ const AboutSection: React.FC = () => {
               <div className="space-y-2">
                 <p className="text-[11px] font-mono text-muted-foreground/50 uppercase tracking-widest">Core stack</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {['Kubernetes', 'Terraform', 'AWS · GCP', 'HashiCorp Vault', 'GitHub Actions', 'FedRAMP · SOC 2', 'SRE / DevOps', 'AIOps'].map((tech) => (
+                  {['Terraform · IaC', 'AWS · GCP', 'Platform Engineering', 'Internal Dev Platforms', 'Observability · SRE', 'LLMOps · MLOps', 'AIOps'].map((tech) => (
                     <span
                       key={tech}
                       className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono bg-primary/5 text-primary/70 border border-primary/10"

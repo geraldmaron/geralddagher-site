@@ -1,44 +1,19 @@
 'use client';
-import type { ComponentType } from 'react';
 import { useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
-import { 
-  Sparkles, Briefcase, HeartPulse, GraduationCap, Home, Baby, Cross, 
-  HeartHandshake, Eye, Users, Dog, Cat, Heart, ArrowRight, ArrowLeft, 
-  ArrowUp, BookOpen, TrendingUp, RefreshCw, Activity
-} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import type { Milestone } from '@/lib/types/shared';
 
 type FilterType = 'all' | 'career' | 'personal' | 'family' | 'education';
 
-const categoryMeta: Record<FilterType, { label: string; icon: ComponentType<{ className?: string }> }> = {
-  all: { label: 'All', icon: Sparkles },
-  career: { label: 'Career', icon: Briefcase },
-  personal: { label: 'Personal', icon: HeartPulse },
-  family: { label: 'Family', icon: Home },
-  education: { label: 'Education', icon: GraduationCap }
-};
+const FILTERS: FilterType[] = ['all', 'career', 'personal', 'family', 'education'];
 
-const iconMap: Record<string, ComponentType<{ className?: string }>> = {
-  'baby': Baby,
-  'hospital': Activity,
-  'medkit': Activity,
-  'eye-slash': Eye,
-  'sad-tear': Cross,
-  'arrow-right': ArrowRight,
-  'graduation-cap': GraduationCap,
-  'book': BookOpen,
-  'briefcase': Briefcase,
-  'arrow-up': TrendingUp,
-  'procedures': Activity,
-  'cross': Cross,
-  'cat': Cat,
-  'arrow-left': ArrowLeft,
-  'dog': Dog,
-  'heart': Heart,
-  'users': Users,
-  'sync': RefreshCw
+const CATEGORY_STYLES: Record<string, { bg: string; text: string; border: string }> = {
+  career:    { bg: 'bg-blue-500/10',    text: 'text-blue-700 dark:text-blue-300',    border: 'border-blue-500/30' },
+  personal:  { bg: 'bg-purple-500/10',  text: 'text-purple-700 dark:text-purple-300', border: 'border-purple-500/30' },
+  family:    { bg: 'bg-rose-500/10',    text: 'text-rose-700 dark:text-rose-300',    border: 'border-rose-500/30' },
+  education: { bg: 'bg-emerald-500/10', text: 'text-emerald-700 dark:text-emerald-300', border: 'border-emerald-500/30' },
+  default:   { bg: 'bg-muted',          text: 'text-muted-foreground',               border: 'border-border' },
 };
 
 const detectCategory = (milestone: Milestone): FilterType => {
@@ -79,97 +54,145 @@ export default function Timeline({ initialMilestones = [] }: TimelineProps) {
       buckets[decade].push(m);
     });
     return Object.entries(buckets)
-      .sort((a, b) => Number(b[0]) - Number(a[0]))
+      .sort((a, b) => parseInt(b[0], 10) - parseInt(a[0], 10))
       .map(([decade, items]) => [decade, items.sort((a, b) => Number(b.year) - Number(a.year))] as const);
   }, [filtered]);
 
   return (
-    <div className="relative overflow-hidden bg-background text-foreground py-16 sm:py-20">
-      <div className="pointer-events-none absolute inset-0 opacity-40">
-        <div className="absolute left-1/4 top-20 h-64 w-64 rounded-full bg-blue-500/20 blur-3xl" />
-        <div className="absolute right-1/4 bottom-20 h-64 w-64 rounded-full bg-purple-500/20 blur-3xl" />
-      </div>
+    <section
+      aria-label="Timeline"
+      data-section="timeline"
+      className="section-wrapper relative"
+    >
+      <div className="absolute inset-0 dot-grid opacity-40 pointer-events-none" aria-hidden="true" />
 
-      <div className="relative mx-auto flex max-w-5xl flex-col gap-10 px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-4 text-center">
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">Timeline</h1>
-          <p className="text-base text-muted-foreground max-w-2xl mx-auto">
-            Key moments across life, career, and family
+      <div className="section-inner relative">
+        <motion.div
+          className="flex flex-col gap-4 text-center mb-14"
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+        >
+          <span className="section-label mx-auto">Timeline</span>
+          <h2 className="section-heading">A Life in Moments</h2>
+          <p className="section-subheading max-w-xl mx-auto">
+            Key milestones across career, family, and personal life
           </p>
-          <div className="flex flex-wrap justify-center gap-2 mt-2">
-            {(Object.keys(categoryMeta) as FilterType[]).map((key) => {
-              const Icon = categoryMeta[key].icon;
-              const active = filter === key;
-              return (
-                <button
-                  key={key}
-                  onClick={() => setFilter(key)}
-                  className={cn(
-                    'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all',
-                    active
-                      ? 'bg-foreground text-background'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                  )}
-                >
-                  <Icon className="h-4 w-4" />
-                  {categoryMeta[key].label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        </motion.div>
 
-        <div className="space-y-12 max-h-[70vh] overflow-y-auto">
-          {grouped.map(([decade, items]) => (
-            <div key={decade} className="space-y-4">
-              <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm py-2">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl font-bold text-foreground">{decade}</span>
-                  <div className="h-px flex-1 bg-border" />
-                </div>
-              </div>
-              <div className="space-y-4">
-                {items.map((m, idx) => {
-                  const category = detectCategory(m);
-                  const Icon = iconMap[m.icon] || HeartHandshake;
-
-                  const iconColors: Record<string, string> = {
-                    career: 'bg-cyan-500/10 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400',
-                    personal: 'bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400',
-                    family: 'bg-rose-500/10 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400',
-                    education: 'bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400'
-                  };
-
-                  const iconColor = iconColors[category] || 'bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400';
-
-                  return (
-                    <motion.div
-                      key={`${m.event}-${m.year}-${idx}`}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: idx * 0.05 }}
-                      className="group relative flex gap-4 rounded-xl border border-border bg-card p-5 transition-all hover:border-border/80 hover:shadow-lg"
-                    >
-                      <div className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-lg transition-colors", iconColor)}>
-                        <Icon className="h-6 w-6" />
-                      </div>
-                      <div className="flex-1 space-y-2">
-                        <div className="flex items-start justify-between gap-4">
-                          <h3 className="text-lg font-semibold leading-tight">{m.event}</h3>
-                          <span className="shrink-0 text-sm font-medium text-muted-foreground">{m.year}</span>
-                        </div>
-                        <p className="text-sm leading-relaxed text-muted-foreground">
-                          {m.summary}
-                        </p>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </div>
+        <motion.div
+          className="flex flex-wrap justify-center gap-2 mb-12"
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+        >
+          {FILTERS.map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={cn(
+                'px-3 py-1.5 rounded-full text-xs font-semibold capitalize transition-all duration-200',
+                filter === f
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80'
+              )}
+            >
+              {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
+            </button>
           ))}
-        </div>
+        </motion.div>
+
+        <AnimatePresence mode="wait">
+          {filtered.length === 0 ? (
+            <motion.div
+              key="empty"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="py-20 text-center"
+            >
+              <p className="text-muted-foreground text-sm">No milestones in this category yet.</p>
+            </motion.div>
+          ) : (
+            <motion.div
+              key={filter}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="max-w-2xl mx-auto"
+            >
+              {grouped.map(([decade, items]) => (
+                <div key={decade}>
+                  <motion.div
+                    className="flex items-center gap-4 py-4"
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true, margin: '-40px' }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="flex-1 h-px bg-border/30" />
+                    <span className="font-mono text-xs font-bold text-muted-foreground/40 uppercase tracking-[0.2em]">
+                      {decade}
+                    </span>
+                    <div className="flex-1 h-px bg-border/30" />
+                  </motion.div>
+
+                  {items.map((m, idx) => {
+                    const category = detectCategory(m);
+                    const styles = CATEGORY_STYLES[category] ?? CATEGORY_STYLES.default;
+
+                    return (
+                      <motion.div
+                        key={`${m.event}-${m.year}-${idx}`}
+                        className="flex items-start gap-5 py-3 group"
+                        initial={{ opacity: 0, x: -12 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true, margin: '-40px' }}
+                        transition={{ duration: 0.3, delay: idx * 0.04 }}
+                      >
+                        <div className="flex flex-col items-center gap-1 pt-1 flex-shrink-0 w-12">
+                          <span className="font-mono text-xs text-muted-foreground/60 tabular-nums leading-none">
+                            {m.year}
+                          </span>
+                          <div className="w-px flex-1 min-h-[20px] bg-border/20" />
+                        </div>
+
+                        <div className="flex-shrink-0 pt-[3px]">
+                          <span
+                            className={cn(
+                              'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide border',
+                              styles.border,
+                              styles.bg,
+                              styles.text
+                            )}
+                          >
+                            {category}
+                          </span>
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground leading-snug">
+                            {m.event}
+                          </p>
+                          {m.summary && (
+                            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                              {m.summary}
+                            </p>
+                          )}
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </div>
+    </section>
   );
 }

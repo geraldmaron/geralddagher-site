@@ -60,8 +60,8 @@ const TMPPage: FC = () => {
 
   if (error) {
     return (
-      <main className="relative flex min-h-screen w-full flex-col items-center justify-center bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-50">
-        <div className="rounded-xl border border-red-200/60 bg-white/80 px-4 py-3 text-sm text-red-600 shadow-sm backdrop-blur dark:border-red-800/60 dark:bg-red-900/20 dark:text-red-200">
+      <main className="relative flex min-h-screen w-full flex-col items-center justify-center bg-background text-foreground transition-colors duration-300">
+        <div className="rounded-xl border border-destructive/20 bg-card px-4 py-3 text-sm text-destructive shadow-sm">
           {error}
         </div>
       </main>
@@ -69,15 +69,15 @@ const TMPPage: FC = () => {
   }
 
   return (
-    <main className="relative min-h-screen w-full overflow-hidden bg-slate-50 text-slate-900 transition-colors duration-500 dark:bg-slate-950 dark:text-slate-50">
+    <main className="relative min-h-screen w-full bg-background text-foreground transition-colors duration-500">
       <div className="pointer-events-none absolute inset-0 -z-10 opacity-70">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_20%,rgba(59,130,246,0.2),transparent_30%),radial-gradient(circle_at_80%_0%,rgba(236,72,153,0.18),transparent_32%),radial-gradient(circle_at_50%_85%,rgba(52,211,153,0.16),transparent_26%)] dark:bg-[radial-gradient(circle_at_10%_20%,rgba(59,130,246,0.16),transparent_32%),radial-gradient(circle_at_80%_0%,rgba(236,72,153,0.14),transparent_34%),radial-gradient(circle_at_55%_90%,rgba(52,211,153,0.12),transparent_28%)]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-white via-slate-50/60 to-slate-100/70 dark:from-slate-950 dark:via-slate-950/60 dark:to-black/40" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/60 to-muted/70" />
       </div>
 
       <motion.div
         key="content"
-        className="relative z-10 flex flex-col gap-16 pb-16 pt-10 sm:gap-20 sm:pt-14 md:gap-24 md:pt-16"
+        className="relative z-10 flex flex-col gap-10 pb-12 pt-8 sm:gap-16 sm:pb-16 sm:pt-10 md:gap-20 md:pt-14 lg:gap-24 lg:pt-16"
         variants={fadeVariants}
         initial="initial"
         animate="animate"
@@ -88,8 +88,8 @@ const TMPPage: FC = () => {
         {submissions.length > 0 && (
           <section className="relative px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-7xl">
-              <div className="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/70 shadow-xl shadow-blue-500/5 ring-1 ring-slate-200/60 backdrop-blur dark:border-slate-800 dark:bg-slate-900/70 dark:ring-slate-800/70">
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-blue-500/8 via-purple-500/8 to-emerald-400/6 dark:from-blue-400/10 dark:via-purple-400/10 dark:to-emerald-300/10" />
+              <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card shadow-xl shadow-blue-500/5">
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-blue-500/8 via-purple-500/8 to-emerald-400/6" />
                 <div className="relative">
                   <TMPYouTube submissions={submissions} />
                 </div>

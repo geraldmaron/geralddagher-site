@@ -1,7 +1,6 @@
 'use client';
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useTheme } from '@/components/core/ThemeProvider';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import { formatDistanceToNow } from 'date-fns';
@@ -13,12 +12,11 @@ import type { TMPVideo } from '@/lib/types/tmp';
 interface TMPVideoCardProps {
   video: TMPVideo;
   viewMode: 'grid' | 'list';
-  isDarkMode: boolean;
   onSelect: () => void;
   isActive: boolean;
 }
 
-export default function TMPVideoCard({ video, viewMode, isDarkMode, onSelect, isActive }: TMPVideoCardProps) {
+export default function TMPVideoCard({ video, viewMode, onSelect, isActive }: TMPVideoCardProps) {
   const prefersReducedMotion = useReducedMotion();
   
   const cardVariants = {
@@ -51,13 +49,13 @@ export default function TMPVideoCard({ video, viewMode, isDarkMode, onSelect, is
         onClick={onSelect}
         className={cn(
           'group relative overflow-hidden cursor-pointer transition-all duration-300 border',
-          'bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm',
-          'border-gray-200/60 dark:border-gray-800/60',
-          'hover:border-gray-300/80 dark:hover:border-gray-700/80',
-          'shadow-sm hover:shadow-lg dark:shadow-gray-900/20',
+          'bg-card/80 backdrop-blur-sm',
+          'border-border/60',
+          'hover:border-border',
+          'shadow-sm hover:shadow-lg',
           'rounded-2xl min-h-[120px] sm:min-h-[140px] w-full',
           'max-w-full',
-          isActive && 'ring-2 ring-blue-500/60 ring-offset-2 ring-offset-gray-50 dark:ring-offset-gray-900'
+          isActive && 'ring-2 ring-blue-500/60 ring-offset-2 ring-offset-background'
         )}
         role="button"
         tabIndex={0}
@@ -80,7 +78,7 @@ export default function TMPVideoCard({ video, viewMode, isDarkMode, onSelect, is
               />
             </div>
             <div className="flex-1 min-w-0 overflow-hidden relative z-10">
-              <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300 leading-tight line-clamp-2 break-words text-xs sm:text-sm md:text-base lg:text-lg">
+              <h3 className="font-semibold text-foreground group-hover:text-muted-foreground transition-colors duration-300 leading-tight line-clamp-2 break-words text-xs sm:text-sm md:text-base lg:text-lg">
                 {video.title}
               </h3>
             </div>
@@ -88,7 +86,7 @@ export default function TMPVideoCard({ video, viewMode, isDarkMode, onSelect, is
           
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mt-auto relative z-10">
             <div className="flex-1 min-w-0 overflow-hidden relative z-10">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 text-gray-600 dark:text-gray-400">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 text-muted-foreground">
                 <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-shrink-0">
                   <Clock size={14} className="flex-shrink-0" />
                   <span className="whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px] sm:max-w-none">{formatDate(video.published_at)}</span>
@@ -130,11 +128,11 @@ export default function TMPVideoCard({ video, viewMode, isDarkMode, onSelect, is
       className={cn(
         'relative overflow-hidden rounded-2xl cursor-pointer transition-all duration-300',
         'aspect-video w-full',
-        'bg-white dark:bg-gray-900',
-        'shadow-lg hover:shadow-xl dark:shadow-gray-900/30',
-        'border border-gray-200/60 dark:border-gray-800/60',
-        'hover:border-gray-300/80 dark:hover:border-gray-700/80',
-        isActive && 'ring-2 ring-blue-500/60 ring-offset-2 ring-offset-gray-50 dark:ring-offset-gray-900'
+        'bg-card',
+        'shadow-lg hover:shadow-xl',
+        'border border-border/60',
+        'hover:border-border',
+        isActive && 'ring-2 ring-blue-500/60 ring-offset-2 ring-offset-background'
       )}
       role="button"
       tabIndex={0}

@@ -46,7 +46,7 @@ const TMPWhatToExpect: React.FC<TMPWhatToExpectProps> = ({
           pull ideas from our{' '}
           <button
             onClick={handleQuestionBankClick}
-            className="text-purple-500 hover:text-purple-600 underline focus:outline-none focus:ring-2 focus:ring-purple-500 rounded"
+            className="text-primary hover:text-primary/80 underline focus:outline-none focus:ring-2 focus:ring-ring rounded"
             aria-label="Open question bank"
           >
             question bank
@@ -111,7 +111,7 @@ const TMPWhatToExpect: React.FC<TMPWhatToExpectProps> = ({
                     whileHover={{ scale: 1.1, rotate: 90 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={onClose}
-                    className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted"
+                    className="absolute top-4 right-4 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full hover:bg-muted"
                     aria-label="Close what to expect dialog"
                   >
                     <X className="w-5 h-5" />
@@ -133,7 +133,7 @@ const TMPWhatToExpect: React.FC<TMPWhatToExpectProps> = ({
                             className="p-3 rounded-full flex-shrink-0 bg-muted"
                             aria-hidden="true"
                           >
-                            <step.icon className="text-purple-500 w-5 h-5" />
+                            <step.icon className="text-primary w-5 h-5" />
                           </div>
                           <div>
                                                          <h3 className="mb-2 text-base font-medium">{step.title}</h3>

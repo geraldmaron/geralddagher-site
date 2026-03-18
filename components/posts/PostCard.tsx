@@ -282,13 +282,13 @@ export default function PostCard({
           role="article"
           aria-labelledby={`post-title-${post.id}`}
         >
-          <article className="bg-card/80 backdrop-blur-sm rounded-xl overflow-hidden border border-border/80 hover:border-border transition-all duration-200 h-full flex shadow-sm hover:shadow-lg">
-            <div className="relative w-40 sm:w-48 flex-shrink-0 bg-muted">
+          <article className="bg-card rounded-xl overflow-hidden border border-border/60 hover:border-primary/30 transition-all duration-200 h-full flex shadow-sm hover:shadow-lg">
+            <div className="relative w-24 sm:w-40 md:w-48 flex-shrink-0 bg-muted">
               <Image
                 src={imageUrl}
                 alt={post.title}
                 fill
-                sizes="(max-width: 640px) 160px, 192px"
+                sizes="(max-width: 640px) 96px, (max-width: 768px) 160px, 192px"
                 className={cn(
                   'object-cover transition-opacity duration-300',
                   imageLoaded ? 'opacity-100' : 'opacity-0'
@@ -470,15 +470,15 @@ export default function PostCard({
         role="article"
         aria-labelledby={`post-title-${post.id}`}
       >
-        <article className="bg-card/80 backdrop-blur-sm rounded-xl overflow-hidden border border-border/80 hover:border-border transition-all duration-200 h-full flex flex-col shadow-sm hover:shadow-lg">
-          <div className="relative aspect-[16/9] overflow-hidden bg-muted">
+        <article className="bg-card rounded-xl overflow-hidden border border-border/60 hover:border-primary/30 transition-all duration-200 h-full flex flex-col shadow-sm hover:shadow-[var(--shadow-lg)] hover:-translate-y-1">
+          <div className="relative aspect-[3/2] overflow-hidden bg-muted">
             <Image
               src={imageUrl}
               alt={post.title}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className={cn(
-                'object-cover transition-transform duration-500 group-hover:scale-105',
+                'object-cover transition-[filter] duration-300 group-hover:brightness-90',
                 imageLoaded ? 'opacity-100' : 'opacity-0'
               )}
               onLoad={() => setImageLoaded(true)}
@@ -521,36 +521,39 @@ export default function PostCard({
                 </button>
               </div>
             )}
+
+            {categoryName && (
+              <div className="absolute bottom-3 start-3">
+                <span className="inline-flex items-center bg-background/90 backdrop-blur-sm text-foreground text-[10px] font-semibold uppercase tracking-wide px-2.5 py-1 rounded-md">
+                  {categoryName}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="p-5 flex-1 flex flex-col">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3 flex-wrap">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-3">
               <time dateTime={displayDate.toISOString()}>{formattedDate}</time>
-              <span>•</span>
+              <span>·</span>
               <span>{readingTime} min read</span>
-              {categoryName && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[11px] font-medium border border-primary/20">
-                  {categoryName}
-                </span>
-              )}
             </div>
 
             <h2
               id={`post-title-${post.id}`}
-              className="text-lg font-semibold text-foreground leading-tight line-clamp-2 mb-3 group-hover:text-primary transition-colors"
+              className="text-xl font-semibold text-foreground leading-tight line-clamp-2 mb-3 group-hover:text-primary transition-colors text-pretty"
             >
               {searchQuery ? highlightText(post.title, searchQuery) : post.title}
             </h2>
 
             <div className="relative mb-4">
               {searchQuery.trim() ? (
-                <div className="prose prose-sm prose-gray dark:prose-invert max-w-none text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                <div className="prose prose-sm prose-gray dark:prose-invert max-w-none text-sm text-muted-foreground leading-relaxed line-clamp-2">
                   {displayText}
                 </div>
               ) : (
                 <div className="prose prose-sm prose-gray dark:prose-invert max-w-none text-sm text-muted-foreground leading-relaxed">
                   {post.excerpt ? (
-                    <p className="line-clamp-3">{post.excerpt}</p>
+                    <p className="line-clamp-2">{post.excerpt}</p>
                   ) : (
                     <div className="max-h-24 overflow-hidden">
                       <SlateRenderer content={previewContent as any} compact className="[&_p]:mb-2 [&_p]:text-sm [&_ul]:my-1 [&_ol]:my-1" />
@@ -562,30 +565,14 @@ export default function PostCard({
             </div>
 
             <div className="flex items-center justify-between gap-3 pt-4 border-t border-border/60 mt-auto">
-              <div className="flex min-w-0 items-center gap-2 overflow-hidden flex-nowrap h-8">
-                {authorName && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary shrink-0">
-                    {authorName}
-                  </span>
-                )}
-                {tagNames.slice(0, 2).map((tagName, index) => (
-                  <span
-                    key={`${tagName}-${index}`}
-                    className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-muted text-muted-foreground shrink-0"
-                  >
-                    {tagName}
-                  </span>
-                ))}
-                {tagNames.length > 2 && (
-                  <span className="text-xs text-muted-foreground shrink-0">
-                    +{tagNames.length - 2}
-                  </span>
-                )}
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <time dateTime={displayDate.toISOString()}>{formattedDate}</time>
+                <span>·</span>
+                <span>{readingTime} min read</span>
               </div>
-
-              <div className="flex items-center gap-1.5 text-sm font-medium text-foreground group-hover:gap-2 transition-all">
+              <div className="flex items-center gap-1.5 text-sm font-medium text-primary group-hover:gap-2 transition-all duration-150">
                 <span>Read</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-3.5 h-3.5" />
               </div>
             </div>
           </div>

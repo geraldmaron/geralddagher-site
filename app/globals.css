@@ -33,9 +33,12 @@
   --muted: 214 18% 94%;
   --muted-foreground: 215 16% 46%;
 
-  /* Accent = secondary */
-  --accent: 214 20% 92%;
-  --accent-foreground: 215 25% 22%;
+  /* Accent — warm indigo, distinct from secondary */
+  --accent: 245 60% 60%;
+  --accent-foreground: 0 0% 100%;
+
+  /* Surface — one step below card, for alternating sections */
+  --surface: 214 25% 96%;
 
   /* Semantic */
   --destructive: 0 78% 55%;
@@ -85,9 +88,12 @@
   --muted: 220 14% 16%;
   --muted-foreground: 215 14% 55%;
 
-  /* Accent */
-  --accent: 220 16% 18%;
-  --accent-foreground: 210 18% 80%;
+  /* Accent — warm indigo, slightly lighter for dark contrast */
+  --accent: 245 60% 65%;
+  --accent-foreground: 222 20% 8%;
+
+  /* Surface — fractionally lighter than background */
+  --surface: 222 20% 10%;
 
   /* Semantic */
   --destructive: 0 70% 48%;
@@ -127,6 +133,7 @@
   --color-muted-foreground: hsl(var(--muted-foreground));
   --color-accent: hsl(var(--accent));
   --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-surface: hsl(var(--surface));
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
   --color-border: hsl(var(--border));
@@ -182,7 +189,8 @@
   }
 
   body {
-    @apply bg-background text-foreground text-sm;
+    @apply bg-background text-foreground;
+    font-size: 15px;
     font-family: var(--font-inter), system-ui, sans-serif;
     overflow-x: hidden;
     width: 100%;
@@ -216,7 +224,23 @@
 
   p {
     @apply font-normal text-sm;
-    line-height: 1.55;
+    line-height: 1.65;
+  }
+
+  .display-heading {
+    @apply font-bold tracking-tighter;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+  }
+
+  .section-heading {
+    @apply text-3xl sm:text-4xl font-semibold tracking-tight text-foreground;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+  }
+
+  .section-subheading {
+    @apply text-sm font-normal text-muted-foreground leading-relaxed;
   }
 
   .hero-section h1,
@@ -445,7 +469,24 @@
   }
 
   ::selection {
-    @apply bg-primary/20 text-foreground;
+    @apply bg-primary/25 text-foreground;
+  }
+
+  html::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  html::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  html::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 9999px;
+  }
+
+  html::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
   }
 
   .loading {
@@ -482,7 +523,8 @@
   }
 
   .card-interactive {
-    @apply card-elevated transition-all duration-200;
+    @apply bg-card border border-border/60 rounded-xl transition-all duration-200;
+    box-shadow: var(--shadow-md);
   }
 
   .card-interactive:hover {
@@ -564,6 +606,31 @@
   .text-responsive-4xl { @apply text-2xl sm:text-3xl; }
   .text-responsive-5xl { @apply text-3xl sm:text-4xl; }
   .text-responsive-6xl { @apply text-4xl sm:text-5xl; }
+
+  /* Section layout helpers */
+  .section-wrapper {
+    @apply w-full py-20 sm:py-28 lg:py-32;
+  }
+
+  .section-inner {
+    @apply max-w-5xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-inner-wide {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Dot-grid background texture */
+  .dot-grid {
+    background-image: radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* Section divider — gradient h-px separator */
+  .section-divider {
+    @apply w-full h-px max-w-4xl mx-auto;
+    background: linear-gradient(to right, transparent, hsl(var(--border) / 0.4), transparent);
+  }
 }
 
 /* ============================================================

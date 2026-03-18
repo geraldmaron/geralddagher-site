@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronDown, Lightbulb } from 'lucide-react';
 import questionsData from '@/lib/tmp_questions.json';
-import { useTheme } from '@/components/core/ThemeProvider';
 import Button from '@/components/core/Button';
 import { RemoveScroll } from 'react-remove-scroll';
 
@@ -13,7 +12,6 @@ interface TMPQuestionsProps {
   scrollPosition: number;
 }
 const TMPQuestions: React.FC<TMPQuestionsProps> = ({ isOpen, onClose }) => {
-  const { isDarkMode } = useTheme();
   const [expandedCategory, setExpandedCategory] = useState<number | null>(null);
   const [expandedQuestions, setExpandedQuestions] = useState<Record<string, boolean>>({});
   useEffect(() => {
@@ -41,9 +39,9 @@ const TMPQuestions: React.FC<TMPQuestionsProps> = ({ isOpen, onClose }) => {
   };
   const modalVariants = {
     hidden: { opacity: 0, scale: 0.95, y: 20 },
-    visible: { 
-      opacity: 1, 
-      scale: 1, 
+    visible: {
+      opacity: 1,
+      scale: 1,
       y: 0,
       transition: {
         type: "spring" as const,
@@ -51,8 +49,8 @@ const TMPQuestions: React.FC<TMPQuestionsProps> = ({ isOpen, onClose }) => {
         stiffness: 300
       }
     },
-    exit: { 
-      opacity: 0, 
+    exit: {
+      opacity: 0,
       scale: 0.95,
       transition: {
         duration: 0.2
@@ -80,12 +78,10 @@ const TMPQuestions: React.FC<TMPQuestionsProps> = ({ isOpen, onClose }) => {
               role="dialog"
               aria-modal="true"
               aria-labelledby="questions-title"
-              className={`relative w-full max-w-4xl mx-2 ${
-                isDarkMode ? 'bg-black' : 'bg-white'
-              } rounded-2xl shadow-2xl overflow-hidden`}
+              className="relative w-full max-w-4xl mx-2 bg-card rounded-2xl shadow-2xl overflow-hidden"
             >
               <div className="max-h-[85vh] overflow-y-auto overscroll-contain">
-                <div className="sticky top-0 z-10 p-4 sm:p-6 pb-4 backdrop-blur-md backdrop-saturate-150 bg-opacity-90">
+                <div className="sticky top-0 z-10 p-4 sm:p-6 pb-4 backdrop-blur-md backdrop-saturate-150 bg-card/90">
                   <motion.div
                     whileHover={{ scale: 1.1, rotate: 90 }}
                     whileTap={{ scale: 0.9 }}
@@ -94,14 +90,14 @@ const TMPQuestions: React.FC<TMPQuestionsProps> = ({ isOpen, onClose }) => {
                     <Button
                       onClick={handleClose}
                       variant="ghost"
-                      size="md"
-                      className="p-2 rounded-full"
+                      size="lg"
+                      className="p-0 w-11 rounded-full"
                       aria-label="Close dialog"
                     >
                       <X size={20} />
                     </Button>
                   </motion.div>
-                  <h2 
+                  <h2
                     id="questions-title"
                     className="text-center mb-4"
                   >
@@ -119,11 +115,7 @@ const TMPQuestions: React.FC<TMPQuestionsProps> = ({ isOpen, onClose }) => {
                       initial={false}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: categoryIndex * 0.1 }}
-                      className={`border-l-2 ${
-                        isDarkMode 
-                          ? 'border-gray-600/30' 
-                          : 'border-gray-300/50'
-                      }`}
+                      className="border-l-2 border-border/40"
                     >
                       <Button
                         onClick={() => toggleCategory(categoryIndex)}
@@ -156,11 +148,7 @@ const TMPQuestions: React.FC<TMPQuestionsProps> = ({ isOpen, onClose }) => {
                                   initial={false}
                                   animate={{ opacity: 1, x: 0 }}
                                   transition={{ delay: questionIndex * 0.1 }}
-                                  className={`border-l-2 ${
-                                    isDarkMode 
-                                      ? 'border-gray-600/40' 
-                                      : 'border-gray-300/60'
-                                  }`}
+                                  className="border-l-2 border-border/50"
                                 >
                                   <Button
                                     onClick={() => toggleQuestion(categoryIndex, questionIndex)}
@@ -170,7 +158,7 @@ const TMPQuestions: React.FC<TMPQuestionsProps> = ({ isOpen, onClose }) => {
                                     aria-expanded={expandedQuestions[`${categoryIndex}-${questionIndex}`]}
                                   >
                                     <p className="flex-1 text-sm">{question.question}</p>
-                                    <ChevronDown 
+                                    <ChevronDown
                                       size={14}
                                       className={`transform transition-transform ${
                                         expandedQuestions[`${categoryIndex}-${questionIndex}`] ? 'rotate-180' : ''
@@ -185,7 +173,7 @@ const TMPQuestions: React.FC<TMPQuestionsProps> = ({ isOpen, onClose }) => {
                                         exit={{ height: 0 }}
                                         className="overflow-hidden"
                                       >
-                                        <p className="px-4 pb-4 text-gray-600 dark:text-gray-400 text-sm">
+                                        <p className="px-4 pb-4 text-muted-foreground text-sm">
                                           {question.description}
                                         </p>
                                       </motion.div>

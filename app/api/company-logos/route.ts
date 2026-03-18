@@ -6,7 +6,12 @@ export async function GET() {
     'IBM': getPublicAssetUrl('site-assets/company-logos/b5ad68ba-bd6c-4c14-ac18-7772bb303fea.png'),
     'HashiCorp': getPublicAssetUrl('site-assets/company-logos/c420ef5c-00b4-4db3-a965-551f3e3b89a3.png'),
     'AT&T': getPublicAssetUrl('site-assets/company-logos/b708bc5d-b83a-4fc8-af5f-22a5b4ee2ad4.png'),
-    'The Craneware Group (formerly Sentry Data Systems)': getPublicAssetUrl('site-assets/company-logos/b1d81986-af43-402e-a7eb-ccb076221965.svg')
+    'The Craneware Group (formerly Sentry Data Systems)': getPublicAssetUrl('site-assets/company-logos/b1d81986-af43-402e-a7eb-ccb076221965.svg'),
+    'Verizon': 'https://logo.clearbit.com/verizon.com',
+    'Verizon Wireless': 'https://logo.clearbit.com/verizon.com',
+    'Mount Sinai': 'https://logo.clearbit.com/mountsinai.org',
+    'Mount Sinai Health System': 'https://logo.clearbit.com/mountsinai.org',
+    "McDonald's": 'https://logo.clearbit.com/mcdonalds.com',
   };
 
   return NextResponse.json({ data: logoMap });

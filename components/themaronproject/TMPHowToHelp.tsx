@@ -115,14 +115,13 @@ const TMPHowToHelp: React.FC = () => {
   };
 
   return (
-    <section className="relative isolate overflow-hidden px-4 py-16 sm:px-6 sm:py-20 lg:px-10 lg:py-24">
+    <section className="relative isolate overflow-hidden bg-surface section-wrapper">
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(59,130,246,0.2),transparent_28%),radial-gradient(circle_at_85%_10%,rgba(236,72,153,0.16),transparent_32%),radial-gradient(circle_at_50%_85%,rgba(52,211,153,0.14),transparent_30%)]" />
-        <div className="absolute inset-0 opacity-80 bg-background/70" />
       </div>
 
       <motion.div
-        className="mx-auto flex max-w-6xl flex-col gap-12"
+        className="section-inner flex flex-col gap-12"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
@@ -171,7 +170,7 @@ const TMPHowToHelp: React.FC = () => {
           variants={itemVariants}
           className="relative overflow-hidden rounded-3xl border border-border/70 bg-gradient-to-r from-blue-600 via-purple-600 to-emerald-500 p-1 shadow-2xl ring-1 ring-blue-500/30"
         >
-          <div className="relative grid gap-8 rounded-[22px] bg-background/90 p-8 shadow-lg backdrop-blur md:grid-cols-[1.2fr_0.8fr]">
+          <div className="relative grid gap-6 rounded-[22px] bg-background/90 p-4 shadow-lg backdrop-blur sm:gap-8 sm:p-6 md:p-8 md:grid-cols-[1.2fr_0.8fr]">
             <div className="space-y-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-primary">
                 Ready when you are

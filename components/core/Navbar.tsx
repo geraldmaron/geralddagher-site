@@ -93,6 +93,8 @@ const NavItemComponent: React.FC<{
         <div>
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            aria-expanded={isDropdownOpen}
+            aria-haspopup="true"
             className={cn(
               'w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200',
               isChildActive
@@ -101,10 +103,10 @@ const NavItemComponent: React.FC<{
             )}
           >
             <div className="flex items-center gap-3">
-              <Icon className="w-4 h-4" />
+              <Icon aria-hidden="true" className="w-4 h-4" />
               <span className="text-sm font-medium">{item.name}</span>
             </div>
-            <ChevronDown className={cn(
+            <ChevronDown aria-hidden="true" className={cn(
               'w-4 h-4 transition-transform duration-200',
               isDropdownOpen && 'rotate-180'
             )} />
@@ -126,6 +128,7 @@ const NavItemComponent: React.FC<{
                       key={child.name}
                       href={child.href}
                       onClick={onClick}
+                      aria-current={childActive ? 'page' : undefined}
                       className={cn(
                         'flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 text-sm',
                         childActive
@@ -133,7 +136,7 @@ const NavItemComponent: React.FC<{
                           : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                       )}
                     >
-                      <ChildIcon className="w-4 h-4" />
+                      <ChildIcon aria-hidden="true" className="w-4 h-4" />
                       <span className="font-medium">{child.name}</span>
                     </Link>
                   );
@@ -149,6 +152,7 @@ const NavItemComponent: React.FC<{
       <Link
         href={item.href}
         onClick={onClick}
+        aria-current={isActive ? 'page' : undefined}
         className={cn(
           'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200',
           isActive
@@ -156,7 +160,7 @@ const NavItemComponent: React.FC<{
             : 'text-muted-foreground hover:bg-muted hover:text-foreground'
         )}
       >
-        <Icon className="w-4 h-4" />
+        <Icon aria-hidden="true" className="w-4 h-4" />
         <span className="text-sm font-medium">{item.name}</span>
       </Link>
     );
@@ -170,6 +174,12 @@ const NavItemComponent: React.FC<{
         onMouseLeave={() => setIsDropdownOpen(false)}
       >
         <button
+          aria-haspopup="true"
+          aria-expanded={isDropdownOpen}
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setIsDropdownOpen(false);
+          }}
           className={cn(
             'relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
@@ -179,7 +189,7 @@ const NavItemComponent: React.FC<{
           )}
         >
           <span>{item.name}</span>
-          <ChevronDown className={cn('w-3.5 h-3.5 transition-transform duration-200', isDropdownOpen && 'rotate-180')} />
+          <ChevronDown aria-hidden="true" className={cn('w-3.5 h-3.5 transition-transform duration-200', isDropdownOpen && 'rotate-180')} />
         </button>
 
         <AnimatePresence>
@@ -205,6 +215,7 @@ const NavItemComponent: React.FC<{
                     key={child.name}
                     href={child.href}
                     onClick={onClick}
+                    aria-current={childActive ? 'page' : undefined}
                     className={cn(
                       'flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors',
                       childActive
@@ -212,7 +223,7 @@ const NavItemComponent: React.FC<{
                         : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                     )}
                   >
-                    <ChildIcon className="w-4 h-4" />
+                    <ChildIcon aria-hidden="true" className="w-4 h-4" />
                     <span className="font-medium whitespace-nowrap">{child.name}</span>
                   </Link>
                 );
@@ -228,19 +239,21 @@ const NavItemComponent: React.FC<{
     <Link
       href={item.href}
       onClick={onClick}
+      aria-current={isActive ? 'page' : undefined}
       className={cn(
-        'relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
+        'relative flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors duration-200',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
         isActive
-          ? 'bg-primary/10 text-primary'
-          : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
+          ? 'text-primary font-semibold'
+          : 'text-foreground/60 hover:text-foreground'
       )}
     >
       <span>{item.name}</span>
       {isActive && (
         <motion.div
+          aria-hidden="true"
           layoutId="nav-indicator"
-          className="absolute inset-0 bg-primary/10 rounded-lg -z-10"
+          className="absolute bottom-0 inset-x-1 h-0.5 bg-primary rounded-full"
           transition={{ type: 'spring', stiffness: 400, damping: 32 }}
         />
       )}
@@ -332,8 +345,8 @@ export default function Navbar() {
         role="banner"
         className={cn(
           'fixed top-0 w-full z-50',
-          'border-b',
-          isScrolled ? 'border-border/60' : 'border-transparent'
+          'border-b border-border/30',
+          isScrolled && 'border-border/60'
         )}
         style={{ zIndex: zIndex.navbar }}
         initial={{ y: -100 }}
@@ -348,7 +361,7 @@ export default function Navbar() {
               : 'bg-transparent'
           )}
         >
-          <nav className="h-16 lg:h-18 w-full px-4 sm:px-6 lg:px-8">
+          <nav aria-label="Main navigation" className="h-14 lg:h-16 w-full px-4 sm:px-6 lg:px-8">
             <div className="h-full max-w-7xl mx-auto flex items-center justify-between gap-4">
 
               {/* Logo */}
@@ -418,9 +431,9 @@ export default function Navbar() {
                   )}
                   aria-label={`Current theme: ${themeMode}. Click to cycle.`}
                 >
-                  {themeMode === 'light' && <Sun className="w-4 h-4 text-amber-500" />}
-                  {themeMode === 'dark' && <Moon className="w-4 h-4 text-blue-400" />}
-                  {themeMode === 'system' && <Monitor className="w-4 h-4 text-muted-foreground" />}
+                  {themeMode === 'light' && <Sun aria-hidden="true" className="w-4 h-4 text-amber-500" />}
+                  {themeMode === 'dark' && <Moon aria-hidden="true" className="w-4 h-4 text-blue-400" />}
+                  {themeMode === 'system' && <Monitor aria-hidden="true" className="w-4 h-4 text-muted-foreground" />}
                 </motion.button>
 
                 {/* Admin Quick Actions - Desktop only */}
@@ -435,7 +448,7 @@ export default function Navbar() {
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                     )}
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus aria-hidden="true" className="w-4 h-4" />
                     <span>New Post</span>
                   </button>
                 )}
@@ -446,6 +459,9 @@ export default function Navbar() {
                     <div className="relative">
                       <button
                         onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                        aria-label="User menu"
+                        aria-haspopup="true"
+                        aria-expanded={isUserMenuOpen}
                         className={cn(
                           'flex items-center gap-2 px-2.5 py-1.5 rounded-lg',
                           'bg-muted/60 border border-border/60',
@@ -468,7 +484,7 @@ export default function Navbar() {
                             </span>
                           </div>
                         )}
-                        <ChevronDown className={cn('w-3.5 h-3.5 text-muted-foreground transition-transform duration-200', isUserMenuOpen && 'rotate-180')} />
+                        <ChevronDown aria-hidden="true" className={cn('w-3.5 h-3.5 text-muted-foreground transition-transform duration-200', isUserMenuOpen && 'rotate-180')} />
                       </button>
 
                       <AnimatePresence>
@@ -513,7 +529,7 @@ export default function Navbar() {
                                         : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                                     )}
                                   >
-                                    <Icon className="w-4 h-4" />
+                                    <Icon aria-hidden="true" className="w-4 h-4" />
                                     <span>{option.label}</span>
                                   </button>
                                 );
@@ -527,7 +543,7 @@ export default function Navbar() {
                                   className="flex items-center gap-3 px-4 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                                   onClick={() => setIsUserMenuOpen(false)}
                                 >
-                                  <Settings className="w-4 h-4" />
+                                  <Settings aria-hidden="true" className="w-4 h-4" />
                                   <span>Settings</span>
                                 </Link>
                               )}
@@ -537,7 +553,7 @@ export default function Navbar() {
                                   className="flex items-center gap-3 px-4 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                                   onClick={() => setIsUserMenuOpen(false)}
                                 >
-                                  <LayoutDashboard className="w-4 h-4" />
+                                  <LayoutDashboard aria-hidden="true" className="w-4 h-4" />
                                   <span>Admin Dashboard</span>
                                 </Link>
                               )}
@@ -547,7 +563,7 @@ export default function Navbar() {
                                   className="flex items-center gap-3 px-4 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                                   onClick={() => setIsUserMenuOpen(false)}
                                 >
-                                  <Home className="w-4 h-4" />
+                                  <Home aria-hidden="true" className="w-4 h-4" />
                                   <span>Visit Site</span>
                                 </Link>
                               )}
@@ -555,7 +571,7 @@ export default function Navbar() {
                                 onClick={handleLogout}
                                 className="w-full flex items-center gap-3 px-4 py-2 text-sm text-destructive hover:bg-destructive/8 transition-colors"
                               >
-                                <LogOut className="w-4 h-4" />
+                                <LogOut aria-hidden="true" className="w-4 h-4" />
                                 <span>Sign out</span>
                               </button>
                             </div>
@@ -583,14 +599,16 @@ export default function Navbar() {
                         <button
                           onClick={() => setSubscriptionModalOpen(true)}
                           className={cn(
-                            'flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200',
-                            'bg-muted/60 border border-border/60',
-                            'hover:bg-muted text-muted-foreground hover:text-primary',
+                            'flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200',
+                            'bg-primary text-primary-foreground',
+                            'hover:bg-primary/90',
                             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                           )}
                           aria-label="Subscribe to updates"
                         >
-                          <Mail className="w-4 h-4" />
+                          <Mail aria-hidden="true" className="w-3.5 h-3.5 md:hidden" />
+                          <span className="hidden md:inline">Subscribe</span>
+                          <span className="md:hidden sr-only">Subscribe</span>
                         </button>
                       )}
                     </div>
@@ -658,10 +676,15 @@ export default function Navbar() {
                 'shadow-[inset_1px_0_0_rgba(0,0,0,0.05)]'
               )}
             >
-              <div className="flex items-center justify-between px-5 py-4 border-b border-border/60">
-                <h2 id={mobileMenuHeadingId} className="text-sm font-semibold text-foreground">
-                  {isAdminArea ? 'Admin Menu' : 'Navigation'}
-                </h2>
+              <div className="flex items-center justify-between px-5 py-4 bg-surface border-b border-border/40">
+                <div className="flex items-center gap-2.5">
+                  <div className="relative w-8 h-8">
+                    <Image src={logoSrc} alt="Dagher Logo" fill style={{ objectFit: 'contain' }} sizes="32px" />
+                  </div>
+                  <h2 id={mobileMenuHeadingId} className="text-sm font-semibold text-foreground">
+                    {isAdminArea ? 'Admin Menu' : 'Menu'}
+                  </h2>
+                </div>
                 <button
                   onClick={() => setIsMenuOpen(false)}
                   className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -699,7 +722,7 @@ export default function Navbar() {
                         'text-background font-medium text-sm'
                       )}
                     >
-                      <Plus className="w-4 h-4" />
+                      <Plus aria-hidden="true" className="w-4 h-4" />
                       <span>New Post</span>
                     </button>
                   </div>
@@ -723,7 +746,7 @@ export default function Navbar() {
                               : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                           )}
                         >
-                          <Icon className="w-4 h-4" />
+                          <Icon aria-hidden="true" className="w-4 h-4" />
                           <span>{option.label}</span>
                         </button>
                       );
@@ -761,7 +784,7 @@ export default function Navbar() {
                         onClick={() => setIsMenuOpen(false)}
                         className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                       >
-                        {isAdminArea ? <Home className="w-4 h-4" /> : <LayoutDashboard className="w-4 h-4" />}
+                        {isAdminArea ? <Home aria-hidden="true" className="w-4 h-4" /> : <LayoutDashboard aria-hidden="true" className="w-4 h-4" />}
                         <span className="font-medium">{isAdminArea ? 'Visit Site' : 'Admin Dashboard'}</span>
                       </Link>
                     )}
@@ -769,7 +792,7 @@ export default function Navbar() {
                       onClick={() => { handleLogout(); setIsMenuOpen(false); }}
                       className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-destructive hover:bg-destructive/8 transition-colors"
                     >
-                      <LogOut className="w-4 h-4" />
+                      <LogOut aria-hidden="true" className="w-4 h-4" />
                       <span className="font-medium">Sign out</span>
                     </button>
                   </div>

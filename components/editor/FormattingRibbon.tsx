@@ -22,15 +22,20 @@ import {
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import * as Separator from '@radix-ui/react-separator';
-import { 
-  isInTable, 
-  insertTable, 
-  addTableRow, 
-  removeTableRow, 
-  addTableColumn, 
-  removeTableColumn, 
-  deleteTable 
+import {
+  isInTable,
+  insertTable,
+  addTableRow,
+  removeTableRow,
+  addTableColumn,
+  removeTableColumn,
+  deleteTable
 } from '@/lib/editor/tableUtils';
+import {
+  isListItem,
+  indentListItem,
+  outdentListItem
+} from '@/lib/editor/listUtils';
 
 interface FormattingRibbonProps {
   editor: any;
@@ -58,6 +63,8 @@ interface Tool {
   variant?: 'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'danger';
   badge?: string;
 }
+
+const LIST_TYPES = ['bulleted-list', 'numbered-list', 'todo-list'];
 
 export const FormattingRibbon: React.FC<FormattingRibbonProps> = ({
   editor,
@@ -120,14 +127,14 @@ export const FormattingRibbon: React.FC<FormattingRibbonProps> = ({
     if (!selection) return;
     
     const isActive = isBlockActive(format);
-    const isList = ['bulleted-list', 'numbered-list', 'todo-list'].includes(format);
+    const isList = LIST_TYPES.includes(format);
 
     try {
       Transforms.unwrapNodes(editor, {
         match: (n) =>
           !Editor.isEditor(n) &&
           SlateElement.isElement(n) &&
-          ['bulleted-list', 'numbered-list', 'todo-list'].includes(n.type),
+          LIST_TYPES.includes(n.type),
         split: true,
       });
 
@@ -514,6 +521,22 @@ export const FormattingRibbon: React.FC<FormattingRibbonProps> = ({
           action: () => toggleBlock('todo-list'),
           isActive: isBlockActive('todo-list'),
           variant: 'success'
+        },
+        {
+          id: 'indent-list',
+          icon: Indent,
+          label: 'Increase Indent',
+          shortcut: 'Tab',
+          action: () => indentListItem(editor),
+          disabled: !isListItem(editor)
+        },
+        {
+          id: 'outdent-list',
+          icon: Outdent,
+          label: 'Decrease Indent',
+          shortcut: '⇧Tab',
+          action: () => outdentListItem(editor),
+          disabled: !isListItem(editor)
         }
       ]
     },

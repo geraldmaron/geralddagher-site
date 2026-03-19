@@ -21,28 +21,26 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/core/Button';
+import { Badge } from '@/components/core/Badge';
 import { TMPSubmissionDrawer } from '@/components/admin/tmpmanager/TMPSubmissionDrawer';
 import { useDebounce } from '@/hooks/useDebounce';
 
 import type { TMPSubmission } from '@/lib/types/shared';
 
 function StatusPill({ status }: { status?: string }) {
-  const palette: Record<string, { bg: string; text: string; border: string }> = {
-    Pending: { bg: 'bg-amber-500/15', text: 'text-amber-200', border: 'border-amber-500/40' },
-    Scheduled: { bg: 'bg-sky-500/15', text: 'text-sky-200', border: 'border-sky-500/40' },
-    Completed: { bg: 'bg-emerald-500/15', text: 'text-emerald-200', border: 'border-emerald-500/40' },
-    Rejected: { bg: 'bg-rose-500/15', text: 'text-rose-200', border: 'border-rose-500/40' }
+  const mapping: Record<string, { variant: 'warning' | 'info' | 'success' | 'destructive' | 'neutral'; label: string }> = {
+    Pending: { variant: 'warning', label: 'Pending' },
+    Scheduled: { variant: 'info', label: 'Scheduled' },
+    Completed: { variant: 'success', label: 'Completed' },
+    Rejected: { variant: 'destructive', label: 'Rejected' },
   };
-  const styles = palette[status || ''] || { bg: 'bg-slate-500/15', text: 'text-slate-200', border: 'border-slate-500/40' };
+  const key = status || 'Pending';
+  const config = mapping[key] || { variant: 'neutral', label: key };
+
   return (
-    <span className={cn(
-      'inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium',
-      styles.bg,
-      styles.text,
-      styles.border
-    )}>
-      {status || '—'}
-    </span>
+    <Badge variant={config.variant} className="inline-flex items-center px-3 py-1 text-xs font-medium">
+      {config.label}
+    </Badge>
   );
 }
 

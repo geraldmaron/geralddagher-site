@@ -2,11 +2,13 @@ import { Metadata, Viewport } from 'next';
 import { name } from '@/lib/constants';
 import { getPublicProfile } from '@/lib/directus/queries';
 
+/**
+ * Application metadata configuration including viewport settings.
+ * Ensures accessible, responsive layout and rich link previews.
+ */
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export async function generateMetadata(): Promise<Metadata> {

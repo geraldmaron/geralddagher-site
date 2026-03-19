@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { Plus, FileText, Calendar, Eye, EyeOff, Edit, Trash2, Search, LayoutGrid, List, Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from '@/components/core/Button';
+import { Badge } from '@/components/core/Badge';
 import { cn } from '@/lib/utils';
 
 type Post = {
@@ -98,17 +99,16 @@ export default function AdminPostsPage() {
   }, [posts, searchQuery, statusFilter, contentTypeFilter, authorFilter]);
 
   const StatusBadge = ({ status }: { status?: string }) => {
-    const isPublished = status === 'published';
+    const normalized = (status || 'draft').toLowerCase();
+    const isPublished = normalized === 'published';
+    const variant = isPublished ? 'success' : 'neutral';
+    const Icon = isPublished ? Eye : EyeOff;
+
     return (
-      <span className={cn(
-        'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border',
-        isPublished
-          ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800'
-          : 'bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700'
-      )}>
-        {isPublished ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
-        {status || 'draft'}
-      </span>
+      <Badge variant={variant as any} className="inline-flex items-center gap-1.5">
+        <Icon className="h-3 w-3" />
+        {normalized || 'draft'}
+      </Badge>
     );
   };
 

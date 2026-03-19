@@ -29,7 +29,7 @@ const TMPVideoPagination: React.FC<TMPVideoPaginationProps> = ({
           currentPage === 1
             ? 'bg-gray-300 cursor-not-allowed'
             : 'bg-purple-500 hover:bg-purple-600'
-        } text-white focus:outline-none focus:ring-2 focus:ring-purple-500`}
+        } text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
         aria-label="Previous page"
         aria-disabled={currentPage === 1}
       >
@@ -47,7 +47,7 @@ const TMPVideoPagination: React.FC<TMPVideoPaginationProps> = ({
           currentPage === totalPages
             ? 'bg-gray-300 cursor-not-allowed'
             : 'bg-purple-500 hover:bg-purple-600'
-        } text-white focus:outline-none focus:ring-2 focus:ring-purple-500`}
+        } text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
         aria-label="Next page"
         aria-disabled={currentPage === totalPages}
       >

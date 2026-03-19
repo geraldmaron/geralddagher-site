@@ -2,11 +2,6 @@ name: Deploy CMS
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - 'ops/compose/**'
 
 concurrency:
   group: deploy-cms
@@ -17,6 +12,7 @@ permissions:
 
 jobs:
   deploy:
+    if: ${{ secrets.DROPLET_IP != '' && secrets.SSH_PRIVATE_KEY != '' && secrets.CMS_DOMAIN != '' }}
     runs-on: ubuntu-latest
     environment:
       name: production

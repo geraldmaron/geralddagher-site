@@ -17,6 +17,7 @@ export type CustomElement = {
   rowSpan?: number;
   checked?: boolean;
   collapsed?: boolean;
+  depth?: number;
 };
 export type CustomText = {
   text: string;

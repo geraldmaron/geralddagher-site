@@ -1,6 +1,6 @@
-import { Editor, Transforms, Element as SlateElement, Range, Point } from 'slate';
+import { Editor, Transforms, Element as SlateElement, Range } from 'slate';
 import { ReactEditor } from 'slate-react';
-import { CustomElement, CustomText } from '@/lib/types/editor';
+import { CustomElement } from '@/lib/types/editor';
 import { insertHTMLData, insertPlainTextData } from './paste-handler';
 
 export interface SlashCommand {
@@ -16,7 +16,6 @@ export interface SlashCommand {
 }
 
 export const SLASH_COMMANDS: SlashCommand[] = [
-  // Headings
   {
     id: 'heading-1',
     title: 'Heading 1',
@@ -59,7 +58,6 @@ export const SLASH_COMMANDS: SlashCommand[] = [
       Transforms.setNodes(editor, block);
     },
   },
-  // Basic
   {
     id: 'paragraph',
     title: 'Text',
@@ -86,7 +84,6 @@ export const SLASH_COMMANDS: SlashCommand[] = [
       Transforms.insertNodes(editor, divider);
     },
   },
-  // Lists
   {
     id: 'bullet-list',
     title: 'Bulleted List',
@@ -101,8 +98,6 @@ export const SLASH_COMMANDS: SlashCommand[] = [
       Transforms.setNodes(editor, block);
       const list: CustomElement = { type: 'bulleted-list', children: [] };
       Transforms.wrapNodes(editor, list);
-      
-      // After wrapping, ensure selection points to a valid text node
       try {
         const { selection } = editor;
         if (selection) {
@@ -110,7 +105,6 @@ export const SLASH_COMMANDS: SlashCommand[] = [
           Transforms.select(editor, start);
         }
       } catch (e) {
-        // Silently handle selection errors
       }
     },
   },
@@ -127,8 +121,6 @@ export const SLASH_COMMANDS: SlashCommand[] = [
       Transforms.setNodes(editor, block);
       const list: CustomElement = { type: 'numbered-list', children: [] };
       Transforms.wrapNodes(editor, list);
-      
-      // After wrapping, ensure selection points to a valid text node
       try {
         const { selection } = editor;
         if (selection) {
@@ -136,7 +128,6 @@ export const SLASH_COMMANDS: SlashCommand[] = [
           Transforms.select(editor, start);
         }
       } catch (e) {
-        // Silently handle selection errors
       }
     },
   },
@@ -152,8 +143,6 @@ export const SLASH_COMMANDS: SlashCommand[] = [
       Transforms.setNodes(editor, block);
       const list: CustomElement = { type: 'todo-list', children: [] };
       Transforms.wrapNodes(editor, list);
-      
-      // After wrapping, ensure selection points to a valid text node
       try {
         const { selection } = editor;
         if (selection) {
@@ -161,11 +150,9 @@ export const SLASH_COMMANDS: SlashCommand[] = [
           Transforms.select(editor, start);
         }
       } catch (e) {
-        // Silently handle selection errors
       }
     },
   },
-  // Content
   {
     id: 'quote',
     title: 'Quote',
@@ -204,8 +191,6 @@ export const SLASH_COMMANDS: SlashCommand[] = [
       Transforms.setNodes(editor, block);
       const list: CustomElement = { type: 'toggle-list', children: [] };
       Transforms.wrapNodes(editor, list);
-      
-      // After wrapping, ensure selection points to a valid text node
       try {
         const { selection } = editor;
         if (selection) {
@@ -213,7 +198,6 @@ export const SLASH_COMMANDS: SlashCommand[] = [
           Transforms.select(editor, start);
         }
       } catch (e) {
-        // Silently handle selection errors
       }
     },
   },
@@ -231,7 +215,6 @@ export const SLASH_COMMANDS: SlashCommand[] = [
       Transforms.setNodes(editor, block);
     },
   },
-  // Tables
   {
     id: 'table',
     title: 'Table',
@@ -240,7 +223,6 @@ export const SLASH_COMMANDS: SlashCommand[] = [
     keywords: ['table', 'grid'],
     group: 'Tables',
     action: (editor) => {
-      // Import table utils inline to prevent nesting
       const { isInTable, insertTable } = require('@/lib/editor/tableUtils');
       
       if (isInTable(editor)) {
@@ -250,7 +232,6 @@ export const SLASH_COMMANDS: SlashCommand[] = [
       insertTable(editor, 2, 3);
     },
   },
-  // Media
   {
     id: 'image',
     title: 'Image',
@@ -274,7 +255,6 @@ export const SLASH_COMMANDS: SlashCommand[] = [
           };
           Transforms.insertNodes(editor, placeholderImage);
           
-          // Upload file to storage
           try {
             const formData = new FormData();
             formData.append('file', file);
@@ -332,7 +312,6 @@ export const SLASH_COMMANDS: SlashCommand[] = [
           };
           Transforms.insertNodes(editor, placeholderVideo);
           
-          // Upload file to storage
           try {
             const formData = new FormData();
             formData.append('file', file);
@@ -396,7 +375,6 @@ export const SLASH_COMMANDS: SlashCommand[] = [
       input.click();
     },
   },
-  // Links
   {
     id: 'link',
     title: 'Link',
@@ -420,23 +398,12 @@ export const SLASH_COMMANDS: SlashCommand[] = [
   },
 ];
 
-/**
- * Markdown shortcuts plugin - handles common markdown patterns like:
- * - `* ` or `- ` → bulleted list
- * - `1. ` → numbered list
- * - `# `, `## `, `### ` → headings
- * - `> ` → blockquote
- * - ``` ` ``` → code block
- * 
- * Best practice: This plugin intercepts space key to check for markdown patterns
- */
 export const withMarkdownShortcuts = (editor: any) => {
   const { insertText } = editor;
 
   editor.insertText = (text: string) => {
     const { selection } = editor;
 
-    // Only handle space key for markdown shortcuts
     if (text === ' ' && selection && Range.isCollapsed(selection)) {
       const { anchor } = selection;
       const block = Editor.above(editor, {
@@ -453,7 +420,6 @@ export const withMarkdownShortcuts = (editor: any) => {
       const range = { anchor, focus: start };
       const beforeText = Editor.string(editor, range);
 
-      // Helper to convert to list
       function convertToList(listType: 'bulleted-list' | 'numbered-list') {
         Transforms.delete(editor, { distance: beforeText.length, unit: 'character', reverse: true });
         
@@ -480,10 +446,9 @@ export const withMarkdownShortcuts = (editor: any) => {
       const numberedListMatch = beforeText.match(/^(\d+)\.$/);
       if (numberedListMatch) {
         convertToList('numbered-list');
-        return; // Don't insert the space
+        return;
       }
 
-      // Match other markdown patterns
       const patterns: Record<string, () => void> = {
         '*': () => convertToList('bulleted-list'),
         '-': () => convertToList('bulleted-list'),
@@ -495,15 +460,13 @@ export const withMarkdownShortcuts = (editor: any) => {
         '```': () => convertToBlock('code-block'),
       };
 
-      // Check other patterns
       const handler = patterns[beforeText];
       if (handler) {
         handler();
-        return; // Don't insert the space
+        return;
       }
     }
 
-    // Continue with default insertText behavior
     insertText(text);
   };
 
@@ -517,7 +480,6 @@ export const withSlashCommands = (editor: any) => {
     insertText(text);
     
     if (text === '/') {
-      // Use setTimeout to ensure the text is inserted before checking context
       setTimeout(() => {
         const isContext = isSlashCommandContext(editor);
         
@@ -566,7 +528,6 @@ export const withEmojiCommands = (editor: any) => {
   const { insertText } = editor;
 
   editor.insertText = (text: string) => {
-    // Call the original insertText first (which includes slash commands)
     insertText(text);
     
     if (text === ':' && isEmojiContext(editor)) {
@@ -618,7 +579,6 @@ export const withMediaHandling = (editor: any) => {
       const file = files[0];
       
       if (file.type.startsWith('image/')) {
-        // Insert placeholder image
         const placeholderImage: CustomElement = {
           type: 'image',
           url: URL.createObjectURL(file),
@@ -627,7 +587,6 @@ export const withMediaHandling = (editor: any) => {
         };
         Transforms.insertNodes(editor, placeholderImage);
         
-        // Upload to storage
         try {
           const formData = new FormData();
           formData.append('file', file);
@@ -642,7 +601,6 @@ export const withMediaHandling = (editor: any) => {
           
           if (response.ok) {
             const uploadData = await response.json();
-            // Update with real URL
             const [match] = Editor.nodes(editor, {
               match: n => !Editor.isEditor(n) && SlateElement.isElement(n) && n.type === 'image' && n.url === URL.createObjectURL(file),
               at: [],
@@ -664,7 +622,6 @@ export const withMediaHandling = (editor: any) => {
       }
       
       if (file.type.startsWith('video/')) {
-        // Insert placeholder video
         const placeholderVideo: CustomElement = {
           type: 'video',
           url: URL.createObjectURL(file),
@@ -672,7 +629,6 @@ export const withMediaHandling = (editor: any) => {
         };
         Transforms.insertNodes(editor, placeholderVideo);
         
-        // Upload to storage
         try {
           const formData = new FormData();
           formData.append('file', file);
@@ -687,7 +643,6 @@ export const withMediaHandling = (editor: any) => {
           
           if (response.ok) {
             const uploadData = await response.json();
-            // Update with real URL
             const [match] = Editor.nodes(editor, {
               match: n => !Editor.isEditor(n) && SlateElement.isElement(n) && n.type === 'video' && n.url === URL.createObjectURL(file),
               at: [],
@@ -740,7 +695,6 @@ const isSlashCommandContext = (editor: any): boolean => {
     const start = Editor.start(editor, selection.focus.path);
     const beforeText = Editor.string(editor, { anchor: start, focus: selection.focus });
     
-    // Allow slash commands at the beginning of a line, after whitespace, or when the only text is '/'
     return beforeText === '' || beforeText.match(/^\s*$/) !== null || beforeText === '/';
   } catch (error) {
     return false;

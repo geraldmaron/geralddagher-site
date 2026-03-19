@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Editor, Transforms, Range } from 'slate';
+import { Editor, Transforms, Range, Element as SlateElement } from 'slate';
 import { cn } from '@/lib/utils';
 import { zIndex } from '@/lib/utils/z-index';
 import { Button } from '@/components/core/Button';
@@ -573,7 +573,6 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
                       onMouseDown={(e) => {
                         e.preventDefault();
                         if (editor) {
-                          const { Transforms, Element: SlateElement } = require('slate');
                           Transforms.unwrapNodes(editor, {
                             match: (n: any) =>
                               !Editor.isEditor(n) &&

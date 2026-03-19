@@ -39,7 +39,7 @@ export default function TermsOfServicePage() {
           </div>
           <div className="px-6 py-4 space-y-4">
             <p>
-              Our website provides personal content, blog posts, professional information, and various interactive features. The content includes but is not limited to:
+              Our website provides personal content, blog posts, professional information, and various interactive features. The content includes but isn't limited to:
             </p>
             <ul className="list-disc list-inside space-y-1 text-gray-600 dark:text-gray-400">
               <li>Personal blog posts and articles</li>
@@ -114,7 +114,7 @@ export default function TermsOfServicePage() {
               Our website is provided on an "as is" and "as available" basis. We make no warranties, express or implied, regarding the operation of our website or the information, content, or materials included on our website.
             </p>
             <p>
-              We do not warrant that our website will be uninterrupted or error-free, that defects will be corrected, or that our website or the server that makes it available are free of viruses or other harmful components.
+              We don't warrant that our website will be uninterrupted or error-free, that defects will be corrected, or that our website or the server that makes it available is free of viruses or other harmful components.
             </p>
           </div>
         </div>
@@ -147,7 +147,7 @@ export default function TermsOfServicePage() {
           </div>
           <div className="px-6 py-4 space-y-4">
             <p>
-              Our website may contain links to third-party websites or services that are not owned or controlled by us. We have no control over, and assume no responsibility for, the content, privacy policies, or practices of any third-party websites or services.
+              Our website may contain links to third-party websites or services that aren't owned or controlled by us. We don't have control over, and assume no responsibility for, the content, privacy policies, or practices of any third-party websites or services.
             </p>
             <p>
               You acknowledge and agree that we shall not be responsible or liable for any damage or loss caused by the use of such third-party websites or services.

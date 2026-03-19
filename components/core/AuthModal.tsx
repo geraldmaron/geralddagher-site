@@ -84,7 +84,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   </div>
                   <div>
                     <Dialog.Title className="text-xl font-bold text-neutral-900 dark:text-white">
-                      Sign In
+                      Admin
                     </Dialog.Title>
                     <Dialog.Description id={descriptionId} className="text-sm text-neutral-600 dark:text-neutral-400">
                       Access your account

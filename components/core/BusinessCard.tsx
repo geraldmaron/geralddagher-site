@@ -21,6 +21,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import ResumeModal from "./ResumeModal";
+import Chip from "./Chip";
 
 export interface BusinessCardProfile {
   name: string;
@@ -212,12 +213,15 @@ const BusinessCard: React.FC<BusinessCardProps> = ({
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {profile.keywords.slice(0, 5).map((keyword) => (
-                    <span
+                    <Chip
                       key={keyword}
-                      className="px-3 py-1 rounded-full bg-neutral-100/80 dark:bg-neutral-800/80 text-neutral-700 dark:text-neutral-200 text-[11px] font-semibold tracking-wide border border-neutral-200/70 dark:border-neutral-700"
+                      size="xs"
+                      variant="subtle"
+                      color="neutral"
+                      className="border border-neutral-200/70 dark:border-neutral-700 bg-neutral-100/80 dark:bg-neutral-800/80 text-neutral-700 dark:text-neutral-200 tracking-wide"
                     >
                       {keyword}
-                    </span>
+                    </Chip>
                   ))}
                 </div>
               </div>

@@ -2,6 +2,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { FileIcon } from 'lucide-react';
+import { normalizeContent } from '@/lib/editor/normalizeContent';
 interface SlateNode {
   type?: string;
   children?: SlateNode[];
@@ -18,6 +19,8 @@ interface SlateNode {
   emoji?: string;
   level?: number;
   ordered?: boolean;
+  depth?: number;
+  checked?: boolean;
   [key: string]: any;
 }
 interface SlateRendererProps {
@@ -26,7 +29,7 @@ interface SlateRendererProps {
   compact?: boolean;
 }
 export default function SlateRenderer({ content, className = '', compact = false }: SlateRendererProps) {
-  const normalizeContent = (rawContent: SlateNode[] | { content: SlateNode[] }): SlateNode[] => {
+  const resolveContent = (rawContent: SlateNode[] | { content: SlateNode[] }): SlateNode[] => {
     if (!rawContent) return [];
     if (Array.isArray(rawContent)) {
       return rawContent;
@@ -110,13 +113,13 @@ export default function SlateRenderer({ content, className = '', compact = false
         );
       case 'bulleted-list':
         return (
-          <ul key={index} className={`list-disc pl-6 space-y-1 text-gray-900 dark:text-gray-100 ${spacing} marker:text-blue-500`}>
+          <ul key={index} className={`list-disc list-outside pl-6 space-y-1 text-gray-900 dark:text-gray-100 ${spacing} marker:text-blue-500`}>
             {node.children?.map((child, i) => renderNode(child, i))}
           </ul>
         );
       case 'numbered-list':
         return (
-          <ol key={index} className={`list-decimal pl-6 space-y-1 text-gray-900 dark:text-gray-100 ${spacing} marker:text-blue-500 marker:font-semibold`}>
+          <ol key={index} className={`list-decimal list-outside pl-6 space-y-1 text-gray-900 dark:text-gray-100 ${spacing} marker:text-blue-500 marker:font-semibold`}>
             {node.children?.map((child, i) => renderNode(child, i))}
           </ol>
         );
@@ -125,6 +128,26 @@ export default function SlateRenderer({ content, className = '', compact = false
           <li key={index} className="leading-relaxed">
             {node.children?.map((child, i) => renderNode(child, i))}
           </li>
+        );
+      case 'todo-list':
+        return (
+          <div key={index} className={`space-y-2 ${spacing}`}>
+            {node.children?.map((child, i) => renderNode(child, i))}
+          </div>
+        );
+      case 'todo-item':
+        return (
+          <div key={index} className="flex items-start gap-2">
+            <input
+              type="checkbox"
+              checked={node.checked || false}
+              readOnly
+              className="mt-1 h-4 w-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 dark:bg-neutral-800 dark:checked:bg-blue-600 dark:checked:border-blue-600 pointer-events-none"
+            />
+            <div className="flex-1 text-neutral-900 dark:text-neutral-100">
+              {node.children?.map((child, i) => renderNode(child, i))}
+            </div>
+          </div>
         );
       case 'image':
         return (
@@ -199,7 +222,7 @@ export default function SlateRenderer({ content, className = '', compact = false
         return node.children?.map((child, i) => renderNode(child, i));
     }
   };
-  const nodes = normalizeContent(content);
+  const nodes = normalizeContent(resolveContent(content) as any) as SlateNode[];
   if (!nodes.length) {
     return (
       <div className={`text-gray-500 dark:text-gray-400 italic text-center py-8 ${className}`}>

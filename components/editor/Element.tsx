@@ -1,5 +1,4 @@
 import React, { memo, useMemo } from 'react';
-import { Element as SlateElement } from 'slate';
 import { CustomElement } from '@/lib/types/editor';
 import { cn } from '@/lib/utils';
 
@@ -74,14 +73,14 @@ const Element = memo<ElementProps>(({
 
       case 'bulleted-list':
         return (
-          <ul {...elementProps} className={cn(elementProps.className, 'list-disc list-inside space-y-1')}>
+          <ul {...elementProps} className={cn(elementProps.className, 'list-disc list-outside')}>
             {children}
           </ul>
         );
 
       case 'numbered-list':
         return (
-          <ol {...elementProps} className={cn(elementProps.className, 'list-decimal list-inside space-y-1')}>
+          <ol {...elementProps} className={cn(elementProps.className, 'list-decimal list-outside')}>
             {children}
           </ol>
         );
@@ -107,9 +106,9 @@ const Element = memo<ElementProps>(({
               type="checkbox"
               checked={element.checked || false}
               readOnly
-              className="mt-1"
+              className="mt-1 h-4 w-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 dark:bg-neutral-800 dark:checked:bg-blue-600 dark:checked:border-blue-600"
             />
-            <div className="flex-1">
+            <div className="flex-1 text-neutral-900 dark:text-neutral-100">
               {children}
             </div>
           </div>

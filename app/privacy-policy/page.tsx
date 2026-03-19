@@ -120,7 +120,7 @@ export default function PrivacyPolicyPage() {
               We implement appropriate security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.
             </p>
             <p>
-              However, no method of transmission over the internet or electronic storage is 100% secure, and we cannot guarantee absolute security.
+              However, no method of transmission over the internet or electronic storage is 100% secure, and we can't guarantee absolute security.
             </p>
           </div>
         </div>
@@ -148,7 +148,7 @@ export default function PrivacyPolicyPage() {
           </div>
           <div className="px-6 py-4 space-y-4">
             <p>
-              Our website is not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13.
+              Our website isn't intended for children under 13 years of age. We don't knowingly collect personal information from children under 13.
             </p>
             <p>
               If you are a parent or guardian and believe your child has provided us with personal information, please contact us immediately.
@@ -161,7 +161,7 @@ export default function PrivacyPolicyPage() {
           </div>
           <div className="px-6 py-4 space-y-4">
             <p>
-              We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last updated" date.
+              We may update this Privacy Policy from time to time. We'll notify you of any changes by posting the new Privacy Policy on this page and updating the "Last updated" date.
             </p>
             <p>
               We encourage you to review this Privacy Policy periodically for any changes.

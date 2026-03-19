@@ -4,7 +4,6 @@ import { Search, X, Filter } from 'lucide-react';
 import * as Select from '@radix-ui/react-select';
 import { cn } from '@/lib/utils';
 import { zIndex } from '@/lib/utils/z-index';
-import Chip from '@/components/core/Chip';
 import { PostStatus } from '@/lib/types/database';
 import type { Category, Tag } from '@/lib/types/database';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -97,9 +96,8 @@ export default function BlogFilters({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={cn(
-              "w-full pl-10 pr-3 h-10 py-2 border border-gray-200/80 dark:border-gray-700/80 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 text-sm shadow-sm",
-              filterError && "border-red-500/80 dark:border-red-500/80",
-              "focus:ring-2 focus:ring-blue-500/20"
+              "w-full pl-10 pr-3 h-10 py-2 border border-border/80 rounded-xl bg-background/80 backdrop-blur-sm text-foreground placeholder-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-all duration-200 text-sm shadow-sm",
+              filterError && "border-destructive/80"
             )}
             aria-invalid={!!filterError}
             aria-describedby={filterError ? "search-error" : undefined}
@@ -162,104 +160,84 @@ export default function BlogFilters({
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">Category</label>
               <div className="flex flex-wrap gap-2">
-                <Chip
-                  as="button"
-                  type="button"
-                  size="sm"
-                  variant={selectedCategory === 'all' ? 'filled' : 'subtle'}
-                  color={selectedCategory === 'all' ? 'blue' : 'neutral'}
+                <span
+                  className={cn(
+                    "cursor-pointer transition-all duration-200 px-3 py-1.5 rounded-full text-sm whitespace-nowrap",
+                    selectedCategory === 'all'
+                      ? "bg-primary/10 text-primary"
+                      : "bg-muted text-muted-foreground border border-border"
+                  )}
                   onClick={() => handleCategoryChange('all')}
                 >
-                  <>
-                    All Categories
-                    {selectedCategory === 'all' && (
+                  All Categories
+                  {selectedCategory === 'all' && (
+                    <X className="ml-1 h-3 w-3 inline" />
+                  )}
+                </span>
+                {categories.map((category) => (
+                  <span
+                    key={category.id}
+                    className={cn(
+                      "cursor-pointer transition-all duration-200 px-3 py-1.5 rounded-full text-sm whitespace-nowrap",
+                      selectedCategory === category.id
+                        ? "bg-primary/10 text-primary"
+                        : "bg-muted text-muted-foreground border border-border"
+                    )}
+                    onClick={() => handleCategoryChange(category.id)}
+                  >
+                    {category.name}
+                    {selectedCategory === category.id && (
                       <X className="ml-1 h-3 w-3 inline" />
                     )}
-                  </>
-                </Chip>
-                {categories.map((category) => {
-                  const isActive = selectedCategory === category.id;
-                  return (
-                    <Chip
-                      key={category.id}
-                      as="button"
-                      type="button"
-                      size="sm"
-                      variant={isActive ? 'filled' : 'subtle'}
-                      color={isActive ? 'blue' : 'neutral'}
-                      onClick={() => handleCategoryChange(category.id)}
-                    >
-                      <>
-                        {category.name}
-                        {isActive && (
-                          <X className="ml-1 h-3 w-3 inline" />
-                        )}
-                      </>
-                    </Chip>
-                  );
-                })}
+                  </span>
+                ))}
               </div>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">Tags</label>
               <div className="flex flex-wrap gap-2">
-                {tags.map((tag) => {
-                  const isActive = selectedTags.includes(tag.id);
-                  const isDisabled = selectedTags.length >= 5 && !isActive;
-                  return (
-                    <Chip
-                      key={tag.id}
-                      as="button"
-                      type="button"
-                      size="sm"
-                      variant={isActive ? 'filled' : 'subtle'}
-                      color={isActive ? 'blue' : 'neutral'}
-                      onClick={() => !isDisabled && handleTagChange(tag.id)}
-                      className={cn(
-                        isDisabled && 'opacity-50 cursor-not-allowed'
-                      )}
-                    >
-                      <>
-                        {tag.name}
-                        {isActive && (
-                          <X className="ml-1 h-3 w-3 inline" />
-                        )}
-                      </>
-                    </Chip>
-                  );
-                })}
+                {tags.map((tag) => (
+                  <span
+                    key={tag.id}
+                    className={cn(
+                      "cursor-pointer transition-all duration-200 px-3 py-1.5 rounded-full text-sm whitespace-nowrap",
+                      selectedTags.includes(tag.id)
+                        ? "bg-primary/10 text-primary"
+                        : "bg-muted text-muted-foreground border border-border",
+                      selectedTags.length >= 5 && !selectedTags.includes(tag.id) && "opacity-50 cursor-not-allowed"
+                    )}
+                    onClick={() => handleTagChange(tag.id)}
+                  >
+                    {tag.name}
+                    {selectedTags.includes(tag.id) && (
+                      <X className="ml-1 h-3 w-3 inline" />
+                    )}
+                  </span>
+                ))}
               </div>
             </div>
             {isAdmin && (
               <div className="space-y-2">
                 <label className="text-sm font-medium text-muted-foreground">Status</label>
                 <div className="flex flex-wrap gap-2">
-                  {Object.values(PostStatus).map((status) => {
-                    const isActive = selectedStatus.includes(status);
-                    const isDisabled = selectedStatus.length >= 2 && !isActive;
-                    return (
-                      <Chip
-                        key={status}
-                        as="button"
-                        type="button"
-                        size="sm"
-                        variant={isActive ? 'filled' : 'subtle'}
-                        color={isActive ? 'blue' : 'neutral'}
-                        onClick={() => !isDisabled && handleStatusChange(status)}
-                        className={cn(
-                          'whitespace-nowrap',
-                          isDisabled && 'opacity-50 cursor-not-allowed'
-                        )}
-                      >
-                        <>
-                          {status}
-                          {isActive && (
-                            <X className="ml-1 h-3 w-3 inline" />
-                          )}
-                        </>
-                      </Chip>
-                    );
-                  })}
+                  {Object.values(PostStatus).map((status) => (
+                    <span
+                      key={status}
+                      className={cn(
+                        "cursor-pointer transition-all duration-200 px-3 py-1.5 rounded-full text-sm whitespace-nowrap",
+                        selectedStatus.includes(status)
+                          ? "bg-primary/10 text-primary"
+                          : "bg-muted text-muted-foreground border border-border",
+                        selectedStatus.length >= 2 && !selectedStatus.includes(status) && "opacity-50 cursor-not-allowed"
+                      )}
+                      onClick={() => handleStatusChange(status)}
+                    >
+                      {status}
+                      {selectedStatus.includes(status) && (
+                        <X className="ml-1 h-3 w-3 inline" />
+                      )}
+                    </span>
+                  ))}
                 </div>
               </div>
             )}

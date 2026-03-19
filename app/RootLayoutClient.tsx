@@ -1,126 +1,69 @@
-/**
- * Root Layout Client Component
- * 
- * Client-side layout wrapper providing React Query, analytics,
- * toast notifications, and responsive navigation for the application.
- */
-
 'use client';
-import React, { useEffect, useRef } from 'react';
+
+import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Analytics } from "@vercel/analytics/react";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
-import { cn } from '@/lib/utils';
 import Navbar from '@/components/core/Navbar';
 import Footer from '@/components/core/Footer';
 
-// React Query client configuration
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000,   // 10 minutes
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
+const toastStyle = {
+  background: 'var(--toast-bg)',
+  color: 'var(--toast-color)',
+  border: '1px solid hsl(var(--border))',
+  borderRadius: '0.75rem',
+  fontSize: '0.875rem',
+  padding: '12px 16px',
+};
+
+const toastOptions = {
+  duration: 4000,
+  style: toastStyle,
+  success: { duration: 3000 },
+  error: { duration: 5000 },
+};
 
 interface RootLayoutClientProps {
   children: React.ReactNode;
 }
 
-/**
- * Root layout client component with providers and navigation
- * 
- * @param children - Child components to render
- * @returns JSX element with layout providers
- */
 export default function RootLayoutClient({ children }: RootLayoutClientProps) {
   const pathname = usePathname();
   const isAdminRoute = pathname?.startsWith('/admin');
-  const startTime = useRef(performance.now());
 
-  useEffect(() => {
-    const handleResize = () => {
-      // Resize handling logic can be added here
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 5 * 60 * 1000,
+            gcTime: 10 * 60 * 1000,
+            retry: 1,
+            refetchOnWindowFocus: false,
+          },
+        },
+      })
+  );
 
-  // Admin route layout (minimal)
   if (isAdminRoute) {
     return (
       <QueryClientProvider client={queryClient}>
         {children}
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 4000,
-            style: {
-              background: 'var(--toast-bg, #363636)',
-              color: 'var(--toast-color, #fff)',
-            },
-            success: {
-              duration: 3000,
-            },
-            error: {
-              duration: 5000,
-            },
-          }}
-        />
-        <Analytics />
+        <Toaster position="top-right" toastOptions={toastOptions} />
       </QueryClientProvider>
     );
   }
 
-  // Main site layout
   return (
     <QueryClientProvider client={queryClient}>
       <div className="flex flex-col min-h-screen bg-background relative">
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-primary focus:text-primary-foreground focus:font-medium focus:shadow-lg focus:outline-none"
-        >
-          Skip to content
-        </a>
         <Navbar />
-        {/* Main content area with page transitions */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={pathname}
-            id="main-content"
-            className="relative"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-          >
-            {children}
-          </motion.div>
-        </AnimatePresence>
+        <div className="relative">
+          {children}
+        </div>
         <Footer />
       </div>
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          duration: 4000,
-          style: {
-            background: 'var(--toast-bg, #363636)',
-            color: 'var(--toast-color, #fff)',
-          },
-          success: {
-            duration: 3000,
-          },
-          error: {
-            duration: 5000,
-          },
-        }}
-      />
-      <Analytics />
+      <Toaster position="top-right" toastOptions={toastOptions} />
     </QueryClientProvider>
   );
 }

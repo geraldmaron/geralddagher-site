@@ -1,11 +1,12 @@
-import { Loader2 } from 'lucide-react';
-
 export default function Loading() {
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <div className="flex flex-col items-center gap-3">
-        <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
-        <p className="text-sm text-gray-600 dark:text-gray-400">Loading blog...</p>
+      <div className="flex flex-col items-center gap-4">
+        <div className="relative">
+          <div className="w-10 h-10 rounded-full border-2 border-border" />
+          <div className="absolute inset-0 w-10 h-10 rounded-full border-2 border-transparent border-t-primary animate-spin" />
+        </div>
+        <p className="text-sm text-muted-foreground">Loading blog...</p>
       </div>
     </div>
   );

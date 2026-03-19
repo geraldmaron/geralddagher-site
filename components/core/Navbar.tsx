@@ -12,7 +12,6 @@ import {
   Menu,
   X,
   Mic,
-  User,
   Mail,
   LayoutDashboard,
   FileText,
@@ -39,7 +38,6 @@ import { cn } from '@/lib/utils';
 import { zIndex } from '@/lib/utils/z-index';
 import SubscriptionModal from '@/components/SubscriptionModal';
 
-// Navigation configuration
 type NavItem = {
   name: string;
   href: string;
@@ -95,20 +93,22 @@ const NavItemComponent: React.FC<{
         <div>
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            aria-expanded={isDropdownOpen}
+            aria-haspopup="true"
             className={cn(
               'w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200',
               isChildActive
-                ? 'bg-primary text-primary-foreground shadow-sm'
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             )}
           >
-            <div className="flex items-center space-x-3">
-              <Icon className="w-5 h-5" />
-              <span className="font-medium">{item.name}</span>
+            <div className="flex items-center gap-3">
+              <Icon aria-hidden="true" className="w-4 h-4" />
+              <span className="text-sm font-medium">{item.name}</span>
             </div>
-            <ChevronDown className={cn(
-              "w-4 h-4 transition-transform duration-200",
-              isDropdownOpen && "rotate-180"
+            <ChevronDown aria-hidden="true" className={cn(
+              'w-4 h-4 transition-transform duration-200',
+              isDropdownOpen && 'rotate-180'
             )} />
           </button>
           <AnimatePresence>
@@ -117,7 +117,8 @@ const NavItemComponent: React.FC<{
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="ml-4 mt-1 space-y-1 overflow-hidden"
+                transition={{ duration: 0.2 }}
+                className="ms-4 mt-1 space-y-1 overflow-hidden"
               >
                 {item.children?.map((child) => {
                   const ChildIcon = child.icon;
@@ -127,15 +128,16 @@ const NavItemComponent: React.FC<{
                       key={child.name}
                       href={child.href}
                       onClick={onClick}
+                      aria-current={childActive ? 'page' : undefined}
                       className={cn(
-                        'flex items-center space-x-3 px-4 py-2 rounded-lg transition-all duration-200',
+                        'flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 text-sm',
                         childActive
-                          ? 'bg-primary/80 text-primary-foreground'
-                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                       )}
                     >
-                      <ChildIcon className="w-4 h-4" />
-                      <span className="text-sm font-medium">{child.name}</span>
+                      <ChildIcon aria-hidden="true" className="w-4 h-4" />
+                      <span className="font-medium">{child.name}</span>
                     </Link>
                   );
                 })}
@@ -150,15 +152,16 @@ const NavItemComponent: React.FC<{
       <Link
         href={item.href}
         onClick={onClick}
+        aria-current={isActive ? 'page' : undefined}
         className={cn(
-          'flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200',
+          'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200',
           isActive
-            ? 'bg-primary text-primary-foreground shadow-sm'
-            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+            ? 'bg-primary text-primary-foreground'
+            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
         )}
       >
-        <Icon className="w-5 h-5" />
-        <span className="font-medium">{item.name}</span>
+        <Icon aria-hidden="true" className="w-4 h-4" />
+        <span className="text-sm font-medium">{item.name}</span>
       </Link>
     );
   }
@@ -170,41 +173,38 @@ const NavItemComponent: React.FC<{
         onMouseEnter={() => setIsDropdownOpen(true)}
         onMouseLeave={() => setIsDropdownOpen(false)}
       >
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+        <button
+          aria-haspopup="true"
+          aria-expanded={isDropdownOpen}
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setIsDropdownOpen(false);
+          }}
           className={cn(
-            'relative flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200',
-            'group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+            'relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
             isChildActive
-              ? 'text-primary font-semibold'
-              : 'hover:bg-gray-100/60 dark:hover:bg-gray-800/40 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+              ? 'bg-primary/10 text-primary'
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
           )}
         >
-          <Icon className="w-4 h-4" />
-          <span className="text-sm font-medium whitespace-nowrap">{item.name}</span>
-          <ChevronDown className="w-3 h-3" />
-          {isChildActive && (
-            <motion.span
-              layoutId="nav-underline"
-              className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-primary"
-              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            />
-          )}
-        </motion.button>
+          <span>{item.name}</span>
+          <ChevronDown aria-hidden="true" className={cn('w-3.5 h-3.5 transition-transform duration-200', isDropdownOpen && 'rotate-180')} />
+        </button>
 
         <AnimatePresence>
           {isDropdownOpen && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+              exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.15 }}
               className={cn(
-                'absolute top-full left-0 mt-1 min-w-[180px] rounded-xl shadow-xl',
-                'bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl',
-                'border border-gray-200/50 dark:border-gray-700/50',
-                'py-2 z-50'
+                'absolute top-full start-0 mt-1.5 min-w-[180px] rounded-xl overflow-hidden',
+                'bg-popover border border-border/60',
+                'shadow-[0_8px_24px_-4px_rgba(0,0,0,0.12),0_4px_8px_-4px_rgba(0,0,0,0.06)]',
+                'dark:shadow-[0_8px_24px_-4px_rgba(0,0,0,0.40),0_4px_8px_-4px_rgba(0,0,0,0.30)]',
+                'py-1 z-50'
               )}
             >
               {item.children?.map((child) => {
@@ -215,14 +215,15 @@ const NavItemComponent: React.FC<{
                     key={child.name}
                     href={child.href}
                     onClick={onClick}
+                    aria-current={childActive ? 'page' : undefined}
                     className={cn(
-                      'flex items-center space-x-2 px-4 py-2 text-sm transition-colors',
+                      'flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors',
                       childActive
                         ? 'bg-primary/10 text-primary'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                     )}
                   >
-                    <ChildIcon className="w-4 h-4" />
+                    <ChildIcon aria-hidden="true" className="w-4 h-4" />
                     <span className="font-medium whitespace-nowrap">{child.name}</span>
                   </Link>
                 );
@@ -235,29 +236,28 @@ const NavItemComponent: React.FC<{
   }
 
   return (
-    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-      <Link
-        href={item.href}
-        onClick={onClick}
-        className={cn(
-          'relative flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200',
-          'group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-          isActive
-            ? 'text-primary font-semibold'
-            : 'hover:bg-gray-100/60 dark:hover:bg-gray-800/40 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
-        )}
-      >
-        <Icon className="w-4 h-4" />
-        <span className="text-sm font-medium whitespace-nowrap">{item.name}</span>
-        {isActive && (
-          <motion.span
-            layoutId="nav-underline"
-            className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-primary"
-            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-          />
-        )}
-      </Link>
-    </motion.div>
+    <Link
+      href={item.href}
+      onClick={onClick}
+      aria-current={isActive ? 'page' : undefined}
+      className={cn(
+        'relative flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors duration-200',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+        isActive
+          ? 'text-primary font-semibold'
+          : 'text-foreground/60 hover:text-foreground'
+      )}
+    >
+      <span>{item.name}</span>
+      {isActive && (
+        <motion.div
+          aria-hidden="true"
+          layoutId="nav-indicator"
+          className="absolute bottom-0 inset-x-1 h-0.5 bg-primary rounded-full"
+          transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+        />
+      )}
+    </Link>
   );
 };
 
@@ -273,18 +273,23 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Determine if we're in admin area
   const isAdminArea = pathname.startsWith('/admin');
   const isAuthenticated = !!user;
   const hasAdmin = user && hasAdminAccess(user);
 
-  // Logo source based on theme
   const [logoSrc, setLogoSrc] = useState('/Dagher_Logo_2024.png');
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    let rafId: number;
+    const handleScroll = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => setIsScrolled(window.scrollY > 10));
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   useEffect(() => {
@@ -332,66 +337,53 @@ export default function Navbar() {
     { value: 'system', label: 'System', icon: Monitor },
   ];
 
+  const mobileMenuHeadingId = 'mobile-menu-heading';
+
   return (
     <>
-      {/* Main Navigation Header */}
       <motion.header
         role="banner"
         className={cn(
-          'fixed top-0 w-full transition-all duration-500 ease-out z-50',
-          'border-b border-gray-200/50 dark:border-gray-800/50'
+          'fixed top-0 w-full z-50',
+          'border-b border-border/30',
+          isScrolled && 'border-border/60'
         )}
         style={{ zIndex: zIndex.navbar }}
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 100, damping: 20 }}
+        transition={{ type: 'spring', stiffness: 120, damping: 22 }}
       >
-        <motion.div
+        <div
           className={cn(
-            'w-full transition-all duration-500 ease-out',
+            'w-full transition-all duration-300',
             isScrolled
-              ? 'bg-white/95 dark:bg-black/95 shadow-lg shadow-gray-900/5 dark:shadow-gray-900/20'
-              : 'bg-white/90 dark:bg-black/90'
+              ? 'nav-glass shadow-[0_1px_20px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_1px_20px_-4px_rgba(0,0,0,0.35)]'
+              : 'bg-transparent'
           )}
-          style={{
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)'
-          }}
         >
-          <nav className="h-16 lg:h-20 w-full px-2 sm:px-4 lg:px-6">
-            <div className="h-full max-w-7xl mx-auto flex items-center justify-between">
+          <nav aria-label="Main navigation" className="h-14 lg:h-16 w-full px-4 sm:px-6 lg:px-8">
+            <div className="h-full max-w-7xl mx-auto flex items-center justify-between gap-4">
 
               {/* Logo */}
-              <motion.div
-                className="flex items-center"
-                whileHover={{ scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              <Link
+                href="/"
+                aria-label="Home"
+                className="flex items-center shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg p-1 transition-opacity hover:opacity-80"
               >
-                <Link
-                  href="/"
-                  aria-label="Home"
-                  className={cn(
-                    'flex items-center space-x-3 group focus-visible:outline-none focus-visible:ring-2',
-                    'focus-visible:ring-ring rounded-lg p-1 transition-all duration-200'
-                  )}
-                >
-                  <div className="relative w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16">
-                    <Image
-                      src={logoSrc}
-                      alt="Dagher Logo 2024"
-                      fill
-                      priority
-                      style={{ objectFit: 'contain' }}
-                      sizes="(max-width: 640px) 48px, (max-width: 768px) 56px, 64px"
-                      className="transition-transform duration-200 group-hover:scale-105"
-                    />
-                  </div>
-
-                </Link>
-              </motion.div>
+                <div className="relative w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12">
+                  <Image
+                    src={logoSrc}
+                    alt="Dagher Logo"
+                    fill
+                    priority
+                    style={{ objectFit: 'contain' }}
+                    sizes="(max-width: 640px) 40px, (max-width: 768px) 44px, 48px"
+                  />
+                </div>
+              </Link>
 
               {/* Desktop Navigation */}
-              <div className="hidden lg:flex items-center space-x-1">
+              <div className="hidden lg:flex items-center gap-0.5 flex-1">
                 {navigationItems.map((item) => (
                   <NavItemComponent
                     key={item.name}
@@ -403,20 +395,20 @@ export default function Navbar() {
               </div>
 
               {/* Right Side Actions */}
-              <div className="flex items-center space-x-2 sm:space-x-3">
+              <div className="flex items-center gap-2">
                 {/* Admin Search Bar - Desktop only */}
                 {isAdminArea && (
                   <div className="relative hidden lg:block">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input
                       type="text"
                       placeholder="Search..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className={cn(
-                        'pl-10 pr-4 py-2 w-48 rounded-xl text-sm',
-                        'bg-white/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
-                        'backdrop-blur-sm placeholder-gray-400 dark:placeholder-gray-500',
+                        'ps-9 pe-4 py-2 w-44 rounded-lg text-sm',
+                        'bg-muted/60 border border-border/60',
+                        'placeholder:text-muted-foreground text-foreground',
                         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent',
                         'transition-all duration-200'
                       )}
@@ -424,80 +416,56 @@ export default function Navbar() {
                   </div>
                 )}
 
-                {/* Theme Toggle - Desktop only, available for all users */}
-                <div className="hidden md:flex items-center rounded-full border border-gray-200/60 dark:border-gray-700/60 bg-gray-100/80 dark:bg-gray-800/80 p-0.5 relative">
-                  {/* Sliding indicator */}
-                  <motion.div
-                    className="absolute top-0.5 bottom-0.5 w-8 rounded-full bg-white dark:bg-gray-600 shadow-sm"
-                    initial={false}
-                    animate={{
-                      left: themeMode === 'light' ? 2 : themeMode === 'dark' ? 34 : 66,
-                    }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                  />
-                  <button
-                    onClick={() => setThemeMode('light')}
-                    className={cn(
-                      'relative z-10 flex items-center justify-center w-8 h-8 rounded-full transition-colors duration-200',
-                      themeMode === 'light' ? 'text-amber-500' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
-                    )}
-                    aria-label="Light mode"
-                  >
-                    <Sun className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => setThemeMode('dark')}
-                    className={cn(
-                      'relative z-10 flex items-center justify-center w-8 h-8 rounded-full transition-colors duration-200',
-                      themeMode === 'dark' ? 'text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
-                    )}
-                    aria-label="Dark mode"
-                  >
-                    <Moon className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => setThemeMode('system')}
-                    className={cn(
-                      'relative z-10 flex items-center justify-center w-8 h-8 rounded-full transition-colors duration-200',
-                      themeMode === 'system' ? 'text-primary' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
-                    )}
-                    aria-label="System theme"
-                  >
-                    <Monitor className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+                {/* Theme Toggle - Desktop only */}
+                <motion.button
+                  whileTap={{ scale: 0.93 }}
+                  onClick={() => {
+                    const nextMode = themeMode === 'system' ? 'light' : themeMode === 'light' ? 'dark' : 'system';
+                    setThemeMode(nextMode);
+                  }}
+                  className={cn(
+                    'hidden md:flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200',
+                    'bg-muted/60 border border-border/60',
+                    'hover:bg-muted',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+                  )}
+                  aria-label={`Current theme: ${themeMode}. Click to cycle.`}
+                >
+                  {themeMode === 'light' && <Sun aria-hidden="true" className="w-4 h-4 text-amber-500" />}
+                  {themeMode === 'dark' && <Moon aria-hidden="true" className="w-4 h-4 text-blue-400" />}
+                  {themeMode === 'system' && <Monitor aria-hidden="true" className="w-4 h-4 text-muted-foreground" />}
+                </motion.button>
 
-                {/* Quick Actions - Desktop only */}
+                {/* Admin Quick Actions - Desktop only */}
                 {isAdminArea && (
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                  <button
                     onClick={() => router.push('/admin/posts/new')}
                     className={cn(
-                      'hidden md:flex items-center space-x-2 px-3 py-2 rounded-xl',
-                      'bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 dark:hover:bg-gray-200',
-                      'text-white dark:text-gray-900 font-medium text-sm',
+                      'hidden md:flex items-center gap-2 px-3 py-2 rounded-lg',
+                      'bg-foreground hover:bg-foreground/90',
+                      'text-background font-medium text-sm',
                       'transition-all duration-200',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                     )}
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus aria-hidden="true" className="w-4 h-4" />
                     <span>New Post</span>
-                  </motion.button>
+                  </button>
                 )}
 
                 {/* Auth / User Menu - Desktop only */}
                 <div className="hidden md:block">
                   {isAuthenticated ? (
                     <div className="relative">
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                      <button
                         onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                        aria-label="User menu"
+                        aria-haspopup="true"
+                        aria-expanded={isUserMenuOpen}
                         className={cn(
-                          'flex items-center space-x-2 px-3 py-2 rounded-xl',
-                          'bg-white/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
-                          'hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all duration-200',
+                          'flex items-center gap-2 px-2.5 py-1.5 rounded-lg',
+                          'bg-muted/60 border border-border/60',
+                          'hover:bg-muted transition-all duration-200',
                           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
                         )}
                       >
@@ -510,43 +478,41 @@ export default function Navbar() {
                             />
                           </div>
                         ) : (
-                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
-                            <span className="text-white text-xs font-bold">
+                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                            <span className="text-white text-xs font-semibold">
                               {user?.email?.charAt(0).toUpperCase()}
                             </span>
                           </div>
                         )}
-                        <ChevronDown className="w-4 h-4 text-gray-400" />
-                      </motion.button>
+                        <ChevronDown aria-hidden="true" className={cn('w-3.5 h-3.5 text-muted-foreground transition-transform duration-200', isUserMenuOpen && 'rotate-180')} />
+                      </button>
 
                       <AnimatePresence>
                         {isUserMenuOpen && (
                           <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                            initial={{ opacity: 0, scale: 0.96, y: -8 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                            exit={{ opacity: 0, scale: 0.96, y: -8 }}
+                            transition={{ duration: 0.15 }}
                             className={cn(
-                              'absolute right-0 top-full mt-2 w-64 rounded-2xl shadow-xl',
-                              'bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl',
-                              'border border-gray-200/50 dark:border-gray-700/50',
-                              'py-2 z-50'
+                              'absolute end-0 top-full mt-2 w-60 rounded-2xl overflow-hidden',
+                              'bg-popover border border-border/60',
+                              'shadow-[0_16px_48px_-8px_rgba(0,0,0,0.16),0_8px_16px_-8px_rgba(0,0,0,0.08)]',
+                              'dark:shadow-[0_16px_48px_-8px_rgba(0,0,0,0.50),0_8px_16px_-8px_rgba(0,0,0,0.40)]',
+                              'z-50'
                             )}
                           >
-                            <div className="px-4 py-3 border-b border-gray-200/50 dark:border-gray-700/50">
-                              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                Signed in as
-                              </p>
-                              <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                            <div className="px-4 py-3 border-b border-border/60">
+                              <p className="text-xs text-muted-foreground">Signed in as</p>
+                              <p className="text-sm font-medium text-foreground truncate mt-0.5">
                                 {user?.email}
                               </p>
                             </div>
 
-                            <div className="py-2">
-                              <div className="px-4 py-2">
-                                <p className="text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wide">
-                                  Theme
-                                </p>
-                              </div>
+                            <div className="py-1.5">
+                              <p className="px-4 pt-1.5 pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                Theme
+                              </p>
                               {themeOptions.map((option) => {
                                 const Icon = option.icon;
                                 return (
@@ -557,56 +523,55 @@ export default function Navbar() {
                                       setIsUserMenuOpen(false);
                                     }}
                                     className={cn(
-                                      'w-full flex items-center space-x-3 px-4 py-2 text-sm',
-                                      'hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors',
+                                      'w-full flex items-center gap-3 px-4 py-2 text-sm transition-colors',
                                       themeMode === option.value
-                                        ? 'bg-primary/10 text-primary'
-                                        : 'text-gray-700 dark:text-gray-300'
+                                        ? 'text-primary bg-primary/8'
+                                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                                     )}
                                   >
-                                    <Icon className="w-4 h-4" />
+                                    <Icon aria-hidden="true" className="w-4 h-4" />
                                     <span>{option.label}</span>
                                   </button>
                                 );
                               })}
                             </div>
 
-                            <div className="border-t border-gray-200/50 dark:border-gray-700/50 pt-2">
+                            <div className="border-t border-border/60 py-1.5">
                               {user?.has_argus_access && (
                                 <Link
                                   href="/argus/settings"
-                                  className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
+                                  className="flex items-center gap-3 px-4 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                                   onClick={() => setIsUserMenuOpen(false)}
                                 >
-                                  <Settings className="w-4 h-4" />
+                                  <Settings aria-hidden="true" className="w-4 h-4" />
                                   <span>Settings</span>
                                 </Link>
                               )}
                               {!isAdminArea && hasAdmin && (
                                 <Link
                                   href="/admin"
-                                  className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
+                                  className="flex items-center gap-3 px-4 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                                   onClick={() => setIsUserMenuOpen(false)}
                                 >
-                                  <LayoutDashboard className="w-4 h-4" />
+                                  <LayoutDashboard aria-hidden="true" className="w-4 h-4" />
                                   <span>Admin Dashboard</span>
                                 </Link>
                               )}
                               {isAdminArea && (
                                 <Link
                                   href="/"
-                                  className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
+                                  className="flex items-center gap-3 px-4 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                                   onClick={() => setIsUserMenuOpen(false)}
                                 >
-                                  <Home className="w-4 h-4" />
+                                  <Home aria-hidden="true" className="w-4 h-4" />
                                   <span>Visit Site</span>
                                 </Link>
                               )}
                               <button
                                 onClick={handleLogout}
-                                className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-destructive hover:bg-destructive/8 transition-colors"
                               >
-                                <LogOut className="w-4 h-4" />
+                                <LogOut aria-hidden="true" className="w-4 h-4" />
                                 <span>Sign out</span>
                               </button>
                             </div>
@@ -615,67 +580,73 @@ export default function Navbar() {
                       </AnimatePresence>
                     </div>
                   ) : !loading && (
-                    <div className="flex items-center space-x-2">
-                      <motion.button
+                    <div className="flex items-center gap-2">
+                      <button
                         onClick={() => router.push('/login')}
                         className={cn(
-                          'flex items-center px-4 py-2 rounded-xl transition-all duration-200',
-                          'hover:bg-white/50 dark:hover:bg-gray-800/50',
+                          'flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200',
+                          'text-muted-foreground hover:text-foreground hover:bg-muted/60',
                           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                          'text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white',
                           'font-medium text-sm'
                         )}
-                        aria-label="Admin"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                        aria-label="Sign in"
                       >
-                        <LogIn className="w-4 h-4 mr-2" />
-                        <span>Admin</span>
-                      </motion.button>
+                        <LogIn className="w-4 h-4" />
+                        <span>Sign in</span>
+                      </button>
 
                       {!isAdminArea && (
                         <button
                           onClick={() => setSubscriptionModalOpen(true)}
                           className={cn(
-                            'flex items-center px-3 py-2 rounded-xl transition-all duration-200',
-                            'hover:bg-white/50 dark:hover:bg-gray-800/50',
-                            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                            'text-gray-700 dark:text-gray-300 hover:text-primary',
-                            'font-medium text-sm'
+                            'flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200',
+                            'bg-primary text-primary-foreground',
+                            'hover:bg-primary/90',
+                            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                           )}
                           aria-label="Subscribe to updates"
                         >
-                          <Mail className="w-4 h-4" />
+                          <Mail aria-hidden="true" className="w-3.5 h-3.5 md:hidden" />
+                          <span className="hidden md:inline">Subscribe</span>
+                          <span className="md:hidden sr-only">Subscribe</span>
                         </button>
                       )}
                     </div>
                   )}
                 </div>
 
-                {/* Mobile Menu Button - Always visible on small screens */}
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                {/* Mobile Menu Button */}
+                <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                   className={cn(
-                    'lg:hidden flex items-center justify-center w-10 h-10 rounded-xl',
-                    'bg-white/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
-                    'hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all duration-200',
+                    'lg:hidden flex items-center justify-center w-9 h-9 rounded-lg',
+                    'bg-muted/60 border border-border/60',
+                    'hover:bg-muted transition-all duration-200',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
                   )}
                   aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
                   aria-expanded={isMenuOpen}
-                  aria-controls="mobile-navigation"
+                  aria-controls="mobile-nav-drawer"
                 >
-                  {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                </motion.button>
+                  <AnimatePresence mode="wait" initial={false}>
+                    {isMenuOpen ? (
+                      <motion.div key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.15 }}>
+                        <X className="w-4 h-4" />
+                      </motion.div>
+                    ) : (
+                      <motion.div key="open" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }}>
+                        <Menu className="w-4 h-4" />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </button>
               </div>
             </div>
           </nav>
-        </motion.div>
+        </div>
       </motion.header>
 
-      {/* Mobile Menu */}
+      {/* Mobile Drawer */}
       <AnimatePresence>
         {isMenuOpen && (
           <>
@@ -683,59 +654,61 @@ export default function Navbar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
               onClick={() => setIsMenuOpen(false)}
+              aria-hidden="true"
             />
             <motion.div
-              id="mobile-navigation"
+              id="mobile-nav-drawer"
               role="dialog"
               aria-modal="true"
-              aria-label="Navigation menu"
+              aria-labelledby={mobileMenuHeadingId}
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 120 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 140 }}
               className={cn(
-                'fixed top-16 lg:top-20 right-0 bottom-0 z-50 w-full sm:w-96 lg:hidden',
-                'bg-white/95 dark:bg-black/95 backdrop-blur-xl',
-                'border-l border-gray-200/50 dark:border-gray-800/50',
-                'flex flex-col'
+                'fixed top-16 end-0 bottom-0 z-50 w-full sm:w-80 lg:hidden',
+                'bg-background/98 backdrop-blur-xl',
+                'border-s border-border/60',
+                'flex flex-col',
+                'shadow-[inset_1px_0_0_rgba(0,0,0,0.05)]'
               )}
             >
-              <div className="p-6 border-b border-gray-200/50 dark:border-gray-800/50">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <div className="flex items-center justify-between px-5 py-4 bg-surface border-b border-border/40">
+                <div className="flex items-center gap-2.5">
+                  <div className="relative w-8 h-8">
+                    <Image src={logoSrc} alt="Dagher Logo" fill style={{ objectFit: 'contain' }} sizes="32px" />
+                  </div>
+                  <h2 id={mobileMenuHeadingId} className="text-sm font-semibold text-foreground">
                     {isAdminArea ? 'Admin Menu' : 'Menu'}
                   </h2>
-                  <button
-                    onClick={() => setIsMenuOpen(false)}
-                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                    aria-label="Close menu"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
                 </div>
+                <button
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  aria-label="Close menu"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-6">
-                {/* Navigation Links */}
-                <div className="space-y-2">
-                  {navigationItems.map((item) => (
-                    <NavItemComponent
-                      key={item.name}
-                      item={item}
-                      isActive={isActivePath(item.href)}
-                      variant="mobile"
-                      onClick={() => setIsMenuOpen(false)}
-                      pathname={pathname}
-                    />
-                  ))}
-                </div>
+              <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
+                {navigationItems.map((item) => (
+                  <NavItemComponent
+                    key={item.name}
+                    item={item}
+                    isActive={isActivePath(item.href)}
+                    variant="mobile"
+                    onClick={() => setIsMenuOpen(false)}
+                    pathname={pathname}
+                  />
+                ))}
 
-                {/* Admin Quick Actions in Mobile */}
                 {isAdminArea && hasAdmin && (
-                  <div className="mt-6 pt-6 border-t border-gray-200/50 dark:border-gray-800/50">
-                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-3 px-4">
+                  <div className="pt-4 mt-4 border-t border-border/60">
+                    <p className="px-4 pb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                       Quick Actions
                     </p>
                     <button
@@ -744,23 +717,22 @@ export default function Navbar() {
                         setIsMenuOpen(false);
                       }}
                       className={cn(
-                        'w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200',
-                        'bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 dark:hover:bg-gray-200',
-                        'text-white dark:text-gray-900 font-medium'
+                        'w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200',
+                        'bg-foreground hover:bg-foreground/90',
+                        'text-background font-medium text-sm'
                       )}
                     >
-                      <Plus className="w-5 h-5" />
+                      <Plus aria-hidden="true" className="w-4 h-4" />
                       <span>New Post</span>
                     </button>
                   </div>
                 )}
 
-                {/* Theme Options */}
-                <div className="mt-6 pt-6 border-t border-gray-200/50 dark:border-gray-800/50">
-                  <p className="text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-3 px-4">
+                <div className="pt-4 mt-4 border-t border-border/60">
+                  <p className="px-4 pb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                     Theme
                   </p>
-                  <div className="space-y-1">
+                  <div className="space-y-0.5">
                     {themeOptions.map((option) => {
                       const Icon = option.icon;
                       return (
@@ -768,14 +740,14 @@ export default function Navbar() {
                           key={option.value}
                           onClick={() => setThemeMode(option.value as any)}
                           className={cn(
-                            'w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200',
+                            'w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 text-sm',
                             themeMode === option.value
-                              ? 'bg-primary text-primary-foreground shadow-sm'
-                              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                              ? 'bg-primary/10 text-primary font-medium'
+                              : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                           )}
                         >
-                          <Icon className="w-5 h-5" />
-                          <span className="font-medium">{option.label}</span>
+                          <Icon aria-hidden="true" className="w-4 h-4" />
+                          <span>{option.label}</span>
                         </button>
                       );
                     })}
@@ -783,12 +755,12 @@ export default function Navbar() {
                 </div>
               </div>
 
-              {/* Footer section - Auth-dependent */}
+              {/* Mobile Auth Footer */}
               {isAuthenticated ? (
-                <div className="p-6 border-t border-gray-200/50 dark:border-gray-800/50">
-                  <div className="flex items-center space-x-3 mb-4">
+                <div className="px-4 py-4 border-t border-border/60">
+                  <div className="flex items-center gap-3 mb-3 px-1">
                     {user?.avatar_url ? (
-                      <div className="relative w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                      <div className="relative w-8 h-8 rounded-full overflow-hidden shrink-0">
                         <img
                           src={getAvatarUrl(user.avatar_url, { width: 32, height: 32, fit: 'cover', quality: 80 }) || ''}
                           alt={user.name || user.email}
@@ -796,73 +768,60 @@ export default function Navbar() {
                         />
                       </div>
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
-                        <span className="text-white text-sm font-bold">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0">
+                        <span className="text-white text-sm font-semibold">
                           {user?.email?.charAt(0).toUpperCase()}
                         </span>
                       </div>
                     )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                        {user?.email}
-                      </p>
-                    </div>
+                    <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
                   </div>
 
-                  {/* Admin/Site toggle for mobile */}
-                  {hasAdmin && (
-                    <Link
-                      href={isAdminArea ? '/' : '/admin'}
-                      onClick={() => setIsMenuOpen(false)}
-                      className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-2"
+                  <div className="space-y-0.5">
+                    {hasAdmin && (
+                      <Link
+                        href={isAdminArea ? '/' : '/admin'}
+                        onClick={() => setIsMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                      >
+                        {isAdminArea ? <Home aria-hidden="true" className="w-4 h-4" /> : <LayoutDashboard aria-hidden="true" className="w-4 h-4" />}
+                        <span className="font-medium">{isAdminArea ? 'Visit Site' : 'Admin Dashboard'}</span>
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => { handleLogout(); setIsMenuOpen(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-destructive hover:bg-destructive/8 transition-colors"
                     >
-                      {isAdminArea ? <Home className="w-5 h-5" /> : <LayoutDashboard className="w-5 h-5" />}
-                      <span className="font-medium">{isAdminArea ? 'Visit Site' : 'Admin Dashboard'}</span>
-                    </Link>
-                  )}
-
-                  <button
-                    onClick={() => {
-                      handleLogout();
-                      setIsMenuOpen(false);
-                    }}
-                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                  >
-                    <LogOut className="w-5 h-5" />
-                    <span className="font-medium">Sign out</span>
-                  </button>
+                      <LogOut aria-hidden="true" className="w-4 h-4" />
+                      <span className="font-medium">Sign out</span>
+                    </button>
+                  </div>
                 </div>
               ) : !loading && (
-                <div className="p-6 border-t border-gray-200/50 dark:border-gray-800/50 space-y-2">
+                <div className="px-4 py-4 border-t border-border/60 space-y-2">
                   <button
-                    onClick={() => {
-                      router.push('/login');
-                      setIsMenuOpen(false);
-                    }}
+                    onClick={() => { router.push('/login'); setIsMenuOpen(false); }}
                     className={cn(
-                      'w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200',
-                      'bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 dark:hover:bg-gray-200',
-                      'text-white dark:text-gray-900 font-medium'
+                      'w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200',
+                      'bg-foreground hover:bg-foreground/90',
+                      'text-background font-medium text-sm'
                     )}
                   >
-                    <LogIn className="w-5 h-5" />
-                    <span>Admin</span>
+                    <LogIn className="w-4 h-4" />
+                    <span>Sign in</span>
                   </button>
 
                   {!isAdminArea && (
                     <button
-                      onClick={() => {
-                        setSubscriptionModalOpen(true);
-                        setIsMenuOpen(false);
-                      }}
+                      onClick={() => { setSubscriptionModalOpen(true); setIsMenuOpen(false); }}
                       className={cn(
-                        'w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200',
-                        'border border-gray-200 dark:border-gray-700',
-                        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800',
-                        'font-medium'
+                        'w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200',
+                        'border border-border',
+                        'text-muted-foreground hover:bg-muted hover:text-foreground',
+                        'font-medium text-sm'
                       )}
                     >
-                      <Mail className="w-5 h-5" />
+                      <Mail className="w-4 h-4" />
                       <span>Subscribe to updates</span>
                     </button>
                   )}
@@ -873,15 +832,14 @@ export default function Navbar() {
         )}
       </AnimatePresence>
 
-      {/* Click outside to close user menu */}
       {isUserMenuOpen && (
         <div
           className="fixed inset-0 z-30"
           onClick={() => setIsUserMenuOpen(false)}
+          aria-hidden="true"
         />
       )}
 
-      {/* Subscription Modal */}
       <SubscriptionModal
         isOpen={subscriptionModalOpen}
         onClose={() => setSubscriptionModalOpen(false)}

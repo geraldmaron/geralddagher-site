@@ -1,8 +1,10 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { Grid3X3, List, Mail } from 'lucide-react';
+import Image from 'next/image';
+import { Grid3X3, List, Mail, ArrowRight } from 'lucide-react';
 import Button from '@/components/core/Button';
 import { cn } from '@/lib/utils';
+import { getSafeImageUrl } from '@/lib/utils/imageUtils';
 import PostCard from './PostCard';
 import BlogFilters from './BlogFilters';
 import BlogPagination from './BlogPagination';
@@ -13,6 +15,7 @@ import { PostStatus } from '@/lib/types/database';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useAuth } from '@/lib/auth/provider';
 import SubscriptionModal from '@/components/SubscriptionModal';
+
 interface BlogWrapperProps {
   initialPosts: PostData[];
   initialTotal?: number;
@@ -22,6 +25,9 @@ interface BlogWrapperProps {
   onEditPost?: (postId: string) => void;
   onDeletePost?: (postId: string) => Promise<void>;
 }
+
+type PostWithReadingTime = PostData & { reading_time?: number };
+
 export default function BlogWrapper({
   initialPosts,
   initialTotal,
@@ -57,7 +63,6 @@ export default function BlogWrapper({
     setIsLoading(true);
     setError(null);
     try {
-      // Use Next.js API route instead of direct Directus client-side call (avoids CORS)
       const params = new URLSearchParams({
         limit: itemsPerPage.toString(),
         offset: ((currentPage - 1) * itemsPerPage).toString(),
@@ -99,6 +104,7 @@ export default function BlogWrapper({
     effectiveIsAdmin,
     retryCount
   ]);
+
   useEffect(() => {
     setCurrentPage(1);
   }, [debouncedSearchQuery, selectedCategory, selectedTags, selectedStatus, itemsPerPage]);
@@ -141,11 +147,9 @@ export default function BlogWrapper({
     currentPage * itemsPerPage
   );
 
-  const showFeatured = !isLoading && !hasFilters && currentPage === 1 && paginatedPosts.length > 1;
-
   const handleSelectPost = (postId: string) => {
-    setSelectedPosts(prev => 
-      prev.includes(postId) 
+    setSelectedPosts(prev =>
+      prev.includes(postId)
         ? prev.filter(id => id !== postId)
         : [...prev, postId]
     );
@@ -157,7 +161,7 @@ export default function BlogWrapper({
 
   const handleBulkDelete = async () => {
     if (selectedPosts.length === 0) return;
-    
+
     setIsBulkDeleting(true);
     try {
       for (const postId of selectedPosts) {
@@ -173,22 +177,51 @@ export default function BlogWrapper({
     }
   };
 
+  const featuredPost = viewMode === 'grid' && paginatedPosts.length > 0
+    ? paginatedPosts[0] as PostWithReadingTime
+    : null;
+  const remainingPosts = viewMode === 'grid' && paginatedPosts.length > 1
+    ? paginatedPosts.slice(1)
+    : viewMode === 'list' ? paginatedPosts : [];
+
+  const formatFeaturedDate = (post: PostWithReadingTime) => {
+    const date = post.published_at ? new Date(post.published_at) : new Date(post.created_at);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
   return (
-    <div className="space-y-8">
-      {/* Sticky frosted filter bar */}
-      <div className="sticky top-16 lg:top-20 z-30 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 bg-white/80 dark:bg-background/80 backdrop-blur-xl border-b border-blue-200/30 dark:border-blue-800/20">
-        <BlogFilters
-          categories={categories}
-          tags={tags}
-            onSearchChange={handleSearchChange}
-            onCategoryChange={setSelectedCategory}
-            onTagsChange={setSelectedTags}
-            onStatusChange={setSelectedStatus}
-            isAdmin={effectiveIsAdmin}
-          />
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mt-4">
+    <div className="space-y-6">
+      <div>
+        <div className="mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <BlogFilters
+              categories={categories}
+              tags={tags}
+              onSearchChange={handleSearchChange}
+              onCategoryChange={setSelectedCategory}
+              onTagsChange={setSelectedTags}
+              onStatusChange={setSelectedStatus}
+              isAdmin={effectiveIsAdmin}
+            />
+            {!effectiveIsAdmin && (
+              <div className="flex-shrink-0">
+                <Button
+                  onClick={() => setSubscriptionModalOpen(true)}
+                  variant="primary"
+                  size="md"
+                  aria-label="Subscribe to updates"
+                  className="shadow-md shadow-primary/25"
+                >
+                  <Mail className="w-4 h-4 mr-2" />
+                  Subscribe
+                </Button>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/40 pb-4 mb-8">
             <div className="flex items-center gap-4 flex-wrap">
-              <div className="text-sm font-medium text-muted-foreground">
+              <div className="text-sm font-medium text-muted-foreground px-3 py-1.5 rounded-full bg-muted/80 border border-border/60">
                 {isLoading ? 'Loading...' : `${totalPosts} post${totalPosts !== 1 ? 's' : ''}`}
               </div>
               {effectiveIsAdmin && paginatedPosts.length > 0 && (
@@ -211,153 +244,183 @@ export default function BlogWrapper({
                 </div>
               )}
             </div>
-            <div className="flex items-center space-x-3">
-              {!effectiveIsAdmin && (
-                <Button
-                  onClick={() => setSubscriptionModalOpen(true)}
-                  variant="primary"
-                  size="md"
-                  aria-label="Subscribe to updates"
-                  className="shadow-md shadow-blue-500/25 bg-blue-600 hover:bg-blue-700 border-blue-600"
-                >
-                  <Mail className="w-4 h-4 mr-2" />
-                  Subscribe
-                </Button>
-              )}
-              <div className="inline-flex rounded-lg border border-input bg-muted p-1">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={cn(
-                    'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-                    viewMode === 'grid'
-                      ? 'bg-background text-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground'
-                  )}
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={cn(
-                    'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-                    viewMode === 'list'
-                      ? 'bg-background text-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground'
-                  )}
-                >
-                  <List className="h-4 w-4" />
-                </button>
-              </div>
+            <div className="inline-flex rounded-xl border border-border/80 bg-muted/60 backdrop-blur-sm p-1.5 gap-1 shadow-sm">
+              <Button
+                variant={viewMode === 'grid' ? 'primary' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+                className={cn(
+                  'rounded-lg transition-all h-8 w-8 p-0 flex items-center justify-center',
+                  viewMode === 'grid'
+                    ? 'bg-background shadow-sm'
+                    : 'hover:bg-muted/80'
+                )}
+              >
+                <Grid3X3 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'primary' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className={cn(
+                  'rounded-lg transition-all h-8 w-8 p-0 flex items-center justify-center',
+                  viewMode === 'list'
+                    ? 'bg-background shadow-sm'
+                    : 'hover:bg-muted/80'
+                )}
+              >
+                <List className="h-4 w-4" />
+              </Button>
             </div>
           </div>
-      </div>
+        </div>
 
-      {/* Featured post — first post gets a hero treatment */}
-      {showFeatured && (
-        <div className="mb-2">
-          <div className="relative">
-            <PostCard
-              post={paginatedPosts[0]}
-              viewMode="list"
-              isAdmin={effectiveIsAdmin}
-              onEdit={onEditPost ? () => onEditPost(paginatedPosts[0].id) : undefined}
-              onDelete={onDeletePost ? () => onDeletePost(paginatedPosts[0].id) : undefined}
-              searchQuery={debouncedSearchQuery}
-              allTags={tags}
+        <div>
+          {isLoading ? (
+            <BlogSkeleton viewMode={viewMode} count={itemsPerPage} />
+          ) : error ? (
+            <div className="col-span-full text-center py-12">
+              <div className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-red-50/80 dark:bg-red-900/20 border border-red-200/60 dark:border-red-800/60 backdrop-blur-sm">
+                <p className="text-red-600 dark:text-red-400 text-sm font-medium">{error}</p>
+              </div>
+            </div>
+          ) : paginatedPosts.length > 0 ? (
+            <>
+              {featuredPost && (
+                <div className="relative mb-8">
+                  {effectiveIsAdmin && (
+                    <div className="absolute top-3 start-3 z-10">
+                      <input
+                        type="checkbox"
+                        checked={selectedPosts.includes(featuredPost.id)}
+                        onChange={() => handleSelectPost(featuredPost.id)}
+                        className="w-4 h-4 accent-primary bg-background border-input rounded"
+                      />
+                    </div>
+                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-0 rounded-2xl overflow-hidden border border-border/60">
+                    {featuredPost.cover_image ? (
+                      <div className="relative aspect-[4/3] md:aspect-auto">
+                        <Image
+                          src={getSafeImageUrl(featuredPost.cover_image)}
+                          fill
+                          className="object-cover"
+                          alt={featuredPost.title}
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                        />
+                      </div>
+                    ) : (
+                      <div className="relative aspect-[4/3] md:aspect-auto bg-muted/40" />
+                    )}
+                    <div className="flex flex-col justify-between p-5 sm:p-8 bg-card">
+                      <div>
+                        {featuredPost.category && (
+                          <span className="text-xs font-mono font-semibold text-primary uppercase tracking-widest">
+                            {featuredPost.category.name}
+                          </span>
+                        )}
+                        <h3 className="text-2xl font-bold text-foreground mt-2 mb-3 leading-tight">
+                          {featuredPost.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed line-clamp-4">
+                          {featuredPost.excerpt}
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-between mt-6 pt-4 border-t border-border/40">
+                        <span className="text-xs text-muted-foreground font-mono">
+                          {formatFeaturedDate(featuredPost)}
+                          {featuredPost.reading_time != null && ` · ${featuredPost.reading_time} min read`}
+                        </span>
+                        <a
+                          href={`/blog/${featuredPost.slug}`}
+                          className="inline-flex items-center gap-1.5 text-sm font-semibold text-foreground hover:text-primary transition-colors"
+                        >
+                          Read post <ArrowRight className="w-4 h-4" />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {(viewMode === 'list' || remainingPosts.length > 0) && (
+                <div
+                  className={cn(
+                    'grid',
+                    viewMode === 'grid'
+                      ? 'gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3'
+                      : 'gap-4 grid-cols-1'
+                  )}
+                >
+                  {(viewMode === 'list' ? paginatedPosts : remainingPosts).map((post) => (
+                    <div key={post.id} className="relative">
+                      {effectiveIsAdmin && (
+                        <div className="absolute top-2 start-2 z-10">
+                          <input
+                            type="checkbox"
+                            checked={selectedPosts.includes(post.id)}
+                            onChange={() => handleSelectPost(post.id)}
+                            className="w-4 h-4 accent-primary bg-background border-input rounded"
+                          />
+                        </div>
+                      )}
+                      <PostCard
+                        post={post}
+                        viewMode={viewMode}
+                        isAdmin={effectiveIsAdmin}
+                        onEdit={onEditPost ? () => onEditPost(post.id) : undefined}
+                        onDelete={onDeletePost ? () => onDeletePost(post.id) : undefined}
+                        searchQuery={debouncedSearchQuery}
+                        allTags={tags}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="col-span-full">
+              <div className="text-center py-16">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-muted border border-border/60 backdrop-blur-sm flex items-center justify-center shadow-sm">
+                  <Grid3X3 className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">No posts found</h3>
+                <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+                  Try adjusting your search or filters to find what you&apos;re looking for.
+                </p>
+                {effectiveIsAdmin && (
+                  <Button
+                    variant="outline"
+                    size="md"
+                    onClick={() => window.location.href = '/admin/posts/new'}
+                    className="flex items-center gap-2 shadow-sm"
+                  >
+                    <Grid3X3 className="h-4 w-4" />
+                    Create your first post
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {totalPosts > 0 && (
+          <div className="pt-6 border-t border-border/60">
+            <BlogPagination
+              currentPage={currentPage}
+              totalPages={Math.ceil(totalPosts / itemsPerPage)}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+              onItemsPerPageChange={setItemsPerPage}
             />
           </div>
-        </div>
-      )}
-
-      {/* Post grid — remaining posts */}
-      <div>
-        <div
-          className={cn(
-            'grid',
-            viewMode === 'grid'
-              ? 'gap-6 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3'
-              : 'gap-4 grid-cols-1'
-          )}
-        >
-        {isLoading ? (
-          <BlogSkeleton viewMode={viewMode} count={itemsPerPage} />
-        ) : error ? (
-          <div className="col-span-full text-center py-12">
-            <div className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-red-50/80 dark:bg-red-900/20 border border-red-200/60 dark:border-red-800/60 backdrop-blur-sm">
-              <p className="text-red-600 dark:text-red-400 text-sm font-medium">{error}</p>
-            </div>
-          </div>
-        ) : paginatedPosts.length > 0 ? (
-          (showFeatured ? paginatedPosts.slice(1) : paginatedPosts).map((post) => {
-            return (
-              <div key={post.id} className="relative">
-                {effectiveIsAdmin && (
-                  <div className="absolute top-2 left-2 z-10">
-                    <input
-                      type="checkbox"
-                      checked={selectedPosts.includes(post.id)}
-                      onChange={() => handleSelectPost(post.id)}
-                      className="w-4 h-4 text-primary bg-white border-gray-300 rounded focus-visible:ring-ring dark:ring-offset-gray-800 focus-visible:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                    />
-                  </div>
-                )}
-                <PostCard
-                  key={post.id}
-                  post={post}
-                  viewMode={viewMode}
-                  isAdmin={effectiveIsAdmin}
-                  onEdit={onEditPost ? () => onEditPost(post.id) : undefined}
-                  onDelete={onDeletePost ? () => onDeletePost(post.id) : undefined}
-                  searchQuery={debouncedSearchQuery}
-                  allTags={tags}
-                />
-              </div>
-            );
-          })
-        ) : (
-          <div className="col-span-full">
-            <div className="text-center py-16">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-gray-100/80 to-gray-200/60 dark:from-gray-800/80 dark:to-gray-900/60 border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm flex items-center justify-center shadow-sm">
-                <Grid3X3 className="h-8 w-8 text-gray-400 dark:text-gray-500" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No posts found</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                Try adjusting your search or filters to find what you&apos;re looking for.
-              </p>
-              {effectiveIsAdmin && (
-                <Button
-                  variant="outline"
-                  size="md"
-                  onClick={() => window.location.href = '/admin/posts/new'}
-                  className="flex items-center gap-2 shadow-sm"
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                  Create your first post
-                </Button>
-              )}
-            </div>
-          </div>
         )}
-        </div>
       </div>
 
-      {/* Pagination */}
-      {totalPosts > 0 && (
-        <div className="pt-6 border-t border-border/40">
-          <BlogPagination
-            currentPage={currentPage}
-            totalPages={Math.ceil(totalPosts / itemsPerPage)}
-            itemsPerPage={itemsPerPage}
-            onPageChange={setCurrentPage}
-            onItemsPerPageChange={setItemsPerPage}
-          />
-        </div>
-      )}
-
-      <SubscriptionModal 
+      <SubscriptionModal
         isOpen={subscriptionModalOpen}
         onClose={() => setSubscriptionModalOpen(false)}
       />
     </div>
   );
-} 
+}

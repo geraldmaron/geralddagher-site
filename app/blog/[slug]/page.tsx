@@ -4,7 +4,7 @@ import { getPostBySlug, getPosts, getCategoryById, getTagById } from '@/lib/dire
 import { formatDate } from '@/lib/utils/date'
 import { calculateReadingTime } from '@/lib/utils/readingTime'
 import Image from 'next/image'
-import { ArrowLeft, Clock, Calendar, FolderOpen, TagIcon, Sparkles, BookOpen } from 'lucide-react'
+import { ArrowLeft, TagIcon } from 'lucide-react'
 import Link from 'next/link'
 import PostCard from '@/components/posts/PostCard'
 import { Avatar } from '@/components/core/Avatar'
@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     if (!post) {
       return {
         title: 'Post Not Found',
-        description: "We couldn't find this blog post."
+        description: 'The requested blog post could not be found.'
       }
     }
 
@@ -59,34 +59,34 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   } catch (error) {
     return {
       title: 'Post Not Found',
-      description: "We couldn't find this blog post."
+      description: 'The requested blog post could not be found.'
     }
   }
 }
 
 function normalizeContent(content: any) {
   if (!content) return null
-  
+
   if (Array.isArray(content)) {
     return content.length > 0 ? content : null
   }
-  
+
   if (typeof content === 'object' && content !== null) {
     if (content?.content && Array.isArray(content.content)) {
       return content.content.length > 0 ? content.content : null
     }
     return null
   }
-  
+
   if (typeof content === 'string') {
     const trimmed = content.trim()
     if (!trimmed || trimmed.length === 0) return null
-    
+
     const firstChar = trimmed[0]
     if (firstChar !== '{' && firstChar !== '[') {
       return null
     }
-    
+
     try {
       const parsed = JSON.parse(trimmed)
       if (parsed && typeof parsed === 'object') {
@@ -102,7 +102,7 @@ function normalizeContent(content: any) {
       return null
     }
   }
-  
+
   return null
 }
 
@@ -173,166 +173,126 @@ export default async function BlogPostPage({ params }: PageProps) {
     console.error('Error normalizing content:', error)
     contentNodes = null
   }
+
   const postDate = new Date(postRaw.published_at || postRaw.date_created)
-  const isValidPostDate = !isNaN(postDate.getTime())
-  const safePostDate = isValidPostDate ? postDate : new Date()
-  const formattedDate = formatDate(safePostDate)
+  const formattedDate = formatDate(postDate)
   const readingTime = calculateReadingTime(contentNodes || postRaw.content)
   const excerpt = hydratedPost.excerpt || ''
 
   return (
-    <div data-area="blog" className="min-h-screen bg-background text-foreground">
-      <div className="relative isolate overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(56,189,248,0.08),transparent_25%),radial-gradient(circle_at_80%_0%,rgba(167,139,250,0.08),transparent_20%),radial-gradient(circle_at_50%_80%,rgba(74,222,128,0.08),transparent_22%)]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-background opacity-95" />
-        <div className="absolute inset-0 pointer-events-none [mask-image:radial-gradient(ellipse_at_top,white,transparent_72%)]" />
+    <div className="min-h-screen bg-background text-foreground">
+      <article>
+        {/* Article header — narrow reading column */}
+        <div className="max-w-2xl mx-auto px-6 sm:px-8 pt-10 sm:pt-14 pb-8">
+          <Link
+            href="/blog"
+            className="inline-flex items-center gap-1.5 text-xs font-mono text-muted-foreground hover:text-foreground transition-colors mb-8"
+          >
+            <ArrowLeft className="h-3 w-3" />
+            Writing
+          </Link>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
-          <div className="relative overflow-hidden rounded-3xl border border-gray-200 shadow-[0_24px_80px_-32px_rgba(0,0,0,0.35)] bg-gray-950/70 dark:border-white/10 dark:bg-black/60">
-            <div className="absolute inset-0">
-              {hydratedPost.cover_image ? (
-                <Image
-                  src={hydratedPost.cover_image}
-                  alt={hydratedPost.title}
-                  fill
-                  priority
-                  className="object-cover"
-                  sizes="100vw"
+          {category && (
+            <span className="section-label block mb-3">{category.name}</span>
+          )}
+
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight tracking-tight mb-4">
+            {hydratedPost.title}
+          </h1>
+
+          {excerpt && (
+            <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-8">
+              {excerpt}
+            </p>
+          )}
+
+          <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-border/40">
+            <div className="flex items-center gap-3">
+              {author && (
+                <Avatar
+                  avatarId={author.avatar}
+                  firstName={author.first_name}
+                  lastName={author.last_name}
+                  email={author.email}
+                  size="sm"
                 />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-900 to-black" />
               )}
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-black/80" />
-            <div className="relative px-5 sm:px-8 lg:px-10 py-10 sm:py-12 lg:py-14 space-y-8 text-white">
-              <div className="flex items-center justify-between gap-4">
-                <Link
-                  href="/blog"
-                  className="inline-flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Back to blog
-                </Link>
-                <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white ring-1 ring-white/20">
-                  <Sparkles className="h-3.5 w-3.5 text-cyan-200" />
-                  Feature
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="inline-flex items-center gap-2 rounded-full bg-white/10 ring-1 ring-white/20 px-3 py-1 text-xs text-white">
-                  <BookOpen className="h-3.5 w-3.5" />
-                  {readingTime} min read
-                </div>
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold overflow-visible pb-2 tracking-tight" style={{ fontFamily: 'var(--font-display)', lineHeight: '1.15' }}>
-                  {hydratedPost.title}
-                </h1>
-                {excerpt && <p className="text-base sm:text-lg text-white/80 max-w-3xl">{excerpt}</p>}
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                <div className="flex items-center gap-3 rounded-2xl bg-white/10 ring-1 ring-white/15 px-4 py-3">
-                  <Calendar className="h-4 w-4 text-cyan-200" />
-                  <div>
-                    <p className="text-xs text-white/70">Published</p>
-                    <time dateTime={safePostDate.toISOString()} className="font-medium text-white">{formattedDate}</time>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 rounded-2xl bg-white/10 ring-1 ring-white/15 px-4 py-3">
-                  <Clock className="h-4 w-4 text-emerald-200" />
-                  <div>
-                    <p className="text-xs text-white/70">Reading time</p>
-                    <p className="font-medium text-white">{readingTime} minutes</p>
-                  </div>
-                </div>
-                {hydratedPost.category && (
-                  <div className="flex items-center gap-3 rounded-2xl bg-white/10 ring-1 ring-white/15 px-4 py-3">
-                    <FolderOpen className="h-4 w-4 text-indigo-200" />
-                    <div>
-                      <p className="text-xs text-white/70">Category</p>
-                      <p className="font-medium text-white">{hydratedPost.category.name}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3 text-sm">
+              <div>
                 {author && (
-                  <div className="flex items-center gap-3 rounded-2xl bg-white/10 ring-1 ring-white/15 px-4 py-2.5">
-                    <Avatar
-                      avatarId={author.avatar}
-                      firstName={author.first_name}
-                      lastName={author.last_name}
-                      email={author.email}
-                      size="sm"
-                    />
-                    <div>
-                      <p className="text-xs text-white/70">Author</p>
-                      <p className="font-medium text-white">{author.first_name} {author.last_name}</p>
-                    </div>
-                  </div>
+                  <p className="text-sm font-medium text-foreground">
+                    {author.first_name} {author.last_name}
+                  </p>
                 )}
-                {hydratedPost.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {hydratedPost.tags.map((tag: string) => (
-                      <span
-                        key={tag}
-                        className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/10 text-[12px] text-white ring-1 ring-white/15"
-                      >
-                        <TagIcon className="h-3 w-3" />
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
+                <p className="text-xs font-mono text-muted-foreground">
+                  <time dateTime={postDate.toISOString()}>{formattedDate}</time>
+                  {' · '}{readingTime} min read
+                </p>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      <div className="relative z-10">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 pb-20">
-            <div className="rounded-3xl border border-gray-200/80 bg-background shadow-[0_20px_80px_-30px_rgba(0,0,0,0.15)] p-6 sm:p-10 lg:p-14 dark:border-gray-800/60 dark:bg-card/50 dark:shadow-[0_20px_80px_-30px_rgba(0,0,0,0.5)]">
-            {contentNodes ? (
-              <SlateRenderer
-                content={contentNodes}
-                  className="prose prose-lg max-w-none text-gray-800 prose-headings:text-gray-900 prose-headings:tracking-tight prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-4 prose-h3:text-xl prose-h3:mt-8 prose-p:text-gray-700 prose-p:leading-[1.8] prose-strong:text-gray-900 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-primary/40 prose-blockquote:text-gray-600 prose-blockquote:not-italic prose-img:rounded-xl dark:prose-invert dark:prose-p:text-gray-300 dark:prose-headings:text-white dark:prose-blockquote:text-gray-400"
-              />
-            ) : (
-              <div className="text-gray-500 dark:text-gray-400">No content available.</div>
+            {hydratedPost.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {hydratedPost.tags.map((tag: string) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-muted border border-border/60 text-muted-foreground"
+                  >
+                    <TagIcon className="h-2.5 w-2.5" />
+                    {tag}
+                  </span>
+                ))}
+              </div>
             )}
           </div>
+        </div>
 
-          <div className="mt-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 mb-1">Up next</p>
-                <h2 className="text-3xl sm:text-4xl font-semibold text-gray-900 dark:text-white overflow-visible" style={{ fontFamily: 'var(--font-display)', lineHeight: '1.2' }}>Recent posts</h2>
-              </div>
-              <Link
-                href="/blog"
-                className="text-sm text-gray-700 hover:text-gray-900 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors dark:text-gray-200 dark:hover:text-white dark:hover:bg-white/10"
-              >
-                Browse all
-                <ArrowLeft className="h-4 w-4 rotate-180" />
-              </Link>
-            </div>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {hydratedRecentPosts.map((recentPost) => (
-                <PostCard key={recentPost.id} post={recentPost as any} viewMode="grid" forcePreview />
-              ))}
-            </div>
+        {/* Cover image — full width */}
+        {hydratedPost.cover_image && (
+          <div className="w-full aspect-video relative overflow-hidden">
+            <Image
+              src={hydratedPost.cover_image}
+              alt={hydratedPost.title}
+              fill
+              priority
+              className="object-cover"
+              sizes="100vw"
+            />
           </div>
+        )}
 
-          <div className="mt-12 flex justify-center">
+        {/* Prose body — narrow reading column */}
+        <div className="max-w-2xl mx-auto px-6 sm:px-8 py-10 sm:py-14">
+          {contentNodes ? (
+            <SlateRenderer
+              content={contentNodes}
+              className="prose prose-lg max-w-none text-foreground prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground dark:prose-invert"
+            />
+          ) : (
+            <p className="text-muted-foreground text-sm">No content available.</p>
+          )}
+        </div>
+      </article>
+
+      {/* Recent posts */}
+      <div className="border-t border-border/40 bg-muted/20">
+        <div className="section-inner-wide py-12 sm:py-16">
+          <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
+            <div>
+              <span className="section-label">Up next</span>
+              <h2 className="section-heading mt-1">More from the blog</h2>
+            </div>
             <Link
               href="/blog"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-full border border-gray-200 bg-background text-foreground hover:border-gray-300 hover:bg-gray-50 transition-all shadow-sm dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:border-white/40 dark:hover:bg-white/15"
+              className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 transition-colors shrink-0"
             >
-              <ArrowLeft className="h-4 w-4" />
-              Back to blog
+              Browse all
+              <ArrowLeft className="h-3.5 w-3.5 rotate-180" />
             </Link>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {hydratedRecentPosts.map((recentPost) => (
+              <PostCard key={recentPost.id} post={recentPost as any} viewMode="grid" forcePreview />
+            ))}
           </div>
         </div>
       </div>

@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { z } from 'zod';
+import { useState, useEffect, type FormEvent } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { motion, AnimatePresence } from 'framer-motion';
+import { z } from 'zod';
 import { X, Mail, CheckCircle, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -54,7 +53,7 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
     }
   }, [isOpen]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setErrors({});
 
@@ -123,203 +122,196 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
   };
 
   return (
-    <Dialog.Root open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <AnimatePresence>
-        {isOpen && (
-          <Dialog.Portal forceMount>
-            <Dialog.Overlay asChild>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[9998] bg-black/50 backdrop-blur-sm"
-              />
-            </Dialog.Overlay>
-            <Dialog.Content asChild>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 8 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 8 }}
-                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="fixed left-1/2 top-1/2 z-[9999] w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-card border border-border shadow-2xl overflow-hidden"
+    <Dialog.Root open={isOpen} onOpenChange={(open) => { if (!open) handleClose(); }}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 z-[9998] bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-200" />
+        <Dialog.Content
+          className={cn(
+            'fixed left-[50%] top-[50%] z-[9999] -translate-x-1/2 -translate-y-1/2',
+            'w-[calc(100%-2rem)] max-w-md',
+            'bg-popover rounded-2xl shadow-2xl border border-border overflow-hidden',
+            'data-[state=open]:animate-in data-[state=closed]:animate-out',
+            'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+            'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
+            'data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%]',
+            'data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]',
+            'duration-200'
+          )}
+          onEscapeKeyDown={(e) => { if (isLoading) e.preventDefault(); }}
+          onInteractOutside={(e) => { if (isLoading) e.preventDefault(); }}
+        >
+          <div className="relative p-6">
+            <Dialog.Close asChild>
+              <button
+                onClick={handleClose}
+                className={cn(
+                  'absolute top-2 right-2 w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200',
+                  'hover:bg-muted text-muted-foreground hover:text-foreground',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                  'disabled:opacity-50 disabled:cursor-not-allowed'
+                )}
+                aria-label="Close subscription modal"
+                type="button"
+                disabled={isLoading}
               >
-                <div className="relative p-6">
-                  <Dialog.Close asChild>
-                    <button
-                      onClick={handleClose}
-                      disabled={isLoading}
-                      className={cn(
-                        "absolute top-2 right-2 w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200",
-                        "hover:bg-muted text-muted-foreground hover:text-foreground",
-                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                        "disabled:pointer-events-none disabled:opacity-50"
-                      )}
-                      aria-label="Close subscription modal"
-                      type="button"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </Dialog.Close>
+                <X className="w-6 h-6" />
+              </button>
+            </Dialog.Close>
 
-                  <div className="text-center mb-6">
-                    <div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 rounded-full mb-4">
-                      <Mail className="w-6 h-6 text-primary" />
-                    </div>
-                    <Dialog.Title className="text-xl font-semibold text-foreground mb-2">
-                      Stay Updated
-                    </Dialog.Title>
-                    <Dialog.Description className="text-sm text-muted-foreground">
-                      Choose how you&apos;d like to receive updates from Gerald
-                    </Dialog.Description>
-                  </div>
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 rounded-full mb-4">
+                <Mail className="w-6 h-6 text-primary" />
+              </div>
+              <Dialog.Title className="text-xl font-semibold text-foreground mb-2">
+                Stay Updated
+              </Dialog.Title>
+              <p className="text-sm text-muted-foreground">
+                Choose how you&#39;d like to receive updates from Gerald
+              </p>
+            </div>
 
-                  {!result ? (
-                    <form onSubmit={handleSubmit} className="space-y-4" aria-label="Subscription form">
-                      <div>
-                        <label htmlFor="sub-email" className="block text-sm font-medium text-foreground mb-1.5">
-                          Email Address
-                        </label>
-                        <input
-                          type="email"
-                          id="sub-email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          aria-required="true"
-                          aria-invalid={!!errors.email}
-                          aria-describedby={errors.email ? 'sub-email-error' : undefined}
-                          className={cn(
-                            "w-full px-3 py-2 border rounded-lg transition-all duration-200",
-                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent",
-                            "bg-background border-input text-foreground placeholder:text-muted-foreground",
-                            errors.email && "border-destructive focus-visible:ring-destructive"
-                          )}
-                          placeholder="your@email.com"
-                          disabled={isLoading}
-                        />
-                        {errors.email && (
-                          <p id="sub-email-error" className="mt-1 text-sm text-destructive">{errors.email}</p>
-                        )}
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label htmlFor="sub-firstName" className="block text-sm font-medium text-foreground mb-1.5">
-                            First Name
-                          </label>
-                          <input
-                            type="text"
-                            id="sub-firstName"
-                            value={firstName}
-                            onChange={(e) => setFirstName(e.target.value)}
-                            className="w-full px-3 py-2 border rounded-lg bg-background border-input text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                            placeholder="First name (optional)"
-                            disabled={isLoading}
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="sub-lastName" className="block text-sm font-medium text-foreground mb-1.5">
-                            Last Name
-                          </label>
-                          <input
-                            type="text"
-                            id="sub-lastName"
-                            value={lastName}
-                            onChange={(e) => setLastName(e.target.value)}
-                            className="w-full px-3 py-2 border rounded-lg bg-background border-input text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                            placeholder="Last name (optional)"
-                            disabled={isLoading}
-                          />
-                        </div>
-                      </div>
-
-                      <fieldset className="space-y-3">
-                        <legend className="text-sm font-medium text-foreground mb-1.5">
-                          Subscription Options
-                        </legend>
-
-                        <label className="flex items-center space-x-3 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={blog}
-                            onChange={(e) => setBlog(e.target.checked)}
-                            className="w-4 h-4 accent-primary rounded"
-                            disabled={isLoading}
-                          />
-                          <div className="flex-1">
-                            <span className="text-sm font-medium text-foreground">Blog Updates</span>
-                            <p className="text-xs text-muted-foreground">Get notified when new posts are published</p>
-                          </div>
-                        </label>
-
-                        <label className="flex items-center space-x-3 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={substack}
-                            onChange={(e) => setSubstack(e.target.checked)}
-                            className="w-4 h-4 accent-primary rounded"
-                            disabled={isLoading}
-                          />
-                          <div className="flex-1">
-                            <span className="text-sm font-medium text-foreground">Substack Newsletter</span>
-                            <p className="text-xs text-muted-foreground">Access to deeper professional content</p>
-                          </div>
-                        </label>
-
-                        {errors.general && (
-                          <p role="alert" className="text-sm text-destructive">{errors.general}</p>
-                        )}
-                      </fieldset>
-
-                      <button
-                        type="submit"
-                        disabled={isLoading || (!blog && !substack)}
-                        className={cn(
-                          "w-full py-2 px-4 rounded-lg font-medium transition-all duration-200",
-                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                          "disabled:opacity-50 disabled:cursor-not-allowed",
-                          "bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
-                        )}
-                      >
-                        {isLoading ? 'Processing...' : 'Subscribe'}
-                      </button>
-                    </form>
-                  ) : (
-                    <div className="text-center space-y-4">
-                      <div className={cn(
-                        "inline-flex items-center justify-center w-12 h-12 rounded-full",
-                        result.success ? "bg-emerald-500/10" : "bg-destructive/10"
-                      )}>
-                        {result.success ? (
-                          <CheckCircle className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-                        ) : (
-                          <AlertCircle className="w-6 h-6 text-destructive" />
-                        )}
-                      </div>
-
-                      <div>
-                        <h3 className={cn(
-                          "text-lg font-semibold mb-2",
-                          result.success ? "text-emerald-700 dark:text-emerald-300" : "text-destructive"
-                        )}>
-                          {result.success ? 'Success!' : 'Error'}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">{result.message}</p>
-                      </div>
-
-                      <button
-                        onClick={handleClose}
-                        className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
-                      >
-                        Close
-                      </button>
-                    </div>
+            {!result ? (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="sub-email" className="block text-sm font-medium text-foreground mb-2">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    id="sub-email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={cn(
+                      'w-full px-3 py-2 border rounded-lg transition-all duration-200',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent',
+                      'bg-background border-input text-foreground placeholder:text-muted-foreground',
+                      errors.email && 'border-destructive focus-visible:ring-destructive'
+                    )}
+                    placeholder="your@email.com"
+                    disabled={isLoading}
+                  />
+                  {errors.email && (
+                    <p className="mt-1 text-sm text-destructive">{errors.email}</p>
                   )}
                 </div>
-              </motion.div>
-            </Dialog.Content>
-          </Dialog.Portal>
-        )}
-      </AnimatePresence>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="sub-firstName" className="block text-sm font-medium text-foreground mb-2">
+                      First Name
+                    </label>
+                    <input
+                      type="text"
+                      id="sub-firstName"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg bg-background border-input text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent"
+                      placeholder="First name (optional)"
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="sub-lastName" className="block text-sm font-medium text-foreground mb-2">
+                      Last Name
+                    </label>
+                    <input
+                      type="text"
+                      id="sub-lastName"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg bg-background border-input text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent"
+                      placeholder="Last name (optional)"
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+
+                <fieldset className="space-y-3">
+                  <legend className="block text-sm font-medium text-foreground mb-2">
+                    Subscription Options
+                  </legend>
+
+                  <label className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={blog}
+                      onChange={(e) => setBlog(e.target.checked)}
+                      className="w-4 h-4 accent-primary rounded"
+                      disabled={isLoading}
+                    />
+                    <div className="flex-1">
+                      <span className="text-sm font-medium text-foreground">Blog Updates</span>
+                      <p className="text-xs text-muted-foreground">Get notified when new posts are published</p>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={substack}
+                      onChange={(e) => setSubstack(e.target.checked)}
+                      className="w-4 h-4 accent-primary rounded"
+                      disabled={isLoading}
+                    />
+                    <div className="flex-1">
+                      <span className="text-sm font-medium text-foreground">Substack Newsletter</span>
+                      <p className="text-xs text-muted-foreground">Access to deeper professional content</p>
+                    </div>
+                  </label>
+
+                  {errors.general && (
+                    <p className="text-sm text-destructive">{errors.general}</p>
+                  )}
+                </fieldset>
+
+                <button
+                  type="submit"
+                  disabled={isLoading || (!blog && !substack)}
+                  className={cn(
+                    'w-full py-2 px-4 rounded-lg font-medium transition-all duration-200',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                    'disabled:opacity-50 disabled:cursor-not-allowed',
+                    'bg-primary hover:bg-primary/90 active:bg-primary/80',
+                    'text-primary-foreground shadow-sm hover:shadow-md'
+                  )}
+                >
+                  {isLoading ? 'Processing...' : 'Subscribe'}
+                </button>
+              </form>
+            ) : (
+              <div className="text-center space-y-4">
+                <div className={cn(
+                  'inline-flex items-center justify-center w-12 h-12 rounded-full',
+                  result.success ? 'bg-green-100 dark:bg-green-900/30' : 'bg-destructive/10'
+                )}>
+                  {result.success ? (
+                    <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
+                  ) : (
+                    <AlertCircle className="w-6 h-6 text-destructive" />
+                  )}
+                </div>
+
+                <div>
+                  <h3 className={cn(
+                    'text-lg font-semibold mb-2',
+                    result.success ? 'text-green-900 dark:text-green-100' : 'text-destructive'
+                  )}>
+                    {result.success ? 'Success!' : 'Error'}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">{result.message}</p>
+                </div>
+
+                <button
+                  onClick={handleClose}
+                  className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
+                >
+                  Close
+                </button>
+              </div>
+            )}
+          </div>
+        </Dialog.Content>
+      </Dialog.Portal>
     </Dialog.Root>
   );
 }

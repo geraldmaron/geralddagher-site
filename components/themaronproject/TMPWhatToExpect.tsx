@@ -1,7 +1,6 @@
 import React from 'react';
+import { X, Laptop, Clock, MessageCircle, Video, Share2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTheme } from '@/components/core/ThemeProvider';
-import { X, Laptop, Clock, MessageSquare, Video, Share2 } from 'lucide-react';
 import { RemoveScroll } from 'react-remove-scroll';
 
 interface TMPWhatToExpectProps {
@@ -14,7 +13,6 @@ const TMPWhatToExpect: React.FC<TMPWhatToExpectProps> = ({
   onClose,
   onOpenQuestions
 }) => {
-  const { isDarkMode } = useTheme();
   const handleQuestionBankClick = (e: React.MouseEvent) => {
     e.preventDefault();
     onOpenQuestions();
@@ -33,7 +31,7 @@ const TMPWhatToExpect: React.FC<TMPWhatToExpectProps> = ({
         "Each session lasts about an hour, and you'll be on camera, so wear whatever makes you comfortable - a T-shirt or hoodie is fine. The first 15 minutes will cover any questions you have, a quick technical check, and confirm any areas you might not want to discuss."
     },
     {
-      icon: MessageSquare,
+      icon: MessageCircle,
       title: 'Recording Kickoff',
       description:
         "When we start recording, I'll do a brief welcome, introduce myself, and then introduce you. I'll ask you to share a bit about yourself, and from there, we'll keep things relaxed and conversational."
@@ -48,7 +46,7 @@ const TMPWhatToExpect: React.FC<TMPWhatToExpectProps> = ({
           pull ideas from our{' '}
           <button
             onClick={handleQuestionBankClick}
-            className="text-purple-500 hover:text-purple-600 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+            className="text-primary hover:text-primary/80 underline focus:outline-none focus:ring-2 focus:ring-ring rounded"
             aria-label="Open question bank"
           >
             question bank
@@ -102,9 +100,7 @@ const TMPWhatToExpect: React.FC<TMPWhatToExpectProps> = ({
               initial="hidden"
               animate="visible"
               exit="exit"
-              className={`relative w-full max-w-2xl mx-2 ${
-                isDarkMode ? 'bg-gray-900' : 'bg-white'
-              } rounded-xl shadow-2xl overflow-hidden`}
+              className="relative w-full max-w-2xl mx-2 bg-popover rounded-xl shadow-2xl overflow-hidden"
               role="dialog"
               aria-labelledby="what-to-expect-title"
               aria-modal="true"
@@ -115,7 +111,7 @@ const TMPWhatToExpect: React.FC<TMPWhatToExpectProps> = ({
                     whileHover={{ scale: 1.1, rotate: 90 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={onClose}
-                    className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800"
+                    className="absolute top-4 right-4 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full hover:bg-muted"
                     aria-label="Close what to expect dialog"
                   >
                     <X className="w-5 h-5" />
@@ -130,22 +126,18 @@ const TMPWhatToExpect: React.FC<TMPWhatToExpectProps> = ({
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className={`p-4 rounded-lg ${
-                          isDarkMode ? 'bg-gray-800' : 'bg-gray-50'
-                        }`}
+                        className="p-4 rounded-lg bg-muted"
                       >
                         <div className="flex items-start gap-4">
                           <div
-                            className={`p-3 rounded-full flex-shrink-0 ${
-                              isDarkMode ? 'bg-gray-700' : 'bg-gray-200'
-                            }`}
+                            className="p-3 rounded-full flex-shrink-0 bg-muted"
                             aria-hidden="true"
                           >
-                            <step.icon className="text-purple-500 w-5 h-5" />
+                            <step.icon className="text-primary w-5 h-5" />
                           </div>
                           <div>
                                                          <h3 className="mb-2 text-base font-medium">{step.title}</h3>
-                             <p className="text-gray-600 dark:text-gray-300">{step.description}</p>
+                             <p className="text-muted-foreground">{step.description}</p>
                           </div>
                         </div>
                       </motion.div>

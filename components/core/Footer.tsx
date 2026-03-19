@@ -1,121 +1,113 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Heart, Mail } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
+import Image from 'next/image';
+import { Mail } from 'lucide-react';
 import SocialMediaBar from '@/components/core/SocialBar';
 import { BugReportModal } from '@/components/core/BugReportModal';
 import { name } from '@/lib/constants';
-import { useTheme } from '@/components/core/ThemeProvider';
-import ScrollReveal from '@/components/core/ScrollReveal';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
   const [isBugReportOpen, setIsBugReportOpen] = useState(false);
-  const { isDarkMode } = useTheme();
-  const logoSrc = '/Dagher_Logo_2024_Mark_White.png';
-  const logoFallback = '/Dagher_Logo_2024_Mark.png';
+  const [logoSrc] = useState('/Dagher_Logo_2024.png');
 
   return (
     <>
       <footer
-        className="w-full bg-gray-950 text-gray-300"
+        className="w-full bg-surface"
         role="contentinfo"
       >
-        {/* Gradient top border */}
-        <div className="h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" />
 
-        <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <ScrollReveal preset="fade-up">
-            {/* Top section: Logo + Tagline + Social */}
-            <div className="flex flex-col items-center text-center mb-12">
-              <div className="relative w-12 h-12 mb-4">
+        <div className="mx-auto w-full max-w-6xl px-6 sm:px-8 lg:px-10 py-16 lg:py-20">
+
+          <div className="flex items-center justify-between mb-12">
+            <Link href="/" aria-label="Home">
+              <div className="relative w-10 h-10">
                 <Image
-                  src={isDarkMode ? logoSrc : logoSrc}
-                  alt="Logo"
+                  src={logoSrc}
+                  alt="Dagher Logo"
                   fill
-                  style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
-                  sizes="48px"
-                  onError={(e) => { (e.target as HTMLImageElement).src = logoFallback; }}
+                  style={{ objectFit: 'contain' }}
+                  sizes="40px"
+                  className="dark:hidden"
+                />
+                <Image
+                  src="/Dagher_Logo_2024_WH.png"
+                  alt="Dagher Logo"
+                  fill
+                  style={{ objectFit: 'contain' }}
+                  sizes="40px"
+                  className="hidden dark:block"
                 />
               </div>
-              <p className="text-sm text-gray-400 max-w-md mb-6">
-                Exploring technology, culture, leadership, and the spaces in between.
-              </p>
-              <SocialMediaBar className="justify-center px-0 [&_a]:text-gray-400 [&_a:hover]:text-white" />
-            </div>
-          </ScrollReveal>
+            </Link>
+            <SocialMediaBar className="justify-end px-0" />
+          </div>
 
-          {/* Links grid */}
-          <ScrollReveal preset="fade-up" delay={0.1}>
-            <div className="grid grid-cols-2 gap-8 sm:grid-cols-4 mb-12">
-              <div className="flex flex-col gap-3">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-100">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16 mb-12">
+            <div className="flex flex-col gap-5">
+              <p className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight text-pretty leading-tight">
+                Building platforms.<br />Leading teams.<br />Writing it down.
+              </p>
+              <a
+                href="mailto:me@geralddagher.com"
+                className="inline-flex items-center gap-2 self-start rounded-full bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <Mail className="w-4 h-4" />
+                Get in touch
+              </a>
+            </div>
+
+            <div className="grid grid-cols-2 gap-8">
+              <div className="flex flex-col gap-1">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
                   Explore
-                </h3>
-                <Link href="/" className="text-sm text-gray-400 hover:text-white transition-colors">
-                  Home
-                </Link>
-                <Link href="/blog" className="text-sm text-gray-400 hover:text-white transition-colors">
+                </p>
+                <Link href="/blog" className="text-sm text-foreground/70 hover:text-foreground transition-colors py-1">
                   Writing
                 </Link>
-                <Link href="/themaronproject" className="text-sm text-gray-400 hover:text-white transition-colors">
+                <Link href="/themaronproject" className="text-sm text-foreground/70 hover:text-foreground transition-colors py-1">
                   The Maron Project
                 </Link>
-              </div>
-
-              <div className="flex flex-col gap-3">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-100">
-                  Products
-                </h3>
-                <Link href="/argus" className="text-sm text-gray-400 hover:text-white transition-colors">
-                  Argus
-                </Link>
-                <Link href="/rss" className="text-sm text-gray-400 hover:text-white transition-colors">
+                <a href="/rss" className="text-sm text-foreground/70 hover:text-foreground transition-colors py-1">
                   RSS Feed
-                </Link>
+                </a>
               </div>
 
-              <div className="flex flex-col gap-3">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-100">
+              <div className="flex flex-col gap-1">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
                   Connect
-                </h3>
-                <a href="mailto:me@geralddagher.com" className="text-sm text-gray-400 hover:text-white transition-colors">
-                  Email
+                </p>
+                <a href="mailto:me@geralddagher.com" className="text-sm text-foreground/70 hover:text-foreground transition-colors py-1">
+                  Email Me
                 </a>
-                <Link href="/themaronproject" className="text-sm text-gray-400 hover:text-white transition-colors">
+                <Link href="/themaronproject" className="text-sm text-foreground/70 hover:text-foreground transition-colors py-1">
                   Share Your Story
                 </Link>
-                <button
-                  onClick={() => setIsBugReportOpen(true)}
-                  className="text-sm text-gray-400 hover:text-white transition-colors text-left"
-                >
-                  Report a Bug
-                </button>
-              </div>
-
-              <div className="flex flex-col gap-3">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-100">
-                  Legal
-                </h3>
-                <Link href="/privacy-policy" className="text-sm text-gray-400 hover:text-white transition-colors">
-                  Privacy Policy
-                </Link>
-                <Link href="/terms-of-service" className="text-sm text-gray-400 hover:text-white transition-colors">
-                  Terms of Service
-                </Link>
               </div>
             </div>
-          </ScrollReveal>
+          </div>
 
-          {/* Bottom bar */}
-          <div className="border-t border-gray-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-            <div className="flex items-center gap-2">
-              <Heart className="h-3.5 w-3.5 text-red-500 animate-wave" aria-label="love" />
-              <span>Made with intention by {name}</span>
+          <div className="border-t border-border/50 pt-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
+            <span>Made with intention by {name}</span>
+            <div className="flex items-center gap-4 flex-wrap justify-center">
+              <Link href="/privacy-policy" className="hover:text-foreground transition-colors">
+                Privacy Policy
+              </Link>
+              <Link href="/terms-of-service" className="hover:text-foreground transition-colors">
+                Terms of Service
+              </Link>
+              <button
+                onClick={() => setIsBugReportOpen(true)}
+                className="hover:text-foreground transition-colors focus-visible:outline-none focus-visible:underline"
+              >
+                Report a Bug
+              </button>
+              <span>© {currentYear} {name}</span>
             </div>
-            <span>© {currentYear} {name}. All rights reserved.</span>
           </div>
         </div>
       </footer>

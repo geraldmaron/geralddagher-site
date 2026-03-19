@@ -380,7 +380,7 @@ export default function AdminDashboard() {
                     borderRadius: '8px',
                     color: '#1f2937'
                   }}
-                  formatter={(value?: number) => [formatNumber(value ?? 0), 'Requests']}
+                  formatter={(value) => [formatNumber(typeof value === 'number' ? value : 0), 'Requests']}
                 />
                 <Bar dataKey="value" fill="#10b981" radius={[0, 8, 8, 0]} />
               </BarChart>
@@ -422,7 +422,7 @@ export default function AdminDashboard() {
                     borderRadius: '8px',
                     color: '#1f2937'
                   }}
-                  formatter={(value?: number) => [formatNumber(value ?? 0), 'Views']}
+                  formatter={(value: number | undefined) => [formatNumber(value ?? 0), 'Views']}
                 />
                 <Bar dataKey="views" fill="#3b82f6" radius={[8, 8, 0, 0]} />
               </BarChart>

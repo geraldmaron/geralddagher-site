@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useTheme } from '@/components/core/ThemeProvider';
 import { cn } from '@/lib/utils';
 import TMPVideoCard from './TMPVideoCard';
 import TMPVideoPlayer from '@/components/admin/tmpmanager/TMPVideoPlayer';
@@ -31,7 +30,6 @@ const TMPVideoGrid: React.FC<TMPVideoGridProps> = ({
   activeVideo,
   onVideoSelect
 }) => {
-  const { isDarkMode } = useTheme();
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
   const [activeVideoState, setActiveVideoState] = useState<string | null>(activeVideo);
 
@@ -71,7 +69,6 @@ const TMPVideoGrid: React.FC<TMPVideoGridProps> = ({
             viewMode={viewMode}
             isActive={video.youtube_id === activeVideoState}
             onSelect={() => handleVideoSelect(video.youtube_id)}
-            isDarkMode={isDarkMode}
           />
         ))}
       </motion.div>

@@ -425,7 +425,7 @@ const AboutSection: React.FC = () => {
       role="region"
       aria-label="About me"
       data-section="about"
-      className="section-wrapper bg-background"
+      className="section-wrapper bg-background !pb-12 sm:!pb-20 lg:!pb-24"
     >
       <div className="section-inner">
         <div className="space-y-20 sm:space-y-24">
@@ -814,7 +814,7 @@ const AboutSection: React.FC = () => {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-80px' }}
-        className="relative w-full border-t border-border/40"
+        className="relative w-full border-t border-border/40 mt-12 sm:mt-16"
       >
         {/* Full-viewport-width mosaic background */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">

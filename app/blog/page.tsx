@@ -30,7 +30,7 @@ export default async function BlogPage() {
     return (
       <main aria-label="Blog" className="w-full min-h-screen">
         <div className="w-full bg-muted/30 border-b border-border/40 dot-grid">
-          <div className="section-inner-wide py-14 sm:py-20">
+          <div className="section-inner-wide pt-32 pb-16 sm:pt-40 sm:pb-24">
             <div className="max-w-2xl">
               <span className="section-label">Writing</span>
               <h1 className="section-heading mt-2">Thoughts, stories, and reflections.</h1>
@@ -55,7 +55,7 @@ export default async function BlogPage() {
     return (
       <main aria-label="Blog" className="w-full min-h-screen">
         <div className="w-full bg-muted/30 border-b border-border/40 dot-grid">
-          <div className="section-inner-wide py-14 sm:py-20">
+          <div className="section-inner-wide pt-32 pb-16 sm:pt-40 sm:pb-24">
             <div className="max-w-2xl">
               <span className="section-label">Writing</span>
               <h1 className="section-heading mt-2">Thoughts, stories, and reflections.</h1>

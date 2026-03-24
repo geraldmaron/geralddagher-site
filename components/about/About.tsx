@@ -298,6 +298,21 @@ const COMPANY_CAREER_URLS: Record<string, string> = {
   'Mount Sinai Health System': 'https://careers.mountsinai.org'
 };
 
+const MOSAIC_PHOTOS = [
+  '/polaroids/LittleMe.jpg',
+  '/polaroids/ThrowbackFamily.jpg',
+  '/polaroids/MomAndI.jpg',
+  '/polaroids/WeddingBelt.jpg',
+  '/polaroids/Family.jpg',
+  '/polaroids/BabyG.jpg',
+  '/polaroids/JamieAndI.jpg',
+  '/polaroids/Fro.jpg',
+  '/polaroids/Deuces.jpg',
+  '/polaroids/reInvent.jpg',
+  '/polaroids/MomAndI2.jpg',
+  '/polaroids/BrokenFace.jpg',
+];
+
 const PASSIONS = [
   { emoji: '🎤', label: 'Spoken Word', desc: 'Writing and performing since high school' },
   { emoji: '✊', label: 'Advocacy', desc: 'Amplifying underrepresented voices' },
@@ -326,6 +341,9 @@ const AboutSection: React.FC = () => {
   const [domainSections, setDomainSections] = useState<DomainSection[]>(DOMAIN_SECTIONS);
   const [companyLogos, setCompanyLogos] = useState<Record<string, string>>({});
   const [expandedQuadrants, setExpandedQuadrants] = useState<Record<string, boolean>>({});
+  const [photoOrder, setPhotoOrder] = useState<number[]>(() =>
+    Array.from({ length: 48 }, (_, i) => i % MOSAIC_PHOTOS.length)
+  );
 
   const keywords: string[] = personalInfo?.profile?.keywords || [];
 
@@ -417,6 +435,13 @@ const AboutSection: React.FC = () => {
     return () => clearInterval(interval);
   }, [keywords.length]);
 
+  useEffect(() => {
+    const order = Array.from({ length: 48 }, () =>
+      Math.floor(Math.random() * MOSAIC_PHOTOS.length)
+    );
+    setPhotoOrder(order);
+  }, []);
+
   const roles: RoleInfo[] = personalInfo?.roles || [];
   const activeRole = roles[selectedRole] ?? null;
 
@@ -425,7 +450,7 @@ const AboutSection: React.FC = () => {
       role="region"
       aria-label="About me"
       data-section="about"
-      className="section-wrapper bg-background"
+      className="section-wrapper bg-background !pb-12 sm:!pb-20 lg:!pb-24"
     >
       <div className="section-inner">
         <div className="space-y-20 sm:space-y-24">
@@ -522,7 +547,7 @@ const AboutSection: React.FC = () => {
                 {personalInfo?.profile?.about?.businessCard || ''}
               </p>
 
-              <blockquote className="text-base font-medium text-foreground/80 border-s-4 border-primary/40 ps-4 not-italic">
+              <blockquote className="text-xs font-medium text-foreground/80 border-s-4 border-primary/40 ps-4 not-italic">
                 I work at the intersection of reliability and product, where trust is built one deployment at a time.
               </blockquote>
 
@@ -814,34 +839,18 @@ const AboutSection: React.FC = () => {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-80px' }}
-        className="relative w-full border-t border-border/40"
+        className="relative w-full border-t border-border/40 mt-12 sm:mt-16"
       >
         {/* Full-viewport-width mosaic background */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
           <div className="absolute inset-0 grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 auto-rows-fr">
-            {Array.from({ length: 48 }).map((_, i) => {
-              const photos = [
-                '/polaroids/LittleMe.jpg',
-                '/polaroids/ThrowbackFamily.jpg',
-                '/polaroids/MomAndI.jpg',
-                '/polaroids/WeddingBelt.jpg',
-                '/polaroids/Family.jpg',
-                '/polaroids/BabyG.jpg',
-                '/polaroids/JamieAndI.jpg',
-                '/polaroids/Fro.jpg',
-                '/polaroids/Deuces.jpg',
-                '/polaroids/reInvent.jpg',
-                '/polaroids/MomAndI2.jpg',
-                '/polaroids/BrokenFace.jpg',
-              ];
-              return (
-                <div key={i} className="relative overflow-hidden">
-                  <Image src={photos[i % photos.length]} alt="" fill className="object-cover" sizes="12vw" />
-                </div>
-              );
-            })}
+            {photoOrder.map((photoIdx, i) => (
+              <div key={i} className="relative overflow-hidden">
+                <Image src={MOSAIC_PHOTOS[photoIdx]} alt="" fill className="object-cover opacity-50" sizes="12vw" />
+              </div>
+            ))}
           </div>
-          <div className="absolute inset-0 bg-background/85" />
+          <div className="absolute inset-0 bg-background/80" />
         </div>
 
         <div className="section-inner relative z-10 py-10 sm:py-14">
@@ -883,7 +892,7 @@ const AboutSection: React.FC = () => {
               {/* Spoken Word */}
               <div className="relative overflow-hidden rounded-xl p-5 bg-purple-500/20 border border-purple-500/30">
                 <p className="text-xs font-mono text-purple-400/70 uppercase tracking-widest mb-1">🎤 Spoken Word</p>
-                <p className="text-base font-semibold text-foreground leading-snug">
+                <p className="text-sm font-semibold text-foreground leading-snug">
                   &ldquo;Words before platforms.<br />Stages before standups.&rdquo;
                 </p>
                 <p className="text-xs text-muted-foreground mt-2">Writing and performing since high school, the craft that shapes how I communicate everything</p>

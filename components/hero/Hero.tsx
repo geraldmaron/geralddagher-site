@@ -159,14 +159,14 @@ const Hero: React.FC = () => {
 
             <motion.p
               variants={itemVariants}
-              className="max-w-2xl text-base leading-relaxed text-slate-100/90"
+              className="max-w-2xl text-xs leading-relaxed text-slate-100/90"
             >
               Product and platform leader translating reliability, risk, and delivery discipline into durable business outcomes. I help teams ship fast without breaking trust.
             </motion.p>
 
             <motion.div
               variants={itemVariants}
-              className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4"
+              className="flex flex-row items-center gap-3 sm:gap-4"
             >
               <Button
                 variant="primary"

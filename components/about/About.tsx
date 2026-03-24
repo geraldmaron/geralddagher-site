@@ -522,7 +522,7 @@ const AboutSection: React.FC = () => {
                 {personalInfo?.profile?.about?.businessCard || ''}
               </p>
 
-              <blockquote className="text-base font-medium text-foreground/80 border-s-4 border-primary/40 ps-4 not-italic">
+              <blockquote className="text-xs font-medium text-foreground/80 border-s-4 border-primary/40 ps-4 not-italic">
                 I work at the intersection of reliability and product, where trust is built one deployment at a time.
               </blockquote>
 
@@ -883,7 +883,7 @@ const AboutSection: React.FC = () => {
               {/* Spoken Word */}
               <div className="relative overflow-hidden rounded-xl p-5 bg-purple-500/20 border border-purple-500/30">
                 <p className="text-xs font-mono text-purple-400/70 uppercase tracking-widest mb-1">🎤 Spoken Word</p>
-                <p className="text-base font-semibold text-foreground leading-snug">
+                <p className="text-sm font-semibold text-foreground leading-snug">
                   &ldquo;Words before platforms.<br />Stages before standups.&rdquo;
                 </p>
                 <p className="text-xs text-muted-foreground mt-2">Writing and performing since high school, the craft that shapes how I communicate everything</p>

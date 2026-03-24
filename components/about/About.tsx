@@ -298,6 +298,21 @@ const COMPANY_CAREER_URLS: Record<string, string> = {
   'Mount Sinai Health System': 'https://careers.mountsinai.org'
 };
 
+const MOSAIC_PHOTOS = [
+  '/polaroids/LittleMe.jpg',
+  '/polaroids/ThrowbackFamily.jpg',
+  '/polaroids/MomAndI.jpg',
+  '/polaroids/WeddingBelt.jpg',
+  '/polaroids/Family.jpg',
+  '/polaroids/BabyG.jpg',
+  '/polaroids/JamieAndI.jpg',
+  '/polaroids/Fro.jpg',
+  '/polaroids/Deuces.jpg',
+  '/polaroids/reInvent.jpg',
+  '/polaroids/MomAndI2.jpg',
+  '/polaroids/BrokenFace.jpg',
+];
+
 const PASSIONS = [
   { emoji: '🎤', label: 'Spoken Word', desc: 'Writing and performing since high school' },
   { emoji: '✊', label: 'Advocacy', desc: 'Amplifying underrepresented voices' },
@@ -326,6 +341,9 @@ const AboutSection: React.FC = () => {
   const [domainSections, setDomainSections] = useState<DomainSection[]>(DOMAIN_SECTIONS);
   const [companyLogos, setCompanyLogos] = useState<Record<string, string>>({});
   const [expandedQuadrants, setExpandedQuadrants] = useState<Record<string, boolean>>({});
+  const [photoOrder, setPhotoOrder] = useState<number[]>(() =>
+    Array.from({ length: 48 }, (_, i) => i % MOSAIC_PHOTOS.length)
+  );
 
   const keywords: string[] = personalInfo?.profile?.keywords || [];
 
@@ -416,6 +434,13 @@ const AboutSection: React.FC = () => {
     }, 3000);
     return () => clearInterval(interval);
   }, [keywords.length]);
+
+  useEffect(() => {
+    const order = Array.from({ length: 48 }, () =>
+      Math.floor(Math.random() * MOSAIC_PHOTOS.length)
+    );
+    setPhotoOrder(order);
+  }, []);
 
   const roles: RoleInfo[] = personalInfo?.roles || [];
   const activeRole = roles[selectedRole] ?? null;
@@ -819,29 +844,13 @@ const AboutSection: React.FC = () => {
         {/* Full-viewport-width mosaic background */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
           <div className="absolute inset-0 grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 auto-rows-fr">
-            {Array.from({ length: 48 }).map((_, i) => {
-              const photos = [
-                '/polaroids/LittleMe.jpg',
-                '/polaroids/ThrowbackFamily.jpg',
-                '/polaroids/MomAndI.jpg',
-                '/polaroids/WeddingBelt.jpg',
-                '/polaroids/Family.jpg',
-                '/polaroids/BabyG.jpg',
-                '/polaroids/JamieAndI.jpg',
-                '/polaroids/Fro.jpg',
-                '/polaroids/Deuces.jpg',
-                '/polaroids/reInvent.jpg',
-                '/polaroids/MomAndI2.jpg',
-                '/polaroids/BrokenFace.jpg',
-              ];
-              return (
-                <div key={i} className="relative overflow-hidden">
-                  <Image src={photos[i % photos.length]} alt="" fill className="object-cover" sizes="12vw" />
-                </div>
-              );
-            })}
+            {photoOrder.map((photoIdx, i) => (
+              <div key={i} className="relative overflow-hidden">
+                <Image src={MOSAIC_PHOTOS[photoIdx]} alt="" fill className="object-cover opacity-50" sizes="12vw" />
+              </div>
+            ))}
           </div>
-          <div className="absolute inset-0 bg-background/85" />
+          <div className="absolute inset-0 bg-background/80" />
         </div>
 
         <div className="section-inner relative z-10 py-10 sm:py-14">

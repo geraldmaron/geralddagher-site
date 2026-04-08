@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createDirectusServerClient } from '@/lib/directus/server-client';
 import { updateItem, deleteItem } from '@directus/sdk';
-import { getCurrentUser } from '@/lib/directus/auth';
+import { withAdminAuth } from '@/lib/auth/api-auth';
 
 const updateSchema = z.object({
   name: z.string().min(1).optional(),
@@ -13,10 +13,8 @@ const updateSchema = z.object({
   sort_order: z.number().optional()
 });
 
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export const PATCH = withAdminAuth(async (_user, req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   try {
-    const user = await getCurrentUser();
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const { id } = await params;
     const body = await req.json();
     const data = updateSchema.parse(body);
@@ -26,12 +24,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   } catch (error: any) {
     return NextResponse.json({ error: error?.message || 'Failed to update tag' }, { status: 400 });
   }
-}
+});
 
-export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export const DELETE = withAdminAuth(async (_user, _req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   try {
-    const user = await getCurrentUser();
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const { id } = await params;
     const client = await createDirectusServerClient();
     await client.request(deleteItem('tags', id));
@@ -39,4 +35,4 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   } catch (error: any) {
     return NextResponse.json({ error: error?.message || 'Failed to delete tag' }, { status: 400 });
   }
-}
+});

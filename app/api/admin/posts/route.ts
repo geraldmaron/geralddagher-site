@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createPost } from '@/lib/directus/queries/posts';
-import { getCurrentUser } from '@/lib/directus/auth';
+import { withAdminAuth } from '@/lib/auth/api-auth';
 
 const postSchema = z.object({
   title: z.string().min(1),
@@ -30,14 +30,8 @@ const postSchema = z.object({
   document_type: z.number().optional().nullable()
 });
 
-export async function POST(req: NextRequest) {
+export const POST = withAdminAuth(async (_user, req: NextRequest) => {
   try {
-    const user = await getCurrentUser();
-    const roleName = (user as any)?.role?.name?.toLowerCase();
-    if (!user || (roleName !== 'admin' && roleName !== 'administrator')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const json = await req.json();
     const data = postSchema.parse(json);
 
@@ -69,4 +63,4 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     return NextResponse.json({ error: error?.message || 'Failed to create post' }, { status: 400 });
   }
-}
+});

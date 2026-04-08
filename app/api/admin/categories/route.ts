@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createDirectusServerClient } from '@/lib/directus/server-client';
 import { readItems, createItem } from '@directus/sdk';
-import { getCurrentUser } from '@/lib/directus/auth';
+import { withAdminAuth } from '@/lib/auth/api-auth';
 
 const categorySchema = z.object({
   name: z.string().min(1),
@@ -12,20 +12,18 @@ const categorySchema = z.object({
   sort_order: z.number().optional()
 });
 
-export async function GET() {
+export const GET = withAdminAuth(async () => {
   try {
-    const client = await createDirectusServerClient({ requireAuth: false });
+    const client = await createDirectusServerClient();
     const data = await client.request(readItems('categories', { limit: 100, sort: ['name'] }));
     return NextResponse.json({ data });
   } catch (error: any) {
     return NextResponse.json({ error: 'Failed to load categories' }, { status: 500 });
   }
-}
+});
 
-export async function POST(req: NextRequest) {
+export const POST = withAdminAuth(async (_user, req: NextRequest) => {
   try {
-    const user = await getCurrentUser();
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const body = await req.json();
     const data = categorySchema.parse(body);
     const client = await createDirectusServerClient();
@@ -34,4 +32,4 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     return NextResponse.json({ error: error?.message || 'Failed to create category' }, { status: 400 });
   }
-}
+});

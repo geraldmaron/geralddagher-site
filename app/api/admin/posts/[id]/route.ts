@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createDirectusServerClient } from '@/lib/directus/server-client';
-import { readItem, readItems, updateItem, deleteItem } from '@directus/sdk';
-import { getCurrentUser } from '@/lib/directus/auth';
+import { readItems, updateItem, deleteItem } from '@directus/sdk';
+import { withAdminAuth } from '@/lib/auth/api-auth';
 
 const updateSchema = z.object({
   title: z.string().optional(),
@@ -28,24 +28,11 @@ const updateSchema = z.object({
   document_type: z.number().optional().nullable()
 });
 
-async function ensureAdmin() {
-  const user = await getCurrentUser();
-  const roleName = (user as any)?.role?.name?.toLowerCase();
-  if (!user || (roleName !== 'admin' && roleName !== 'administrator')) {
-    return null;
-  }
-  return user;
-}
-
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export const GET = withAdminAuth(async (_user, _req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   try {
-    const user = await ensureAdmin();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const client = await createDirectusServerClient({ requireAuth: false });
+
+    const { id } = await params;
 
     const decodedId = decodeURIComponent(id);
     const isNumeric = /^\d+$/.test(decodedId);
@@ -89,27 +76,23 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     if (!data) {
       return NextResponse.json({ error: `Post not found: ${decodedId}` }, { status: 404 });
     }
-    
+
     return NextResponse.json({ data });
   } catch (error: any) {
     const errorMessage = error?.errors?.[0]?.message || error?.message || 'Not found';
-    return NextResponse.json({ 
-      error: errorMessage, 
-      details: process.env.NODE_ENV === 'development' ? error : undefined 
+    return NextResponse.json({
+      error: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? error : undefined
     }, { status: 404 });
   }
-}
+});
 
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export const PATCH = withAdminAuth(async (_user, req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   try {
-    const user = await ensureAdmin();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const body = await req.json();
     const data = updateSchema.parse(body);
+
+    const { id } = await params;
 
     const client = await createDirectusServerClient();
 
@@ -137,18 +120,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   } catch (error: any) {
     return NextResponse.json({ error: error?.message || 'Failed to update post' }, { status: 400 });
   }
-}
+});
 
-export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export const DELETE = withAdminAuth(async (_user, _req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   try {
-    const user = await ensureAdmin();
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
+    const { id } = await params;
     const client = await createDirectusServerClient();
     await client.request(deleteItem('posts', Number(id)));
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ error: 'Failed to delete post' }, { status: 400 });
   }
-}
+});

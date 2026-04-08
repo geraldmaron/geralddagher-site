@@ -89,9 +89,6 @@ export function PostMetadataForm({ data, onChange, onSave, isSaving, categories:
   const [loading, setLoading] = useState(!providedCategories || !providedTags);
   const [metadataExpanded, setMetadataExpanded] = useState(false);
 
-  const GERALD_USER_ID = '9b1b7df2-b252-4a55-978a-f550465d6470';
-  const LETTER_TYPE_ID = 2;
-
   useEffect(() => {
     if (providedCategories && providedTags) {
       setCategories(providedCategories);
@@ -144,28 +141,13 @@ export function PostMetadataForm({ data, onChange, onSave, isSaving, categories:
     }
   };
 
-  // Auto-set defaults when Argus content is enabled
   useEffect(() => {
-    if (data.is_argus_content) {
-      const updates: Partial<PostFormData> = {};
-
-      if (data.author !== GERALD_USER_ID) {
-        updates.author = GERALD_USER_ID;
-      }
-
-      if (data.document_type !== LETTER_TYPE_ID) {
-        updates.document_type = LETTER_TYPE_ID;
-      }
-
-      if (Object.keys(updates).length > 0) {
-        onChange(updates);
-      }
-    } else {
+    if (!data.is_argus_content) {
       if (data.document_type !== null) {
         onChange({ document_type: null });
       }
     }
-  }, [data.is_argus_content, data.author, data.document_type, GERALD_USER_ID, LETTER_TYPE_ID, onChange]);
+  }, [data.is_argus_content, data.document_type, onChange]);
 
   const generateSlug = useCallback((title: string) => {
     return title
@@ -336,7 +318,6 @@ export function PostMetadataForm({ data, onChange, onSave, isSaving, categories:
             <select
               value={data.author || ''}
               onChange={(e) => {
-                console.log('Author selected:', e.target.value);
                 onChange({ author: e.target.value || null });
               }}
               className="w-full px-4 py-2.5 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm cursor-pointer"
@@ -345,7 +326,6 @@ export function PostMetadataForm({ data, onChange, onSave, isSaving, categories:
               <option value="">No author</option>
               {authors.length === 0 && <option disabled>Loading authors...</option>}
               {authors.map((author) => {
-                console.log('Rendering author option:', author);
                 return (
                   <option key={author.id} value={author.id}>
                     {author.first_name} {author.last_name}
@@ -370,10 +350,9 @@ export function PostMetadataForm({ data, onChange, onSave, isSaving, categories:
                 Document Type
               </label>
               <select
-                value={data.document_type || LETTER_TYPE_ID}
+                value={data.document_type || ''}
                 onChange={(e) => onChange({ document_type: Number(e.target.value) })}
                 className="w-full px-4 py-2.5 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm cursor-pointer"
-                disabled={data.is_argus_content}
               >
                 {documentTypes.map((type) => (
                   <option key={type.id} value={type.id}>

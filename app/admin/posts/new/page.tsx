@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Descendant } from 'slate';
 import { Editor } from '@/components/editor/Editor';
@@ -10,6 +10,7 @@ import { toast } from 'react-hot-toast';
 import { ArrowLeft, Loader2, Save } from 'lucide-react';
 import { useAutosave } from '@/components/editor/hooks/useAutosave';
 import { formatDistanceToNow } from 'date-fns';
+import { useAuth } from '@/lib/auth/provider';
 
 const EMPTY_CONTENT: Descendant[] = [
   {
@@ -20,6 +21,7 @@ const EMPTY_CONTENT: Descendant[] = [
 
 export default function NewPostPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [saving, setSaving] = useState(false);
   const [postId, setPostId] = useState<number | null>(null);
   const [content, setContent] = useState<Descendant[]>(EMPTY_CONTENT);
@@ -28,7 +30,7 @@ export default function NewPostPage() {
     excerpt: '',
     slug: '',
     cover_image: null as string | null,
-    author: '9b1b7df2-b252-4a55-978a-f550465d6470' as string | null,
+    author: null as string | null,
     category: null as number | null,
     tags: [] as number[],
     featured: false,
@@ -39,8 +41,39 @@ export default function NewPostPage() {
     seo_keywords: null as string | null,
     is_argus_content: false,
     argus_users: [] as string[],
-    document_type: 1 as number | null
+    document_type: null as number | null
   });
+
+  useEffect(() => {
+    if (user?.id && !metadata.author) {
+      setMetadata(prev => ({ ...prev, author: user.id }));
+    }
+  }, [user?.id, metadata.author]);
+
+  useEffect(() => {
+    const savedDraft = localStorage.getItem('new_post_draft');
+    if (savedDraft) {
+      try {
+        const parsed = JSON.parse(savedDraft);
+        if (parsed.content) setContent(parsed.content);
+        if (parsed.metadata) {
+          setMetadata(prev => ({ 
+            ...prev, 
+            ...parsed.metadata,
+            author: parsed.metadata.author || prev.author 
+          }));
+        }
+      } catch (e) {
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!postId && (content !== EMPTY_CONTENT || metadata.title !== '')) {
+      const draft = { content, metadata };
+      localStorage.setItem('new_post_draft', JSON.stringify(draft));
+    }
+  }, [content, metadata, postId]);
 
   const handleSave = async () => {
     if (!metadata.title.trim()) {
@@ -71,7 +104,7 @@ export default function NewPostPage() {
 
         const { data } = await res.json();
         toast.success('Post updated successfully!');
-        router.push(`/admin/posts/${data.slug}`);
+        window.history.replaceState(null, '', `/admin/posts/${data.slug}`);
       } else {
         const res = await fetch('/api/admin/posts', {
           method: 'POST',
@@ -90,6 +123,8 @@ export default function NewPostPage() {
         const { data } = await res.json();
         setPostId(data.id);
         toast.success('Post created successfully!');
+        localStorage.removeItem('new_post_draft');
+        window.history.replaceState(null, '', `/admin/posts/${data.slug}`);
       }
     } catch (error: any) {
       toast.error(error?.message || 'Failed to save post');
@@ -134,6 +169,8 @@ export default function NewPostPage() {
 
       const { data } = await res.json();
       setPostId(data.id);
+      localStorage.removeItem('new_post_draft');
+      window.history.replaceState(null, '', `/admin/posts/${data.slug}`);
     }
   };
 

@@ -1,4 +1,3 @@
-import React from 'react';
 import Hero from '@/components/hero/Hero';
 import AboutMe from '@/components/about/About';
 import Timeline from '@/components/Timeline';
@@ -45,7 +44,7 @@ export default async function Home() {
               <div className="flex flex-col gap-3 mb-8 sm:mb-12">
                 <span className="section-label">Writing</span>
                 <h2 className="section-heading">Latest Posts</h2>
-                <p className="section-subheading max-w-xl">Thoughts on platform engineering, product leadership, and building with intention.</p>
+                <p className="section-subheading max-w-2xl">Thoughts on platform engineering, product leadership, and building with intention.</p>
               </div>
               <BlogWrapper
                 initialPosts={posts as any}
@@ -80,7 +79,7 @@ export default async function Home() {
               <div className="flex flex-col gap-3 mb-8 sm:mb-12">
                 <span className="section-label">Writing</span>
                 <h2 className="section-heading">Latest Posts</h2>
-                <p className="section-subheading max-w-xl">Thoughts on platform engineering, product leadership, and building with intention.</p>
+                <p className="section-subheading max-w-2xl">Thoughts on platform engineering, product leadership, and building with intention.</p>
               </div>
               <div className="text-center py-12">
                 <div className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-muted border border-border/60">

@@ -37,7 +37,7 @@ export default function BlogWrapper({
   onEditPost,
   onDeletePost
 }: BlogWrapperProps) {
-  const { user } = useAuth();
+  useAuth();
   const effectiveIsAdmin = Boolean(isAdmin);
   const [posts, setPosts] = useState<PostData[]>(initialPosts);
   const [totalPosts, setTotalPosts] = useState(initialTotal ?? initialPosts.length);
@@ -136,8 +136,6 @@ export default function BlogWrapper({
     fetchPosts
   ]);
 
-  const totalPages = Math.ceil(totalPosts / itemsPerPage);
-
   const hasFilters = debouncedSearchQuery || selectedCategory || selectedTags.length > 0 || (effectiveIsAdmin && selectedStatus.length > 0);
   const needsPagination = currentPage > 1 || itemsPerPage !== initialPosts.length;
   const usedAPI = hasFilters || needsPagination;
@@ -190,9 +188,15 @@ export default function BlogWrapper({
   };
 
   return (
-    <div className="space-y-6">
-      <div>
+    <div className="space-y-8">
+      <div className="section-panel p-5 sm:p-6 lg:p-8">
         <div className="mb-6">
+          <div className="mb-5 flex flex-col gap-2 sm:mb-6">
+            <p className="section-kicker">Editorial archive</p>
+            <p className="section-lead max-w-2xl">
+              Browse recent writing across technology, culture, leadership, and systems thinking with a calmer, more readable archive surface.
+            </p>
+          </div>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <BlogFilters
               categories={categories}
@@ -219,9 +223,9 @@ export default function BlogWrapper({
             )}
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/40 pb-4 mb-8">
+          <div className="flex flex-col items-start justify-between gap-4 border-b border-border/40 pb-4 mb-8 sm:flex-row sm:items-center">
             <div className="flex items-center gap-4 flex-wrap">
-              <div className="text-sm font-medium text-muted-foreground px-3 py-1.5 rounded-full bg-muted/80 border border-border/60">
+              <div className="rounded-full border border-border/60 bg-background/80 px-3 py-1.5 text-sm font-medium text-muted-foreground shadow-sm">
                 {isLoading ? 'Loading...' : `${totalPosts} post${totalPosts !== 1 ? 's' : ''}`}
               </div>
               {effectiveIsAdmin && paginatedPosts.length > 0 && (
@@ -244,7 +248,7 @@ export default function BlogWrapper({
                 </div>
               )}
             </div>
-            <div className="inline-flex rounded-xl border border-border/80 bg-muted/60 backdrop-blur-sm p-1.5 gap-1 shadow-sm">
+            <div className="inline-flex gap-1 rounded-xl border border-border/80 bg-muted/60 p-1.5 shadow-sm backdrop-blur-sm">
               <Button
                 variant={viewMode === 'grid' ? 'primary' : 'ghost'}
                 size="sm"
@@ -298,7 +302,7 @@ export default function BlogWrapper({
                       />
                     </div>
                   )}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-0 rounded-2xl overflow-hidden border border-border/60">
+                  <div className="section-panel-muted grid grid-cols-1 gap-0 overflow-hidden md:grid-cols-2">
                     {featuredPost.cover_image ? (
                       <div className="relative aspect-[4/3] md:aspect-auto">
                         <Image
@@ -312,7 +316,7 @@ export default function BlogWrapper({
                     ) : (
                       <div className="relative aspect-[4/3] md:aspect-auto bg-muted/40" />
                     )}
-                    <div className="flex flex-col justify-between p-5 sm:p-8 bg-card">
+                      <div className="flex flex-col justify-between bg-card/82 p-5 sm:p-8">
                       <div>
                         {featuredPost.category && (
                           <span className="text-xs font-mono font-semibold text-primary uppercase tracking-widest">
@@ -380,8 +384,8 @@ export default function BlogWrapper({
             </>
           ) : (
             <div className="col-span-full">
-              <div className="text-center py-16">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-muted border border-border/60 backdrop-blur-sm flex items-center justify-center shadow-sm">
+              <div className="py-16 text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-border/60 bg-muted shadow-sm backdrop-blur-sm">
                   <Grid3X3 className="h-8 w-8 text-muted-foreground" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-2">No posts found</h3>
@@ -405,7 +409,7 @@ export default function BlogWrapper({
         </div>
 
         {totalPosts > 0 && (
-          <div className="pt-6 border-t border-border/60">
+          <div className="border-t border-border/60 pt-6">
             <BlogPagination
               currentPage={currentPage}
               totalPages={Math.ceil(totalPosts / itemsPerPage)}

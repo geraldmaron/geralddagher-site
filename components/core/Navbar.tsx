@@ -31,7 +31,7 @@ import {
   FileType,
   Settings,
 } from 'lucide-react';
-import { useTheme } from '@/components/core/ThemeProvider';
+import { useTheme, type ThemeMode } from '@/components/core/ThemeProvider';
 import { useAuth } from '@/lib/auth/provider';
 import { hasAdminAccess } from '@/lib/auth/client-groups';
 import { cn } from '@/lib/utils';
@@ -46,6 +46,8 @@ type NavItem = {
   publicOnly?: boolean;
   children?: NavItem[];
 };
+
+type NavTone = 'default' | 'inverted';
 
 const publicNavigation: NavItem[] = [
   { name: 'Home', href: '/', icon: Home },
@@ -78,7 +80,8 @@ const NavItemComponent: React.FC<{
   onClick?: () => void;
   variant?: 'desktop' | 'mobile';
   pathname: string;
-}> = ({ item, isActive, onClick, variant = 'desktop', pathname }) => {
+  tone?: NavTone;
+}> = ({ item, isActive, onClick, variant = 'desktop', pathname, tone = 'default' }) => {
   const Icon = item.icon;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const hasChildren = item.children && item.children.length > 0;
@@ -180,14 +183,18 @@ const NavItemComponent: React.FC<{
           onKeyDown={(e) => {
             if (e.key === 'Escape') setIsDropdownOpen(false);
           }}
-          className={cn(
-            'relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-            isChildActive
-              ? 'bg-primary/10 text-primary'
-              : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
-          )}
-        >
+            className={cn(
+              'relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+              isChildActive
+                ? tone === 'inverted'
+                  ? 'bg-background/16 text-foreground'
+                  : 'bg-primary/10 text-primary'
+                : tone === 'inverted'
+                  ? 'text-foreground/80 hover:text-foreground hover:bg-background/12'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
+            )}
+          >
           <span>{item.name}</span>
           <ChevronDown aria-hidden="true" className={cn('w-3.5 h-3.5 transition-transform duration-200', isDropdownOpen && 'rotate-180')} />
         </button>
@@ -240,23 +247,30 @@ const NavItemComponent: React.FC<{
       href={item.href}
       onClick={onClick}
       aria-current={isActive ? 'page' : undefined}
-      className={cn(
-        'relative flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors duration-200',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-        isActive
-          ? 'text-primary font-semibold'
-          : 'text-foreground/60 hover:text-foreground'
-      )}
-    >
-      <span>{item.name}</span>
-      {isActive && (
-        <motion.div
-          aria-hidden="true"
-          layoutId="nav-indicator"
-          className="absolute bottom-0 inset-x-1 h-0.5 bg-primary rounded-full"
-          transition={{ type: 'spring', stiffness: 400, damping: 32 }}
-        />
-      )}
+        className={cn(
+          'relative flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors duration-200',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+          isActive
+            ? tone === 'inverted'
+              ? 'text-foreground font-semibold'
+              : 'text-primary font-semibold'
+            : tone === 'inverted'
+              ? 'text-foreground/80 hover:text-foreground'
+              : 'text-foreground/70 hover:text-foreground'
+        )}
+      >
+        <span>{item.name}</span>
+        {isActive && (
+          <motion.div
+            aria-hidden="true"
+            layoutId="nav-indicator"
+            className={cn(
+              'absolute bottom-0 inset-x-1 h-0.5 rounded-full',
+              tone === 'inverted' ? 'bg-foreground' : 'bg-primary'
+            )}
+            transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+          />
+        )}
     </Link>
   );
 };
@@ -277,8 +291,6 @@ export default function Navbar() {
   const isAuthenticated = !!user;
   const hasAdmin = user && hasAdminAccess(user);
 
-  const [logoSrc, setLogoSrc] = useState('/Dagher_Logo_2024.png');
-
   useEffect(() => {
     let rafId: number;
     const handleScroll = () => {
@@ -292,9 +304,10 @@ export default function Navbar() {
     };
   }, []);
 
-  useEffect(() => {
-    setLogoSrc(isDarkMode ? '/Dagher_Logo_2024_WH.png' : '/Dagher_Logo_2024.png');
-  }, [isDarkMode]);
+  const isPublicHero = !isAdminArea && pathname === '/' && !isScrolled && !isMenuOpen;
+  const navTone: NavTone = isPublicHero && isDarkMode ? 'inverted' : 'default';
+  const isInvertedTone = navTone === 'inverted';
+  const logoSrc = isDarkMode || isInvertedTone ? '/Dagher_Logo_2024_WH.png' : '/Dagher_Logo_2024.png';
 
   const navigationItems = useMemo(() => {
     if (isAdminArea && hasAdmin) {
@@ -331,7 +344,7 @@ export default function Navbar() {
     }
   };
 
-  const themeOptions = [
+  const themeOptions: Array<{ value: ThemeMode; label: string; icon: React.ComponentType<{ className?: string }> }> = [
     { value: 'light', label: 'Light', icon: Sun },
     { value: 'dark', label: 'Dark', icon: Moon },
     { value: 'system', label: 'System', icon: Monitor },
@@ -343,10 +356,12 @@ export default function Navbar() {
     <>
       <motion.header
         role="banner"
+        data-nav-tone={navTone}
         className={cn(
           'fixed top-0 w-full z-50',
           'border-b border-border/30',
-          isScrolled && 'border-border/60'
+          isScrolled && 'border-border/60',
+          isInvertedTone && 'border-border/50'
         )}
         style={{ zIndex: zIndex.navbar }}
         initial={{ y: -100 }}
@@ -356,9 +371,11 @@ export default function Navbar() {
         <div
           className={cn(
             'w-full transition-all duration-300',
-            isScrolled
-              ? 'nav-glass shadow-[0_1px_20px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_1px_20px_-4px_rgba(0,0,0,0.35)]'
-              : 'bg-black/30 dark:bg-black/50 backdrop-blur-md'
+            isAdminArea
+              ? isScrolled
+                ? 'nav-glass shadow-[0_1px_20px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_1px_20px_-4px_rgba(0,0,0,0.35)]'
+                : 'bg-background/82 backdrop-blur-md'
+              : 'nav-glass'
           )}
         >
           <nav aria-label="Main navigation" className="h-14 lg:h-16 w-full px-4 sm:px-6 lg:px-8">
@@ -383,15 +400,18 @@ export default function Navbar() {
               </Link>
 
               {/* Desktop Navigation */}
-              <div className="hidden lg:flex items-center gap-0.5 flex-1">
-                {navigationItems.map((item) => (
-                  <NavItemComponent
-                    key={item.name}
-                    item={item}
-                    isActive={isActivePath(item.href)}
-                    pathname={pathname}
-                  />
-                ))}
+              <div className="hidden lg:flex items-center flex-1">
+                <div className={cn('flex items-center gap-0.5', !isAdminArea && 'glass-surface rounded-full px-1.5 py-1')}>
+                  {navigationItems.map((item) => (
+                    <NavItemComponent
+                      key={item.name}
+                      item={item}
+                      isActive={isActivePath(item.href)}
+                      pathname={pathname}
+                      tone={navTone}
+                    />
+                  ))}
+                </div>
               </div>
 
               {/* Right Side Actions */}
@@ -424,16 +444,19 @@ export default function Navbar() {
                     setThemeMode(nextMode);
                   }}
                   className={cn(
-                    'hidden md:flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200',
-                    'bg-muted/60 border border-border/60',
-                    'hover:bg-muted',
+                    'hidden md:flex items-center justify-center w-9 h-9 transition-all duration-200',
+                    isInvertedTone
+                      ? 'shell-control shell-control-hero'
+                      : !isAdminArea
+                        ? 'shell-control'
+                        : 'rounded-lg bg-muted/60 border border-border/60 hover:bg-muted',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                   )}
                   aria-label={`Current theme: ${themeMode}. Click to cycle.`}
                 >
-                  {themeMode === 'light' && <Sun aria-hidden="true" className="w-4 h-4 text-amber-500" />}
-                  {themeMode === 'dark' && <Moon aria-hidden="true" className="w-4 h-4 text-blue-400" />}
-                  {themeMode === 'system' && <Monitor aria-hidden="true" className="w-4 h-4 text-muted-foreground" />}
+                  {themeMode === 'light' && <Sun aria-hidden="true" className={cn('w-4 h-4', isInvertedTone ? 'text-amber-300' : 'text-amber-500')} />}
+                  {themeMode === 'dark' && <Moon aria-hidden="true" className={cn('w-4 h-4', isInvertedTone ? 'text-blue-200' : 'text-blue-400')} />}
+                  {themeMode === 'system' && <Monitor aria-hidden="true" className={cn('w-4 h-4', isInvertedTone ? 'text-white/80' : 'text-muted-foreground')} />}
                 </motion.button>
 
                 {/* Admin Quick Actions - Desktop only */}
@@ -463,9 +486,12 @@ export default function Navbar() {
                         aria-haspopup="true"
                         aria-expanded={isUserMenuOpen}
                         className={cn(
-                          'flex items-center gap-2 px-2.5 py-1.5 rounded-lg',
-                          'bg-muted/60 border border-border/60',
-                          'hover:bg-muted transition-all duration-200',
+                          'flex items-center gap-2 px-2.5 py-1.5 transition-all duration-200',
+                          !isAdminArea
+                            ? isInvertedTone
+                              ? 'shell-control shell-control-hero'
+                              : 'shell-control'
+                            : 'rounded-lg bg-muted/60 border border-border/60 hover:bg-muted',
                           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
                         )}
                       >
@@ -519,7 +545,7 @@ export default function Navbar() {
                                   <button
                                     key={option.value}
                                     onClick={() => {
-                                      setThemeMode(option.value as any);
+                                      setThemeMode(option.value);
                                       setIsUserMenuOpen(false);
                                     }}
                                     className={cn(
@@ -585,7 +611,9 @@ export default function Navbar() {
                         onClick={() => router.push('/login')}
                         className={cn(
                           'flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200',
-                          'text-muted-foreground hover:text-foreground hover:bg-muted/60',
+                          isInvertedTone
+                            ? 'text-foreground/80 hover:text-foreground hover:bg-background/12'
+                            : 'text-muted-foreground hover:text-foreground hover:bg-muted/60',
                           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                           'font-medium text-sm'
                         )}
@@ -600,8 +628,9 @@ export default function Navbar() {
                           onClick={() => setSubscriptionModalOpen(true)}
                           className={cn(
                             'flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200',
-                            'bg-primary text-primary-foreground',
-                            'hover:bg-primary/90',
+                            isInvertedTone
+                              ? 'bg-white text-slate-950 hover:bg-white/92'
+                              : 'bg-primary text-primary-foreground hover:bg-primary/90',
                             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                           )}
                           aria-label="Subscribe to updates"
@@ -619,9 +648,12 @@ export default function Navbar() {
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                   className={cn(
-                    'lg:hidden flex items-center justify-center w-9 h-9 rounded-lg',
-                    'bg-muted/60 border border-border/60',
-                    'hover:bg-muted transition-all duration-200',
+                    'lg:hidden flex items-center justify-center w-9 h-9',
+                    isInvertedTone
+                      ? 'shell-control shell-control-hero'
+                      : !isAdminArea
+                        ? 'shell-control'
+                        : 'rounded-lg bg-muted/60 border border-border/60 hover:bg-muted transition-all duration-200',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
                   )}
                   aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
@@ -738,7 +770,7 @@ export default function Navbar() {
                       return (
                         <button
                           key={option.value}
-                          onClick={() => setThemeMode(option.value as any)}
+                           onClick={() => setThemeMode(option.value)}
                           className={cn(
                             'w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 text-sm',
                             themeMode === option.value

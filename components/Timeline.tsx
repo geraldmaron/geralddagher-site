@@ -62,13 +62,14 @@ export default function Timeline({ initialMilestones = [] }: TimelineProps) {
     <section
       aria-label="Timeline"
       data-section="timeline"
-      className="section-wrapper relative"
+      className="section-wrapper relative overflow-hidden"
     >
-      <div className="absolute inset-0 dot-grid opacity-40 pointer-events-none" aria-hidden="true" />
+      <div className="absolute inset-0 dot-grid opacity-35 pointer-events-none" aria-hidden="true" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.08),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(99,102,241,0.08),transparent_32%)] pointer-events-none" aria-hidden="true" />
 
       <div className="section-inner relative">
         <motion.div
-          className="flex flex-col gap-4 text-center mb-14"
+          className="mb-12 flex flex-col gap-4 text-center sm:mb-14"
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
@@ -76,13 +77,13 @@ export default function Timeline({ initialMilestones = [] }: TimelineProps) {
         >
           <span className="section-label mx-auto">Timeline</span>
           <h2 className="section-heading">A Life in Moments</h2>
-          <p className="section-subheading max-w-xl mx-auto">
+          <p className="section-subheading mx-auto max-w-2xl">
             Key milestones across career, family, and personal life
           </p>
         </motion.div>
 
         <motion.div
-          className="flex flex-wrap justify-center gap-2 mb-12"
+          className="mb-10 flex flex-wrap justify-center gap-2 sm:mb-12"
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
@@ -93,10 +94,10 @@ export default function Timeline({ initialMilestones = [] }: TimelineProps) {
               key={f}
               onClick={() => setFilter(f)}
               className={cn(
-                'px-3 py-1.5 rounded-full text-xs font-semibold capitalize transition-all duration-200',
+                'rounded-full border px-3.5 py-1.5 text-xs font-semibold capitalize transition-all duration-200',
                 filter === f
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80'
+                  ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                  : 'border-border/60 bg-background/80 text-muted-foreground hover:border-border hover:bg-muted/80 hover:text-foreground'
               )}
             >
               {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
@@ -123,12 +124,26 @@ export default function Timeline({ initialMilestones = [] }: TimelineProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="max-w-2xl mx-auto relative"
+              className="section-panel mx-auto max-w-3xl overflow-hidden"
             >
-              <div className="max-h-[520px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pr-1">
+              <div className="border-b border-border/50 px-5 py-4 sm:px-6">
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="section-kicker">Milestone archive</p>
+                    <p className="mt-1 text-sm font-medium text-foreground">
+                      {filter === 'all' ? 'All milestones' : `${filter.charAt(0).toUpperCase() + filter.slice(1)} milestones`}
+                    </p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {filtered.length} item{filtered.length === 1 ? '' : 's'}
+                  </p>
+                </div>
+              </div>
+              <div className="relative max-h-[560px] overflow-y-auto px-5 py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:px-6">
+                <div className="pointer-events-none absolute bottom-0 left-[2.85rem] top-0 w-px bg-gradient-to-b from-transparent via-border/35 to-transparent" aria-hidden="true" />
                 {grouped.map(([decade, items]) => (
                   <div key={decade}>
-                    <div className="flex items-center gap-4 py-4 sticky top-0 bg-background/90 backdrop-blur-sm z-10">
+                    <div className="sticky top-0 z-10 flex items-center gap-4 bg-card/92 py-4 backdrop-blur-sm">
                       <div className="flex-1 h-px bg-border/30" />
                       <span className="font-mono text-xs font-bold text-muted-foreground/40 uppercase tracking-[0.2em]">
                         {decade}
@@ -143,13 +158,13 @@ export default function Timeline({ initialMilestones = [] }: TimelineProps) {
                       return (
                         <div
                           key={`${m.event}-${m.year}-${idx}`}
-                          className="flex items-start gap-5 py-3"
+                          className="group flex items-start gap-5 rounded-2xl px-2 py-3 transition-colors duration-200 hover:bg-muted/35"
                         >
                           <div className="flex flex-col items-center gap-1 pt-1 flex-shrink-0 w-12">
-                            <span className="font-mono text-xs text-muted-foreground/60 tabular-nums leading-none">
+                            <span className="font-mono text-xs text-muted-foreground/70 tabular-nums leading-none">
                               {m.year}
                             </span>
-                            <div className="w-px flex-1 min-h-[20px] bg-border/20" />
+                            <div className="h-2 w-2 rounded-full bg-primary/70 ring-4 ring-primary/10" />
                           </div>
 
                           <div className="flex-shrink-0 pt-[3px]">
@@ -165,12 +180,12 @@ export default function Timeline({ initialMilestones = [] }: TimelineProps) {
                             </span>
                           </div>
 
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-foreground leading-snug">
+                          <div className="min-w-0 flex-1 rounded-2xl border border-transparent px-1 py-0.5 transition-colors duration-200 group-hover:border-border/40">
+                            <p className="text-sm font-medium leading-snug text-foreground">
                               {m.event}
                             </p>
                             {m.summary && (
-                              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                                 {m.summary}
                               </p>
                             )}
@@ -181,7 +196,7 @@ export default function Timeline({ initialMilestones = [] }: TimelineProps) {
                   </div>
                 ))}
               </div>
-              <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background to-transparent" aria-hidden="true" />
+              <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-card via-card/88 to-transparent" aria-hidden="true" />
             </motion.div>
           )}
         </AnimatePresence>

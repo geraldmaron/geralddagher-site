@@ -56,7 +56,7 @@ export default function RootLayoutClient({ children }: RootLayoutClientProps) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex flex-col min-h-screen bg-background relative">
+      <div className="public-shell flex flex-col min-h-screen bg-background relative">
         <Navbar />
         <div className="relative">
           {children}

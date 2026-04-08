@@ -313,15 +313,6 @@ const MOSAIC_PHOTOS = [
   '/polaroids/BrokenFace.jpg',
 ];
 
-const PASSIONS = [
-  { emoji: '🎤', label: 'Spoken Word', desc: 'Writing and performing since high school' },
-  { emoji: '✊', label: 'Advocacy', desc: 'Amplifying underrepresented voices' },
-  { emoji: '🏀', label: 'NYC Sports', desc: 'Knicks, Yankees, Giants. Die-hard.' },
-  { emoji: '🧠', label: 'Neurodiversity', desc: 'AuDHD, raising a neurodiverse family' },
-  { emoji: '🌍', label: 'Culture', desc: 'Caribbean roots, Bronx upbringing' },
-  { emoji: '❤️', label: 'Family First', desc: 'Father of 2, husband, present partner' }
-];
-
 const containerVariants = {
   hidden: {},
   visible: {
@@ -333,6 +324,8 @@ const itemVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.45 } }
 };
+
+const ALLY_KEYWORD = 'ally';
 
 const AboutSection: React.FC = () => {
   const [personalInfo, setPersonalInfo] = useState<any>(null);
@@ -450,8 +443,9 @@ const AboutSection: React.FC = () => {
       role="region"
       aria-label="About me"
       data-section="about"
-      className="section-wrapper bg-background !pb-12 sm:!pb-20 lg:!pb-24"
+      className="section-wrapper relative overflow-hidden bg-background !pb-12 sm:!pb-20 lg:!pb-24"
     >
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.08),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(99,102,241,0.08),transparent_32%)]" aria-hidden="true" />
       <div className="section-inner">
         <div className="space-y-20 sm:space-y-24">
 
@@ -461,7 +455,7 @@ const AboutSection: React.FC = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: '-80px' }}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20"
+            className="section-panel relative grid grid-cols-1 gap-12 overflow-hidden p-6 sm:p-8 lg:grid-cols-2 lg:gap-20 lg:p-10"
           >
             {/* Left: sticky label + heading + animated keyword */}
             <motion.div variants={itemVariants} className="flex flex-col gap-6 lg:pt-2">
@@ -470,15 +464,15 @@ const AboutSection: React.FC = () => {
                 {personalInfo?.profile?.location || 'South Florida'}
               </div>
 
-              <div className="flex flex-col gap-1">
-                <h1 className="text-sm font-mono text-muted-foreground tracking-widest uppercase">
+              <div className="flex flex-col gap-2">
+                <p className="section-kicker">
                   About Me
-                </h1>
-                <div className="flex items-baseline gap-2 flex-wrap">
-                  <span className="text-4xl sm:text-5xl font-bold text-foreground leading-tight">
+                </p>
+                <div className="flex flex-col items-start gap-1 sm:gap-2">
+                  <span className="text-4xl sm:text-5xl font-bold text-foreground leading-tight whitespace-nowrap">
                     I&apos;m a
                   </span>
-                  <div className="overflow-hidden">
+                  <div className="keyword-slot overflow-hidden text-4xl sm:text-5xl font-bold leading-tight text-primary">
                     <AnimatePresence mode="wait">
                       <motion.span
                         key={currentKeyword}
@@ -486,14 +480,19 @@ const AboutSection: React.FC = () => {
                         animate={{ y: '0%', opacity: 1 }}
                         exit={{ y: '-100%', opacity: 0 }}
                         transition={{ duration: 0.38, ease: [0.32, 0, 0.67, 0] }}
-                        className="block text-4xl sm:text-5xl font-bold text-primary leading-tight"
+                        className="block leading-tight"
                       >
-                        {keywords[currentKeyword] === 'Ally' ? (
-                          <span className="inline-flex">
-                            <span className="animate-pulse text-red-500">A</span>
-                            <span className="animate-pulse text-orange-500" style={{ animationDelay: '0.1s' }}>l</span>
-                            <span className="animate-pulse text-green-500" style={{ animationDelay: '0.2s' }}>l</span>
-                            <span className="animate-pulse text-blue-500" style={{ animationDelay: '0.3s' }}>y</span>
+                        {keywords[currentKeyword]?.trim().toLowerCase() === ALLY_KEYWORD ? (
+                          <span className="ally-wow" aria-label="Ally">
+                            {['A', 'L', 'L', 'Y'].map((letter, index) => (
+                              <span
+                                key={index}
+                                className="ally-letter"
+                                style={{ animationDelay: `${index * 0.16}s, ${index * 0.16}s` }}
+                              >
+                                {letter}
+                              </span>
+                            ))}
                           </span>
                         ) : (
                           keywords[currentKeyword] || 'Leader'
@@ -515,7 +514,7 @@ const AboutSection: React.FC = () => {
                 ].map((tag) => (
                   <span
                     key={tag}
-                    className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-muted text-muted-foreground border border-border/60"
+                      className="inline-flex items-center rounded-full border border-border/60 bg-background/80 px-3 py-1 text-[11px] font-medium text-foreground/78 shadow-sm"
                   >
                     {tag}
                   </span>
@@ -523,31 +522,27 @@ const AboutSection: React.FC = () => {
               </div>
 
               {/* Quick stats row */}
-              <div className="flex items-center gap-6 pt-2 border-t border-border/30">
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-lg font-bold tabular-nums text-foreground">8+</span>
-                  <span className="text-[11px] text-muted-foreground">Years exp.</span>
-                </div>
-                <div className="w-px h-8 bg-border/40" />
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-lg font-bold tabular-nums text-foreground">15</span>
-                  <span className="text-[11px] text-muted-foreground">Domains</span>
-                </div>
-                <div className="w-px h-8 bg-border/40" />
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-lg font-bold tabular-nums text-foreground">4+</span>
-                  <span className="text-[11px] text-muted-foreground">Companies</span>
-                </div>
+              <div className="grid grid-cols-3 gap-3 pt-2">
+                {[
+                  { value: '8+', label: 'Years exp.' },
+                  { value: '15', label: 'Domains' },
+                  { value: '4+', label: 'Companies' },
+                ].map((stat) => (
+                  <div key={stat.label} className="rounded-2xl border border-border/50 bg-background/72 px-3 py-3 shadow-sm">
+                    <span className="block text-lg font-bold tabular-nums text-foreground">{stat.value}</span>
+                    <span className="block text-[11px] text-muted-foreground">{stat.label}</span>
+                  </div>
+                ))}
               </div>
             </motion.div>
 
             {/* Right: bio + pull-quote */}
-            <motion.div variants={itemVariants} className="flex flex-col gap-6 justify-center">
+            <motion.div variants={itemVariants} className="flex flex-col justify-center gap-6">
               <p className="text-sm text-muted-foreground leading-relaxed">
                 {personalInfo?.profile?.about?.businessCard || ''}
               </p>
 
-              <blockquote className="text-xs font-medium text-foreground/80 border-s-4 border-primary/40 ps-4 not-italic">
+              <blockquote className="rounded-2xl border border-primary/15 bg-primary/6 px-5 py-4 text-xs font-medium text-foreground/82 not-italic shadow-sm">
                 I work at the intersection of reliability and product, where trust is built one deployment at a time.
               </blockquote>
 
@@ -574,7 +569,7 @@ const AboutSection: React.FC = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: '-80px' }}
-            className="space-y-6"
+            className="section-panel space-y-6 p-6 sm:p-8"
           >
             <motion.h2 variants={itemVariants} className="text-2xl font-semibold text-foreground tracking-tight">
               Career
@@ -670,7 +665,7 @@ const AboutSection: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.28, ease: 'easeOut' }}
-                  className="bg-muted/40 border border-border/40 rounded-xl p-6 space-y-3"
+                  className="section-panel-muted space-y-3 p-6"
                 >
                   <div className="flex items-start justify-between gap-4 flex-wrap">
                     <p className="text-base font-semibold text-foreground">
@@ -738,7 +733,7 @@ const AboutSection: React.FC = () => {
 
             <motion.div
               variants={itemVariants}
-              className="border border-border/40 rounded-xl overflow-hidden grid grid-cols-1 sm:grid-cols-2 divide-y divide-border/40 sm:divide-x sm:divide-y-0"
+              className="section-panel-muted overflow-hidden grid grid-cols-1 sm:grid-cols-2 divide-y divide-border/40 sm:divide-x sm:divide-y-0"
             >
               {/* Row 1 */}
               {aggregatedThemes.slice(0, 2).map((theme) => {
@@ -785,7 +780,7 @@ const AboutSection: React.FC = () => {
             {/* Row 2 — separate grid row to handle divide properly */}
             <motion.div
               variants={itemVariants}
-              className="border border-border/40 rounded-xl overflow-hidden grid grid-cols-1 sm:grid-cols-2 divide-y divide-border/40 sm:divide-x sm:divide-y-0"
+              className="section-panel-muted overflow-hidden grid grid-cols-1 sm:grid-cols-2 divide-y divide-border/40 sm:divide-x sm:divide-y-0"
             >
               {aggregatedThemes.slice(2, 4).map((theme) => {
                 const color = ACCENT_COLORS[theme.color];
@@ -856,7 +851,7 @@ const AboutSection: React.FC = () => {
         <div className="section-inner relative z-10 py-10 sm:py-14">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
             {/* Left: identity narrative */}
-            <motion.div variants={itemVariants} className="flex flex-col gap-6">
+            <motion.div variants={itemVariants} className="section-panel-muted flex flex-col gap-6 p-6 sm:p-8">
               <div className="section-label self-start">Personal</div>
 
               <div className="space-y-4">
@@ -886,7 +881,7 @@ const AboutSection: React.FC = () => {
             </motion.div>
 
             {/* Right: passion layout */}
-            <motion.div variants={itemVariants} className="flex flex-col gap-3">
+            <motion.div variants={itemVariants} className="section-panel-muted flex flex-col gap-3 p-5 sm:p-6">
               <p className="text-[11px] font-mono text-muted-foreground/50 uppercase tracking-widest">What drives me</p>
 
               {/* Spoken Word */}

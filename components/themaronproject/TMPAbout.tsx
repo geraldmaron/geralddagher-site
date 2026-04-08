@@ -85,9 +85,9 @@ const TMPAbout = () => {
         initial="hidden"
         animate="visible"
         variants={containerVariants}
-        className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-14 sm:pt-14 sm:pb-16 flex flex-col gap-8 w-full"
+        className="relative mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 pt-10 pb-14 sm:px-6 sm:pt-14 sm:pb-16 lg:px-8"
       >
-        <motion.div variants={titleVariants} className="max-w-3xl space-y-5">
+        <motion.div variants={titleVariants} className="section-panel max-w-3xl space-y-5 border-white/10 bg-slate-950/30 px-6 py-7 shadow-[0_20px_80px_-32px_rgba(15,23,42,0.9)] sm:px-8 sm:py-8">
           <p className="text-xs font-mono uppercase tracking-widest text-rose-400/80">The Maron Project</p>
           <h1 className="text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl">
             Real people.{' '}
@@ -101,7 +101,7 @@ const TMPAbout = () => {
         </motion.div>
 
         {tmpContent && (
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }} className="max-w-2xl space-y-4">
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }} className="section-panel max-w-2xl space-y-4 border-white/10 bg-slate-950/26 px-6 py-6 sm:px-7">
             <div className="w-8 h-px bg-rose-500/60" />
             {tmpContent.split('\n').filter(p => p.trim()).slice(0, 2).map((paragraph: string, index: number) => (
               <p key={index} className="text-base leading-relaxed text-white/75">
@@ -111,7 +111,7 @@ const TMPAbout = () => {
           </motion.div>
         )}
 
-        <motion.div variants={itemVariants} className="border-t border-white/10 pt-8">
+        <motion.div variants={itemVariants} className="section-panel border-white/10 bg-slate-950/24 px-5 py-6 sm:px-6 sm:py-7">
           <div className="grid gap-6 sm:grid-cols-3">
             {highlights.map((h) => (
               <div key={h.label} className="flex flex-col gap-2 border-l border-white/20 pl-4">

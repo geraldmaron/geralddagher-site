@@ -1,4 +1,3 @@
-import React from 'react';
 import { getPosts, getPostsCount, getCategories, getTags } from '@/lib/directus/queries';
 import BlogWrapper from '@/components/posts/BlogWrapper';
 import { Metadata } from 'next';
@@ -29,7 +28,8 @@ export default async function BlogPage() {
 
     return (
       <main aria-label="Blog" className="w-full min-h-screen">
-        <div className="w-full bg-muted/30 border-b border-border/40 dot-grid">
+        <div className="relative w-full overflow-hidden border-b border-border/40 bg-muted/30 dot-grid">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.08),transparent_26%),radial-gradient(circle_at_bottom_right,rgba(99,102,241,0.08),transparent_32%)]" aria-hidden="true" />
           <div className="section-inner-wide pt-32 pb-16 sm:pt-40 sm:pb-24">
             <div className="max-w-2xl">
               <span className="section-label">Writing</span>
@@ -54,7 +54,8 @@ export default async function BlogPage() {
   } catch (error) {
     return (
       <main aria-label="Blog" className="w-full min-h-screen">
-        <div className="w-full bg-muted/30 border-b border-border/40 dot-grid">
+        <div className="relative w-full overflow-hidden border-b border-border/40 bg-muted/30 dot-grid">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.08),transparent_26%),radial-gradient(circle_at_bottom_right,rgba(99,102,241,0.08),transparent_32%)]" aria-hidden="true" />
           <div className="section-inner-wide pt-32 pb-16 sm:pt-40 sm:pb-24">
             <div className="max-w-2xl">
               <span className="section-label">Writing</span>

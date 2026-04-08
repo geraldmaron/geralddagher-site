@@ -4,7 +4,6 @@ import { useTyped } from '@/lib/utils/hooks/useTyped';
 import { cn } from '@/lib/utils';
 import { name } from '@/lib/constants';
 import { motion } from 'framer-motion';
-
 const TypingText: React.FC = () => {
   const [terminalCommands, setTerminalCommands] = useState<string[]>([]);
   const { displayText, isTyping } = useTyped(terminalCommands, 60, 3000, 80);
@@ -33,7 +32,21 @@ const TypingText: React.FC = () => {
       transition={{ duration: 0.8, delay: 0.4 }}
     >
       <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight text-center">
-        Hi, I&apos;m {name}
+        Hi, I&apos;m{' '}
+          <span
+            style={{
+              backgroundImage: 'url(/images/Hero.png)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center top',
+              backgroundAttachment: 'fixed',
+              WebkitBackgroundClip: 'text',
+              backgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              color: 'transparent',
+            }}
+          >
+            {name}
+          </span>
       </div>
 
       <div className="relative w-full max-w-3xl overflow-hidden rounded-2xl border border-white/10 bg-black/50 shadow-2xl shadow-blue-500/10 backdrop-blur">

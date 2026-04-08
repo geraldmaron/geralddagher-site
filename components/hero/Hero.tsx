@@ -148,9 +148,9 @@ const Hero: React.FC = () => {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_40%,rgba(255,255,255,0.08),transparent_35%)]" />
         </motion.div>
 
-        <div className="mx-auto flex max-w-4xl flex-col items-center gap-10 px-4 pb-16 pt-28 text-center sm:px-6 md:pb-24 md:pt-32 lg:pt-36">
+        <div className="mx-auto flex max-w-5xl flex-col items-center gap-10 px-4 pb-16 pt-28 text-center sm:px-6 md:pb-24 md:pt-32 lg:pt-36">
           <motion.div
-            className="flex w-full flex-col items-center space-y-8"
+            className="section-panel flex w-full max-w-3xl flex-col items-center space-y-8 border-white/10 bg-slate-950/24 px-6 py-8 shadow-[0_20px_80px_-32px_rgba(15,23,42,0.85)] sm:px-8 sm:py-10"
             variants={containerVariants}
             initial="initial"
             animate="animate"
@@ -159,7 +159,7 @@ const Hero: React.FC = () => {
 
             <motion.p
               variants={itemVariants}
-              className="max-w-2xl text-xs leading-relaxed text-slate-100/90"
+              className="max-w-2xl text-xs leading-relaxed text-slate-100/86 sm:text-sm"
             >
               Product and platform leader translating reliability, risk, and delivery discipline into durable business outcomes. I help teams ship fast without breaking trust.
             </motion.p>
@@ -180,7 +180,7 @@ const Hero: React.FC = () => {
               <Button
                 variant="outline"
                 size="md"
-                className="border-white/25 bg-white/10 text-white hover:border-white/40 hover:bg-white/20"
+                className="border-white/25 bg-white/10 text-white hover:border-white/40 hover:bg-white/18"
                 onClick={() => {
                   const about = document.querySelector('[data-section="about"]');
                   if (about) about.scrollIntoView({ behavior: 'smooth' });
@@ -201,7 +201,7 @@ const Hero: React.FC = () => {
           <motion.div
             animate={{ y: [0, 6, 0] }}
             transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-            className="flex flex-col items-center gap-1 text-white/40"
+            className="flex flex-col items-center gap-1 text-white/46"
           >
             <ChevronDown className="h-5 w-5" />
           </motion.div>

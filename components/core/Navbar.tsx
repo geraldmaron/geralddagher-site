@@ -358,7 +358,7 @@ export default function Navbar() {
             'w-full transition-all duration-300',
             isScrolled
               ? 'nav-glass shadow-[0_1px_20px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_1px_20px_-4px_rgba(0,0,0,0.35)]'
-              : 'bg-transparent'
+              : 'bg-black/30 dark:bg-black/50 backdrop-blur-md'
           )}
         >
           <nav aria-label="Main navigation" className="h-14 lg:h-16 w-full px-4 sm:px-6 lg:px-8">

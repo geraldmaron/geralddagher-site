@@ -1,67 +1,30 @@
 import { describe, it, expect } from 'vitest';
+import { generateSlug } from '@/lib/utils/slug';
 
-describe('Post Normalization', () => {
-  function slugify(value: string) {
-    return value
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '') || 'post';
-  }
-
-  function normalizeCoverImage(coverImage: string | null | undefined): string | null | undefined {
-    if (coverImage && typeof coverImage === 'string') {
-      if (!coverImage.startsWith('http') && !coverImage.startsWith('/')) {
-        return `/api/assets/${coverImage}`;
-      }
-    }
-    return coverImage;
-  }
-
-  describe('slugify', () => {
-    it('should convert title to slug', () => {
-      expect(slugify('Test Post')).toBe('test-post');
-      expect(slugify('Another Test Post')).toBe('another-test-post');
-    });
-
-    it('should handle special characters', () => {
-      expect(slugify('Test & Post!')).toBe('test-post');
-      expect(slugify('Test@Post#123')).toBe('test-post-123');
-    });
-
-    it('should handle multiple spaces', () => {
-      expect(slugify('Test    Post')).toBe('test-post');
-    });
-
-    it('should trim leading and trailing dashes', () => {
-      expect(slugify('---Test Post---')).toBe('test-post');
-    });
-
-    it('should return "post" for empty or invalid input', () => {
-      expect(slugify('')).toBe('post');
-      expect(slugify('!!!')).toBe('post');
-    });
+describe('generateSlug', () => {
+  it('converts title to slug', () => {
+    expect(generateSlug('Test Post')).toBe('test-post');
+    expect(generateSlug('Another Test Post')).toBe('another-test-post');
   });
 
-  describe('normalizeCoverImage', () => {
-    it('should normalize file ID to assets URL', () => {
-      expect(normalizeCoverImage('abc-123-def')).toBe('/api/assets/abc-123-def');
-      expect(normalizeCoverImage('file-uuid')).toBe('/api/assets/file-uuid');
-    });
+  it('handles special characters', () => {
+    expect(generateSlug('Test & Post!')).toBe('test-post');
+    expect(generateSlug('Test@Post#123')).toBe('test-post-123');
+  });
 
-    it('should not modify URLs starting with http', () => {
-      expect(normalizeCoverImage('https://example.com/image.jpg')).toBe('https://example.com/image.jpg');
-      expect(normalizeCoverImage('http://example.com/image.jpg')).toBe('http://example.com/image.jpg');
-    });
+  it('handles multiple spaces', () => {
+    expect(generateSlug('Test    Post')).toBe('test-post');
+  });
 
-    it('should not modify URLs starting with /', () => {
-      expect(normalizeCoverImage('/images/cover.jpg')).toBe('/images/cover.jpg');
-      expect(normalizeCoverImage('/api/assets/123')).toBe('/api/assets/123');
-    });
+  it('trims leading and trailing dashes', () => {
+    expect(generateSlug('---Test Post---')).toBe('test-post');
+  });
 
-    it('should handle null and undefined', () => {
-      expect(normalizeCoverImage(null)).toBe(null);
-      expect(normalizeCoverImage(undefined)).toBe(undefined);
-    });
+  it('returns empty string for empty input', () => {
+    expect(generateSlug('')).toBe('');
+  });
+
+  it('returns empty string for symbol-only input', () => {
+    expect(generateSlug('!!!')).toBe('');
   });
 });

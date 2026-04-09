@@ -49,7 +49,6 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-tabs": "^1.1.13",
-    "@radix-ui/react-toast": "^1.2.15",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@tailwindcss/typography": "^0.5.18",
     "@tanstack/react-query": "^5.90.10",
@@ -94,9 +93,7 @@
     "react-remove-scroll": "^2.5.5",
     "react-resizable-panels": "^3.0.6",
     "react-youtube": "^10.1.0",
-    "readline-sync": "^1.4.10",
     "recharts": "^3.4.1",
-    "simple-spellchecker": "^1.0.2",
     "slate": "^0.118.1",
     "slate-dom": "^0.118.1",
     "slate-history": "^0.113.1",
@@ -112,13 +109,9 @@
     "uuid": "^13.0.0",
     "web-file-polyfill": "^1.0.4",
     "whatwg-url": "^15.1.0",
-    "zod": "^3.25.76",
-    "zustand": "^5.0.8"
+    "zod": "^3.25.76"
   },
   "overrides": {
-    "simple-spellchecker": {
-      "tmp": "^0.2.4"
-    },
     "glob": "^10.5.0",
     "js-yaml": "^4.1.1",
     "jws": "^4.0.1",
@@ -153,7 +146,6 @@
     "@types/react": "^19.1.13",
     "@types/react-datepicker": "^6.2.0",
     "@types/react-dom": "^19.1.9",
-    "@types/readline-sync": "^1.4.8",
     "@types/strip-comments": "^2.0.4",
     "@typescript-eslint/eslint-plugin": "^8.44.0",
     "@typescript-eslint/parser": "^8.44.0",

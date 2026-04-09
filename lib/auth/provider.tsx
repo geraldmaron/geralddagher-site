@@ -162,14 +162,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           try {
             const parsedUser = JSON.parse(cachedUser) as User;
             setUser(parsedUser);
-            await refreshUser();
           } catch {
             window.sessionStorage.removeItem('auth:user');
-            setLoading(false);
           }
-        } else {
-          setLoading(false);
         }
+        // Always verify session against server — covers both cached and cookie-only cases
+        await refreshUser();
       } else {
         setLoading(false);
       }

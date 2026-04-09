@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import TMPVideoCard from './TMPVideoCard';
-import TMPVideoPlayer from '@/components/admin/tmpmanager/TMPVideoPlayer';
+import TMPVideoPlayer from './TMPVideoPlayer';
 import type { TMPVideo } from '@/lib/types/tmp';
 
 interface TMPVideoGridProps {
@@ -30,24 +30,20 @@ const TMPVideoGrid: React.FC<TMPVideoGridProps> = ({
   activeVideo,
   onVideoSelect
 }) => {
-  const [isPlayerOpen, setIsPlayerOpen] = useState(false);
-  const [activeVideoState, setActiveVideoState] = useState<string | null>(activeVideo);
-
   const handleVideoSelect = (videoId: string) => {
     onVideoSelect(videoId);
-    setIsPlayerOpen(true);
   };
 
   return (
-    <div 
-      role="region" 
+    <div
+      role="region"
       aria-label="Video gallery"
       className="space-y-8"
     >
       {activeVideo && (
         <TMPVideoPlayer
           videoId={activeVideo}
-          onClose={() => setActiveVideoState(null)}
+          onClose={() => onVideoSelect(null)}
         />
       )}
 
@@ -67,7 +63,7 @@ const TMPVideoGrid: React.FC<TMPVideoGridProps> = ({
             key={video.id}
             video={video}
             viewMode={viewMode}
-            isActive={video.youtube_id === activeVideoState}
+            isActive={video.youtube_id === activeVideo}
             onSelect={() => handleVideoSelect(video.youtube_id)}
           />
         ))}

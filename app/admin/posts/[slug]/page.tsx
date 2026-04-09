@@ -1,16 +1,30 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Descendant } from 'slate';
 import { Editor } from '@/components/editor/Editor';
 import { PostMetadataForm } from '@/components/admin/PostMetadataForm';
 import { Button } from '@/components/core/Button';
 import { toast } from 'react-hot-toast';
-import { ArrowLeft, Loader2, Save } from 'lucide-react';
+import { ArrowLeft, Loader2, Save, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
 import { useAutosave } from '@/components/editor/hooks/useAutosave';
 import { formatDistanceToNow } from 'date-fns';
 import { normalizeImageUrls } from '@/lib/utils/normalize-image-urls';
+import { cn } from '@/lib/utils';
+
+function extractText(nodes: Descendant[]): string {
+  return nodes.map((n: any) => {
+    if (n.text !== undefined) return n.text;
+    if (n.children) return extractText(n.children);
+    return '';
+  }).join(' ');
+}
+
+function wordCount(nodes: Descendant[]): number {
+  const text = extractText(nodes).trim();
+  return text ? text.split(/\s+/).length : 0;
+}
 
 type PostRecord = {
   id: number;
@@ -212,6 +226,9 @@ export default function EditPostPage() {
     }
   };
 
+  const words = useMemo(() => wordCount(content), [content]);
+  const readTime = useMemo(() => Math.max(1, Math.round(words / 200)), [words]);
+
   const autosave = useAutosave({
     enabled: true,
     delay: 30000,
@@ -223,29 +240,28 @@ export default function EditPostPage() {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-neutral-50 dark:bg-neutral-950 overflow-y-auto">
-        <div className="sticky top-0 z-20 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 shadow-sm">
-          <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div className="fixed inset-0 bg-[#0a0b0f] flex flex-col">
+        <div className="flex-shrink-0 z-20 bg-[#111318] border-b border-white/[0.06]">
+          <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <div className="flex items-center justify-between">
-              <Button
-                variant="ghost"
-                size="sm"
+              <button
                 onClick={() => router.push('/admin/posts')}
+                className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-gray-400 hover:bg-white/[0.05] hover:text-gray-200 transition-all"
               >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
-              </Button>
-              <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                <ArrowLeft className="h-4 w-4" />
+                <span className="hidden sm:inline">Back</span>
+              </button>
+              <Loader2 className="h-4 w-4 animate-spin text-blue-400" />
             </div>
           </div>
         </div>
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex-1 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
           <div className="flex flex-col xl:flex-row gap-6 items-start">
             <div className="flex-1 w-full min-w-0">
-              <div className="h-96 bg-neutral-100 dark:bg-neutral-800 rounded-lg animate-pulse" />
+              <div className="h-96 bg-white/[0.03] rounded-xl animate-pulse" />
             </div>
             <div className="hidden xl:block xl:w-96 flex-shrink-0">
-              <div className="h-96 bg-neutral-100 dark:bg-neutral-800 rounded-lg animate-pulse" />
+              <div className="h-96 bg-white/[0.03] rounded-xl animate-pulse" />
             </div>
           </div>
         </div>
@@ -255,51 +271,64 @@ export default function EditPostPage() {
 
   if (!postId) {
     return (
-      <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex items-center justify-center">
+      <div className="fixed inset-0 bg-[#0a0b0f] flex items-center justify-center">
         <div className="text-center">
-          <p className="text-neutral-600 dark:text-neutral-400 mb-4">Post not found</p>
-          <Button onClick={() => router.push('/admin/posts')}>
-            Back to Posts
-          </Button>
+          <p className="text-gray-500 mb-4">Post not found</p>
+          <Button onClick={() => router.push('/admin/posts')}>Back to Posts</Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 bg-neutral-50 dark:bg-neutral-950 flex flex-col">
-      <div className="flex-shrink-0 z-20 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 shadow-sm">
-        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push('/admin/posts')}
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
+    <div className="fixed inset-0 bg-[#0a0b0f] flex flex-col">
+      <div className="flex-shrink-0 z-20 bg-[#111318] border-b border-white/[0.06]">
+        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <button
+                onClick={() => router.push('/admin/posts')}
+                className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-gray-400 hover:bg-white/[0.05] hover:text-gray-200 transition-all shrink-0"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="hidden sm:inline">Back</span>
+              </button>
+              <div className="h-4 w-px bg-white/[0.08] shrink-0" />
+              <h1 className="text-sm font-semibold text-gray-200 truncate">Edit Post</h1>
+              {words > 0 && (
+                <div className="hidden sm:flex items-center gap-3 text-[11px] text-gray-600">
+                  <span>{words.toLocaleString()} words</span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {readTime} min read
+                  </span>
+                </div>
+              )}
+            </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 shrink-0">
               {autosave.isSaving && (
-                <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Saving...</span>
-                </div>
+                <span className="flex items-center gap-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 px-2.5 py-1 text-[11px] text-blue-400">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Saving…
+                </span>
               )}
-
-              {!autosave.isSaving && autosave.lastSaved && (
-                <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-                  <Save className="h-4 w-4" />
-                  <span>Saved {formatDistanceToNow(autosave.lastSaved, { addSuffix: true })}</span>
-                </div>
+              {!autosave.isSaving && autosave.lastSaved && !autosave.error && (
+                <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 text-[11px] text-emerald-400">
+                  <CheckCircle2 className="h-3 w-3" />
+                  {formatDistanceToNow(autosave.lastSaved, { addSuffix: true })}
+                </span>
               )}
-
               {autosave.error && (
-                <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
-                  <span>Autosave failed - will retry</span>
-                </div>
+                <span className="flex items-center gap-1.5 rounded-full bg-red-500/10 border border-red-500/20 px-2.5 py-1 text-[11px] text-red-400">
+                  <AlertCircle className="h-3 w-3" />
+                  Autosave failed
+                </span>
               )}
+              <Button onClick={() => handleSave(true)} loading={saving} size="sm">
+                <Save className="h-3.5 w-3.5 mr-1.5" />
+                Save
+              </Button>
             </div>
           </div>
         </div>

@@ -18,13 +18,13 @@ import {
   ArrowDownRight,
   MapPin,
   Server,
-  Zap
+  Zap,
+  Plus,
+  ImageIcon,
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import {
-  LineChart,
-  Line,
   AreaChart,
   Area,
   BarChart,
@@ -35,10 +35,51 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell
 } from 'recharts';
+
+const CHART_STYLE = {
+  tooltip: {
+    backgroundColor: '#1a1d24',
+    border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: '8px',
+    color: '#e5e7eb',
+    fontSize: '12px',
+  },
+  grid: { stroke: 'rgba(255,255,255,0.04)' },
+  axis: { fill: '#4b5563', fontSize: 11 },
+};
+
+type Stat = {
+  name: string;
+  value: string | number;
+  icon: React.ElementType;
+  href: string | null;
+  trend?: number;
+  accentColor: string;
+  bgGradient: string;
+  borderAccent: string;
+};
+
+const QUICK_ACTIONS = [
+  { label: 'New post', href: '/admin/posts/new', icon: FileText, color: 'text-blue-400', bg: 'bg-blue-500/10 hover:bg-blue-500/[0.15]', border: 'border-blue-500/20' },
+  { label: 'Browse assets', href: '/admin/assets', icon: ImageIcon, color: 'text-violet-400', bg: 'bg-violet-500/10 hover:bg-violet-500/[0.15]', border: 'border-violet-500/20' },
+  { label: 'Manage users', href: '/admin/users', icon: Users, color: 'text-emerald-400', bg: 'bg-emerald-500/10 hover:bg-emerald-500/[0.15]', border: 'border-emerald-500/20' },
+];
+
+function StatusDot({ status }: { status: 'healthy' | 'error' | 'unknown' }) {
+  if (status === 'healthy') {
+    return (
+      <span className="relative flex h-2 w-2">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
+        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+      </span>
+    );
+  }
+  if (status === 'error') {
+    return <span className="h-2 w-2 rounded-full bg-red-400 inline-flex" />;
+  }
+  return <span className="h-2 w-2 rounded-full bg-gray-600 inline-flex" />;
+}
 
 export default function AdminDashboard() {
   const [data, setData] = useState<any>(null);
@@ -51,571 +92,359 @@ export default function AdminDashboard() {
       .catch(() => setLoading(false));
   }, []);
 
-  const formatNumber = (num: number): string => {
-    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
-    return num.toString();
+  const fmt = (n: number) => {
+    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+    if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+    return String(n);
   };
 
-  const formatBytes = (bytes: number): string => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
-  };
-
-  const rawTimeSeries = data?.cloudflare?.timeSeries || [];
-  const timeSeriesData = rawTimeSeries.map((point: any) => {
-    const dateStr = point.date || '';
-    let formattedDate = dateStr;
+  const timeSeriesData = (data?.cloudflare?.timeSeries || []).map((p: any) => {
+    let date = p.date || '';
     try {
-      if (dateStr.includes('T')) {
-        formattedDate = new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      } else if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        const [year, month, day] = dateStr.split('-');
-        const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-        formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      if (date.includes('T')) {
+        date = new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      } else if (date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        const [y, m, d] = date.split('-');
+        date = new Date(+y, +m - 1, +d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       }
-    } catch {
-      formattedDate = dateStr;
-    }
-    return {
-      date: formattedDate,
-      visitors: point.visitors || 0,
-      pageviews: point.pageviews || 0,
-    };
+    } catch { /* keep raw */ }
+    return { date, visitors: p.visitors || 0, pageviews: p.pageviews || 0 };
   });
 
-  const countryData = data?.cloudflare?.requestsByCountry?.slice(0, 10).map((item: any) => ({
-    name: item.country || 'Unknown',
-    value: item.requests || 0,
-  })) || [];
+  const countryData = (data?.cloudflare?.requestsByCountry || [])
+    .slice(0, 8)
+    .map((x: any) => ({ name: x.country || 'Unknown', value: x.requests || 0 }));
 
-  const topPagesData = data?.cloudflare?.topPages?.slice(0, 8).map((page: any) => ({
-    name: page.path?.length > 30 ? page.path.substring(0, 30) + '...' : page.path || '/',
-    views: page.views || 0,
-  })) || [];
+  const topPagesData = (data?.cloudflare?.topPages || [])
+    .slice(0, 8)
+    .map((p: any) => ({
+      name: (p.path?.length > 28 ? p.path.substring(0, 28) + '…' : p.path) || '/',
+      views: p.views || 0,
+    }));
 
-  const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1'];
-
-  const stats = [
-    { 
-      name: 'Posts', 
-      value: data?.stats?.posts || 0, 
-      icon: FileText, 
-      href: '/admin/posts', 
-      color: 'from-blue-500 to-blue-600',
-      textColor: 'text-blue-600',
-      bgColor: 'bg-blue-500/10'
+  const stats: Stat[] = [
+    {
+      name: 'Posts', value: data?.stats?.posts ?? 0, icon: FileText, href: '/admin/posts',
+      accentColor: 'text-blue-400', bgGradient: 'from-blue-500/[0.07]', borderAccent: 'border-t-blue-500/40',
     },
-    { 
-      name: 'Users', 
-      value: data?.stats?.users || 0, 
-      icon: Users, 
-      href: '/admin/users', 
-      color: 'from-green-500 to-green-600',
-      textColor: 'text-green-600',
-      bgColor: 'bg-green-500/10'
+    {
+      name: 'Users', value: data?.stats?.users ?? 0, icon: Users, href: '/admin/users',
+      accentColor: 'text-violet-400', bgGradient: 'from-violet-500/[0.07]', borderAccent: 'border-t-violet-500/40',
     },
-    { 
-      name: 'Categories', 
-      value: data?.stats?.categories || 0, 
-      icon: FolderTree, 
-      href: '/admin/categories', 
-      color: 'from-purple-500 to-purple-600',
-      textColor: 'text-purple-600',
-      bgColor: 'bg-purple-500/10'
+    {
+      name: 'Categories', value: data?.stats?.categories ?? 0, icon: FolderTree, href: '/admin/taxonomy?tab=categories',
+      accentColor: 'text-emerald-400', bgGradient: 'from-emerald-500/[0.07]', borderAccent: 'border-t-emerald-500/40',
     },
-    { 
-      name: 'Tags', 
-      value: data?.stats?.tags || 0, 
-      icon: Tag, 
-      href: '/admin/tags', 
-      color: 'from-amber-500 to-amber-600',
-      textColor: 'text-amber-600',
-      bgColor: 'bg-amber-500/10'
+    {
+      name: 'Tags', value: data?.stats?.tags ?? 0, icon: Tag, href: '/admin/taxonomy?tab=tags',
+      accentColor: 'text-amber-400', bgGradient: 'from-amber-500/[0.07]', borderAccent: 'border-t-amber-500/40',
     },
     ...(data?.cloudflare?.visitors ? [{
       name: 'Visitors (30d)',
-      value: formatNumber(data.cloudflare.visitors.total),
+      value: fmt(data.cloudflare.visitors.total),
       trend: data.cloudflare.visitors.trend,
       icon: Globe,
       href: null,
-      color: 'from-cyan-500 to-cyan-600',
-      textColor: 'text-cyan-600',
-      bgColor: 'bg-cyan-500/10'
+      accentColor: 'text-cyan-400',
+      bgGradient: 'from-cyan-500/[0.07]',
+      borderAccent: 'border-t-cyan-500/40',
     }] : []),
     ...(data?.cloudflare?.pageviews ? [{
       name: 'Pageviews (30d)',
-      value: formatNumber(data.cloudflare.pageviews.total),
+      value: fmt(data.cloudflare.pageviews.total),
       trend: data.cloudflare.pageviews.trend,
       icon: Eye,
       href: null,
-      color: 'from-indigo-500 to-indigo-600',
-      textColor: 'text-indigo-600',
-      bgColor: 'bg-indigo-500/10'
+      accentColor: 'text-pink-400',
+      bgGradient: 'from-pink-500/[0.07]',
+      borderAccent: 'border-t-pink-500/40',
     }] : []),
   ];
 
+  const stateColors: Record<string, string> = {
+    READY: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20',
+    BUILDING: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
+    ERROR: 'text-red-400 bg-red-400/10 border-red-400/20',
+    CANCELED: 'text-gray-500 bg-gray-500/10 border-gray-500/20',
+    QUEUED: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20',
+  };
+
+  const directusStatus = data?.directus?.status === 'healthy' ? 'healthy' : data ? 'error' : 'unknown';
+  const cloudflareStatus = data?.cloudflare ? 'healthy' : data ? 'unknown' : 'unknown';
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-2"
+        className="flex items-center justify-between"
       >
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400 bg-clip-text text-transparent">
-          Dashboard
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Control center for your site analytics and content management
-        </p>
+        <div>
+          <h1 className="text-lg font-semibold text-gray-100 tracking-tight">Dashboard</h1>
+          <p className="text-xs text-gray-500 mt-0.5">Site overview and analytics</p>
+        </div>
+        <Link
+          href="/admin/posts/new"
+          className="flex items-center gap-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/[0.15] border border-blue-500/20 px-3 py-1.5 text-xs font-medium text-blue-300 transition-all"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          New post
+        </Link>
       </motion.div>
 
-      <motion.div 
+      {/* Quick actions */}
+      <motion.div
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.03 }}
+        className="grid grid-cols-3 gap-3"
+      >
+        {QUICK_ACTIONS.map((action) => {
+          const Icon = action.icon;
+          return (
+            <Link
+              key={action.href}
+              href={action.href}
+              className={cn(
+                'flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition-all',
+                action.bg, action.border, action.color
+              )}
+            >
+              <Icon className="h-3.5 w-3.5 shrink-0" />
+              <span className="hidden sm:inline">{action.label}</span>
+            </Link>
+          );
+        })}
+      </motion.div>
+
+      {/* Stat cards */}
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.1 }}
-        className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7"
+        transition={{ delay: 0.05 }}
+        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3"
       >
-        {stats.map((stat, index) => {
+        {stats.map((stat, i) => {
           const Icon = stat.icon;
-          const hasTrend = 'trend' in stat && stat.trend !== undefined;
-          const trendValue = hasTrend ? stat.trend : null;
-          const trendPositive = trendValue !== null && trendValue > 0;
-          const TrendArrow = trendPositive ? ArrowUpRight : ArrowDownRight;
-          
-          const content = (
+          const hasTrend = stat.trend !== undefined;
+          const up = hasTrend && (stat.trend ?? 0) > 0;
+
+          const inner = (
             <div className={cn(
-              'relative p-6 rounded-2xl border transition-all duration-300',
-              stat.href ? 'cursor-pointer' : '',
-              'bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm',
-              'border-gray-200/50 dark:border-gray-700/50',
-              stat.href && 'hover:bg-white/80 dark:hover:bg-gray-800/80',
-              stat.href && 'hover:shadow-lg hover:shadow-gray-900/5 dark:hover:shadow-gray-900/20',
-              stat.href && 'hover:border-gray-300/50 dark:hover:border-gray-600/50'
+              'flex flex-col gap-1.5 p-3 rounded-xl border border-white/[0.06] border-t-2 bg-gradient-to-b to-transparent hover:brightness-110 transition-all h-full',
+              stat.bgGradient,
+              stat.borderAccent,
             )}>
               <div className="flex items-center justify-between">
-                <div className={cn(
-                  'p-3 rounded-xl',
-                  stat.bgColor,
-                  stat.href && 'group-hover:scale-110 transition-transform duration-200'
-                )}>
-                  <Icon className={cn('h-6 w-6', stat.textColor)} />
-                </div>
-                <div className="text-right">
-                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                    {loading ? '...' : stat.value}
-                  </p>
-                  {hasTrend && trendValue !== null && (
-                    <div className={cn(
-                      'flex items-center gap-1 mt-1 text-xs font-medium',
-                      trendPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-                    )}>
-                      <TrendArrow className="h-3 w-3" />
-                      <span>{Math.abs(trendValue).toFixed(1)}%</span>
-                    </div>
-                  )}
-                </div>
+                <Icon className={cn('h-4 w-4', stat.accentColor)} />
+                {hasTrend && (
+                  <span className={cn('flex items-center gap-0.5 text-[10px] font-medium', up ? 'text-emerald-400' : 'text-red-400')}>
+                    {up ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                    {Math.abs(stat.trend ?? 0).toFixed(1)}%
+                  </span>
+                )}
               </div>
-              <div className="mt-4">
-                <p className={cn(
-                  'text-sm font-medium text-gray-600 dark:text-gray-400',
-                  stat.href && 'group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors'
-                )}>
-                  {stat.name}
+              <div>
+                <p className="text-lg font-semibold text-gray-100 tabular-nums leading-none">
+                  {loading ? <span className="text-gray-700">—</span> : stat.value}
                 </p>
+                <p className="text-[11px] text-gray-500 mt-1">{stat.name}</p>
               </div>
-              
-              {stat.href && (
-                <div className={cn(
-                  'absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-5 transition-opacity',
-                  'bg-gradient-to-br',
-                  stat.color
-                )} />
-              )}
             </div>
           );
 
           return (
             <motion.div
               key={stat.name}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 + index * 0.1 }}
-              whileHover={{ scale: stat.href ? 1.02 : 1 }}
-              whileTap={{ scale: stat.href ? 0.98 : 1 }}
+              transition={{ delay: 0.06 + i * 0.04 }}
             >
               {stat.href ? (
-                <Link href={stat.href} className="group block">
-                  {content}
-                </Link>
-              ) : (
-                content
-              )}
+                <Link href={stat.href} className="block h-full">{inner}</Link>
+              ) : inner}
             </motion.div>
           );
         })}
       </motion.div>
 
-      {data?.cloudflare?.timeSeries && timeSeriesData.length > 0 && (
+      {/* Main grid: chart + system status */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        className="grid gap-3 lg:grid-cols-3"
+      >
+        {/* Traffic chart */}
+        {timeSeriesData.length > 0 && (
+          <div className="lg:col-span-2 p-4 rounded-xl bg-white/[0.04] border border-white/[0.06]">
+            <div className="flex items-center gap-2 mb-3">
+              <TrendingUp className="h-4 w-4 text-cyan-500/70" />
+              <h2 className="text-sm font-medium text-gray-300">Traffic — 30 days</h2>
+            </div>
+            <ResponsiveContainer width="100%" height={200}>
+              <AreaChart data={timeSeriesData}>
+                <defs>
+                  <linearGradient id="gVisitors" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="gPageviews" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#818cf8" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#818cf8" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_STYLE.grid.stroke} />
+                <XAxis dataKey="date" tick={CHART_STYLE.axis} interval="preserveStartEnd" minTickGap={20} />
+                <YAxis yAxisId="l" tick={CHART_STYLE.axis} width={36} />
+                <YAxis yAxisId="r" orientation="right" tick={CHART_STYLE.axis} width={36} />
+                <Tooltip contentStyle={CHART_STYLE.tooltip} />
+                <Legend wrapperStyle={{ fontSize: 11, color: '#6b7280' }} />
+                <Area yAxisId="l" type="monotone" dataKey="visitors" stroke="#06b6d4" strokeWidth={1.5} fillOpacity={1} fill="url(#gVisitors)" name="Visitors" dot={false} />
+                <Area yAxisId="r" type="monotone" dataKey="pageviews" stroke="#818cf8" strokeWidth={1.5} fillOpacity={1} fill="url(#gPageviews)" name="Pageviews" dot={false} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {/* System status */}
+        <div className="flex flex-col gap-4">
+          <div className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.06]">
+            <div className="flex items-center gap-2 mb-3">
+              <Activity className="h-4 w-4 text-gray-500" />
+              <h2 className="text-sm font-medium text-gray-300">System</h2>
+            </div>
+            <div className="space-y-0">
+              <div className="flex items-center justify-between py-1.5 border-b border-white/[0.04]">
+                <div className="flex items-center gap-2 text-xs text-gray-400">
+                  <Server className="h-3.5 w-3.5 text-gray-600" />
+                  Directus CMS
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <StatusDot status={directusStatus} />
+                  <span className={cn('text-[11px]', directusStatus === 'healthy' ? 'text-emerald-400' : 'text-red-400')}>
+                    {directusStatus === 'healthy' ? 'Healthy' : 'Error'}
+                  </span>
+                </div>
+              </div>
+              {data?.vercel?.project && (
+                <div className="flex items-center justify-between py-1.5 border-b border-white/[0.04]">
+                  <div className="flex items-center gap-2 text-xs text-gray-400">
+                    <Zap className="h-3.5 w-3.5 text-gray-600" />
+                    Vercel
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <StatusDot status="healthy" />
+                    <span className="text-[11px] text-gray-400">{data.vercel.project.name}</span>
+                  </div>
+                </div>
+              )}
+              {data?.cloudflare && (
+                <div className="flex items-center justify-between py-1.5">
+                  <div className="flex items-center gap-2 text-xs text-gray-400">
+                    <Activity className="h-3.5 w-3.5 text-gray-600" />
+                    Cloudflare
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <StatusDot status={cloudflareStatus} />
+                    <span className="text-[11px] text-emerald-400">Active</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Country + top pages */}
+      {(countryData.length > 0 || topPagesData.length > 0) && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className={cn(
-            'p-6 rounded-2xl border',
-            'bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm',
-            'border-gray-200/50 dark:border-gray-700/50'
-          )}
+          className="grid gap-3 lg:grid-cols-2"
         >
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2.5 bg-indigo-500/10 rounded-xl">
-              <TrendingUp className="h-5 w-5 text-indigo-600" />
+          {countryData.length > 0 && (
+            <div className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.06]">
+              <div className="flex items-center gap-2 mb-3">
+                <MapPin className="h-4 w-4 text-gray-500" />
+                <h2 className="text-sm font-medium text-gray-300">Traffic by country</h2>
+              </div>
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={countryData} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" stroke={CHART_STYLE.grid.stroke} horizontal={false} />
+                  <XAxis type="number" tick={CHART_STYLE.axis} />
+                  <YAxis type="category" dataKey="name" tick={CHART_STYLE.axis} width={70} />
+                  <Tooltip
+                    contentStyle={CHART_STYLE.tooltip}
+                    formatter={(v: number | undefined) => [fmt(v ?? 0), 'Requests']}
+                  />
+                  <Bar dataKey="value" fill="#06b6d4" fillOpacity={0.8} radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Traffic Trends (30 Days)</h2>
-          </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={timeSeriesData}>
-              <defs>
-                <linearGradient id="colorVisitors" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
-                </linearGradient>
-                <linearGradient id="colorPageviews" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-              <XAxis
-                dataKey="date"
-                tick={{ fill: 'currentColor', fontSize: 10 }}
-                className="text-gray-600 dark:text-gray-400"
-                interval="preserveStartEnd"
-                minTickGap={20}
-              />
-              <YAxis 
-                yAxisId="left"
-                tick={{ fill: 'currentColor', fontSize: 12 }}
-                className="text-gray-600 dark:text-gray-400"
-              />
-              <YAxis 
-                yAxisId="right" 
-                orientation="right"
-                tick={{ fill: 'currentColor', fontSize: 12 }}
-                className="text-gray-600 dark:text-gray-400"
-              />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                  border: '1px solid rgba(0, 0, 0, 0.1)',
-                  borderRadius: '8px',
-                  color: '#1f2937'
-                }}
-              />
-              <Legend />
-              <Area 
-                yAxisId="left"
-                type="monotone" 
-                dataKey="visitors" 
-                stroke="#06b6d4" 
-                fillOpacity={1} 
-                fill="url(#colorVisitors)"
-                name="Visitors"
-              />
-              <Area 
-                yAxisId="right"
-                type="monotone" 
-                dataKey="pageviews" 
-                stroke="#3b82f6" 
-                fillOpacity={1} 
-                fill="url(#colorPageviews)"
-                name="Pageviews"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+          )}
+
+          {topPagesData.length > 0 && (
+            <div className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.06]">
+              <div className="flex items-center gap-2 mb-3">
+                <Globe className="h-4 w-4 text-gray-500" />
+                <h2 className="text-sm font-medium text-gray-300">Top pages — 30 days</h2>
+              </div>
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={topPagesData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={CHART_STYLE.grid.stroke} vertical={false} />
+                  <XAxis dataKey="name" angle={-35} textAnchor="end" height={70} tick={CHART_STYLE.axis} />
+                  <YAxis tick={CHART_STYLE.axis} width={36} />
+                  <Tooltip
+                    contentStyle={CHART_STYLE.tooltip}
+                    formatter={(v: number | undefined) => [fmt(v ?? 0), 'Views']}
+                  />
+                  <Bar dataKey="views" fill="#818cf8" fillOpacity={0.8} radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </motion.div>
       )}
 
-
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="grid gap-6 lg:grid-cols-2"
-      >
-        {data?.cloudflare?.requestsByCountry && countryData.length > 0 && (
-          <div className={cn(
-            'p-6 rounded-2xl border',
-            'bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm',
-            'border-gray-200/50 dark:border-gray-700/50'
-          )}>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2.5 bg-green-500/10 rounded-xl">
-                <MapPin className="h-5 w-5 text-green-600" />
-              </div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Traffic by Country</h2>
-            </div>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={countryData} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                <XAxis 
-                  type="number"
-                  tick={{ fill: 'currentColor', fontSize: 12 }}
-                  className="text-gray-600 dark:text-gray-400"
-                />
-                <YAxis 
-                  type="category"
-                  dataKey="name"
-                  tick={{ fill: 'currentColor', fontSize: 12 }}
-                  className="text-gray-600 dark:text-gray-400"
-                  width={80}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                    border: '1px solid rgba(0, 0, 0, 0.1)',
-                    borderRadius: '8px',
-                    color: '#1f2937'
-                  }}
-                  formatter={(value) => [formatNumber(typeof value === 'number' ? value : 0), 'Requests']}
-                />
-                <Bar dataKey="value" fill="#10b981" radius={[0, 8, 8, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-
-        {topPagesData.length > 0 && (
-          <div className={cn(
-            'p-6 rounded-2xl border',
-            'bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm',
-            'border-gray-200/50 dark:border-gray-700/50'
-          )}>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2.5 bg-indigo-500/10 rounded-xl">
-                <Globe className="h-5 w-5 text-indigo-600" />
-              </div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Top Pages (30d)</h2>
-            </div>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={topPagesData}>
-                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                <XAxis 
-                  dataKey="name"
-                  angle={-45}
-                  textAnchor="end"
-                  height={100}
-                  tick={{ fill: 'currentColor', fontSize: 11 }}
-                  className="text-gray-600 dark:text-gray-400"
-                />
-                <YAxis 
-                  tick={{ fill: 'currentColor', fontSize: 12 }}
-                  className="text-gray-600 dark:text-gray-400"
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                    border: '1px solid rgba(0, 0, 0, 0.1)',
-                    borderRadius: '8px',
-                    color: '#1f2937'
-                  }}
-                  formatter={(value: number | undefined) => [formatNumber(value ?? 0), 'Views']}
-                />
-                <Bar dataKey="views" fill="#3b82f6" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-      </motion.div>
-
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.6 }}
-        className="grid gap-6 lg:grid-cols-2"
-      >
-        <div className={cn(
-          'p-6 rounded-2xl border',
-          'bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm',
-          'border-gray-200/50 dark:border-gray-700/50'
-        )}>
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2.5 bg-blue-500/10 rounded-xl">
-              <Activity className="h-5 w-5 text-blue-600" />
-            </div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">System Status</h2>
-          </div>
-          <div className="space-y-3">
-            <div className={cn(
-              'flex items-center justify-between p-4 rounded-xl transition-all',
-              'bg-gray-50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50'
-            )}>
-              <div className="flex items-center gap-3">
-                <Server className="h-4 w-4 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Directus CMS</span>
-              </div>
-              {data?.directus?.status === 'healthy' ? (
-                <span className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400 font-medium">
-                  <CheckCircle2 className="h-4 w-4" />
-                  Healthy
-                </span>
-              ) : (
-                <span className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 font-medium">
-                  <XCircle className="h-4 w-4" />
-                  Error
-                </span>
-              )}
-            </div>
-            {data?.vercel?.project && (
-              <div className={cn(
-                'flex items-center justify-between p-4 rounded-xl transition-all',
-                'bg-gray-50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50'
-              )}>
-                <div className="flex items-center gap-3">
-                  <Zap className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Vercel Project</span>
-                </div>
-                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  {data.vercel.project.name}
-                </span>
-              </div>
-            )}
-            {data?.cloudflare && (
-              <div className={cn(
-                'flex items-center justify-between p-4 rounded-xl transition-all',
-                'bg-gray-50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50'
-              )}>
-                <div className="flex items-center gap-3">
-                  <Activity className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Cloudflare Analytics</span>
-                </div>
-                <span className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400 font-medium">
-                  <CheckCircle2 className="h-4 w-4" />
-                  Active
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className={cn(
-          'p-6 rounded-2xl border',
-          'bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm',
-          'border-gray-200/50 dark:border-gray-700/50'
-        )}>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6">Quick Actions</h2>
-          <div className="space-y-3">
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Link
-                href="/admin/posts/new"
-                className={cn(
-                  'block p-4 rounded-xl transition-all duration-200 group',
-                  'bg-gray-50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
-                  'hover:bg-white dark:hover:bg-gray-800/80 hover:shadow-md',
-                  'hover:border-gray-300/50 dark:hover:border-gray-600/50'
-                )}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-green-500/10 rounded-lg group-hover:scale-110 transition-transform">
-                    <FileText className="h-4 w-4 text-green-600" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">
-                    Create New Post
-                  </span>
-                </div>
-              </Link>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Link
-                href="/admin/users"
-                className={cn(
-                  'block p-4 rounded-xl transition-all duration-200 group',
-                  'bg-gray-50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
-                  'hover:bg-white dark:hover:bg-gray-800/80 hover:shadow-md',
-                  'hover:border-gray-300/50 dark:hover:border-gray-600/50'
-                )}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-orange-500/10 rounded-lg group-hover:scale-110 transition-transform">
-                    <Users className="h-4 w-4 text-orange-600" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">
-                    Manage Users
-                  </span>
-                </div>
-              </Link>
-            </motion.div>
-          </div>
-        </div>
-      </motion.div>
-
-      {data?.vercel?.deployments && data.vercel.deployments.length > 0 && (
+      {/* Recent deployments */}
+      {data?.vercel?.deployments?.length > 0 && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.7 }}
-          className={cn(
-            'p-6 rounded-2xl border',
-              'bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm',
-              'border-gray-200/50 dark:border-gray-700/50'
-          )}
+          transition={{ delay: 0.4 }}
+          className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.06]"
         >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2.5 bg-purple-500/10 rounded-xl">
-                  <GitBranch className="h-5 w-5 text-purple-600" />
-                </div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Recent Deployments</h2>
+          <div className="flex items-center gap-2 mb-3">
+            <GitBranch className="h-4 w-4 text-gray-500" />
+            <h2 className="text-sm font-medium text-gray-300">Recent deployments</h2>
+          </div>
+          <div className="divide-y divide-white/[0.04]">
+            {data.vercel.deployments.slice(0, 5).map((dep: any) => (
+              <div key={dep.uid} className="flex items-center gap-4 py-1.5">
+                <span className={cn('shrink-0 rounded-md border px-1.5 py-0.5 text-[10px] font-medium', stateColors[dep.state] ?? stateColors.QUEUED)}>
+                  {dep.state}
+                </span>
+                <a
+                  href={`https://${dep.url}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 truncate text-xs text-gray-400 hover:text-gray-200 transition-colors"
+                >
+                  {dep.url}
+                </a>
+                {dep.meta?.githubCommitMessage && (
+                  <span className="hidden sm:block truncate max-w-[200px] text-[11px] text-gray-600">
+                    {dep.meta.githubCommitMessage}
+                  </span>
+                )}
+                <span className="shrink-0 text-[11px] text-gray-600">
+                  {new Date(dep.createdAt).toLocaleDateString()}
+                </span>
               </div>
-              <div className="space-y-3">
-            {data.vercel.deployments.slice(0, 5).map((deployment: any) => {
-                  const stateColors: Record<string, string> = {
-                    READY: 'bg-green-500/10 text-green-600 dark:text-green-400',
-                    BUILDING: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-                    ERROR: 'bg-red-500/10 text-red-600 dark:text-red-400',
-                    CANCELED: 'bg-gray-500/10 text-gray-600 dark:text-gray-400',
-                    QUEUED: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400',
-                  };
-                  const stateColor = stateColors[deployment.state] || stateColors.QUEUED;
-                  const deploymentDate = new Date(deployment.createdAt);
-                  const timeAgo = deploymentDate.toLocaleDateString();
-
-                  return (
-                    <div
-                      key={deployment.uid}
-                      className={cn(
-                        'p-4 rounded-xl transition-all',
-                        'bg-gray-50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
-                        'hover:bg-white dark:hover:bg-gray-800/80'
-                      )}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <a
-                          href={`https://${deployment.url}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm font-medium text-gray-900 dark:text-gray-100 hover:underline truncate flex-1"
-                        >
-                          {deployment.url}
-                        </a>
-                        <span className={cn('px-2 py-1 rounded-md text-xs font-medium', stateColor)}>
-                          {deployment.state}
-                        </span>
-                      </div>
-                      {deployment.meta?.githubCommitMessage && (
-                        <p className="text-xs text-gray-600 dark:text-gray-400 truncate mb-1">
-                          {deployment.meta.githubCommitMessage}
-                        </p>
-                      )}
-                      <p className="text-xs text-gray-500 dark:text-gray-500">
-                        {timeAgo}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
+            ))}
+          </div>
         </motion.div>
       )}
     </div>

@@ -55,11 +55,12 @@ export async function POST(request: NextRequest) {
 
     const access = (result as any)?.access_token;
     const refresh = (result as any)?.refresh_token;
-    const expires = (result as any)?.expires;
+    const expiresDuration = (result as any)?.expires; // duration in ms
+    const expiresAt = expiresDuration ? Date.now() + expiresDuration : Date.now() + maxAge * 1000;
 
     const response = NextResponse.json({
       success: true,
-      expiresAt: expires ? new Date(expires).toISOString() : null
+      expiresAt: new Date(expiresAt).toISOString()
     });
 
     const cookieOptions = {
@@ -88,7 +89,7 @@ export async function POST(request: NextRequest) {
 
     response.cookies.set({
       name: 'directus_token_expires',
-      value: expires ? expires.toString() : (Date.now() + maxAge * 1000).toString(),
+      value: expiresAt.toString(),
       ...cookieOptions,
       maxAge,
     });

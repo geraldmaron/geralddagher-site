@@ -6,9 +6,16 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Plus, FileText, Calendar, Eye, EyeOff, Edit, Trash2, Search, LayoutGrid, List, Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import toast from 'react-hot-toast';
 import { Button } from '@/components/core/Button';
 import { Badge } from '@/components/core/Badge';
+import { ConfirmDialog } from '@/components/core/ConfirmDialog';
 import { cn } from '@/lib/utils';
+
+type PostAuthor = { id: string; first_name?: string; last_name?: string; is_author?: boolean };
+type PostCategory = { id: number; name: string };
+type PostTag = { tags_id?: { id: number; name: string } };
+type PostDocumentType = { id: number; name: string; slug: string };
 
 type Post = {
   id: number;
@@ -18,14 +25,14 @@ type Post = {
   published_at?: string;
   view_count?: number;
   featured?: boolean;
-  author?: any;
-  category?: any;
+  author?: PostAuthor | string;
+  category?: PostCategory;
   cover_image?: string | null;
   excerpt?: string | null;
-  tags?: { tags_id?: { id: number; name: string } }[];
+  tags?: PostTag[];
   is_argus_content?: boolean;
-  document_type?: { id: number; name: string; slug: string } | number | null;
-  argus_users?: any[];
+  document_type?: PostDocumentType | number | null;
+  argus_users?: string[];
 };
 
 export default function AdminPostsPage() {
@@ -39,7 +46,8 @@ export default function AdminPostsPage() {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [authors, setAuthors] = useState<any[]>([]);
+  const [authors, setAuthors] = useState<PostAuthor[]>([]);
+  const [confirmDelete, setConfirmDelete] = useState<{ id: number; title: string } | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -58,7 +66,7 @@ export default function AdminPostsPage() {
         }
 
         if (usersRes.ok && usersData.data) {
-          setAuthors(usersData.data.filter((u: any) => u.is_author));
+          setAuthors(usersData.data.filter((u: PostAuthor) => u.is_author));
         }
 
         setLoading(false);
@@ -91,7 +99,7 @@ export default function AdminPostsPage() {
         (contentTypeFilter === 'argus' && post.is_argus_content === true) ||
         (contentTypeFilter === 'regular' && (post.is_argus_content === false || post.is_argus_content === undefined || post.is_argus_content === null));
 
-      const authorId = typeof post.author === 'object' ? post.author?.id : post.author;
+      const authorId = typeof post.author === 'object' ? (post.author as PostAuthor)?.id : post.author;
       const matchesAuthor = authorFilter === 'all' || authorId === authorFilter;
 
       return matchesSearch && matchesStatus && matchesContentType && matchesAuthor;
@@ -112,12 +120,9 @@ export default function AdminPostsPage() {
     );
   };
 
-  const handleDelete = async (postId: number, title?: string) => {
-    const confirmed = typeof window !== 'undefined'
-      ? window.confirm(`Delete "${title || 'this post'}"? This cannot be undone.`)
-      : true;
-    if (!confirmed) return;
-
+  const handleDeleteConfirmed = async () => {
+    if (!confirmDelete) return;
+    const { id: postId } = confirmDelete;
     setDeletingId(postId);
     try {
       const res = await fetch(`/api/admin/posts/${postId}`, { method: 'DELETE' });
@@ -126,135 +131,94 @@ export default function AdminPostsPage() {
         throw new Error(body.error || `Failed to delete post (${res.status})`);
       }
       setPosts((prev) => prev.filter((p) => p.id !== postId));
+      toast.success('Post deleted');
     } catch (err) {
-      if (typeof window !== 'undefined') {
-        alert((err as Error)?.message || 'Failed to delete post');
-      }
+      toast.error((err as Error)?.message || 'Failed to delete post');
     } finally {
       setDeletingId(null);
+      setConfirmDelete(null);
     }
   };
 
+  const selectClass = cn(
+    'px-2.5 py-1.5 rounded-lg text-xs text-gray-300',
+    'bg-white/[0.04] border border-white/[0.08]',
+    'focus:outline-none focus:ring-1 focus:ring-white/20 focus:border-white/20',
+    'transition-all'
+  );
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        className="flex items-center justify-between"
       >
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400 bg-clip-text text-transparent">
-            Posts
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Manage your blog posts and content
-          </p>
+        <div>
+          <h1 className="text-lg font-semibold text-gray-100 tracking-tight">Posts</h1>
+          <p className="text-xs text-gray-500 mt-0.5">Manage your blog posts and content</p>
         </div>
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <Link href="/admin/posts/new">
-            <Button className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 dark:hover:bg-gray-200 dark:text-gray-900 text-white px-4 py-2 rounded-xl font-medium transition-all">
-              <Plus className="h-4 w-4" />
-              New Post
-            </Button>
-          </Link>
-        </motion.div>
+        <Link href="/admin/posts/new">
+          <Button className="flex items-center gap-1.5 bg-white/10 hover:bg-white/15 border border-white/[0.08] text-gray-200 text-xs px-3 py-1.5 rounded-lg font-medium transition-all">
+            <Plus className="h-3.5 w-3.5" />
+            New post
+          </Button>
+        </Link>
       </motion.div>
 
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.1 }}
-        className={cn(
-          'flex flex-col sm:flex-row gap-4 p-4 rounded-2xl border',
-          'bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm',
-          'border-gray-200/50 dark:border-gray-700/50'
-        )}
+        transition={{ delay: 0.05 }}
+        className="flex flex-col sm:flex-row gap-2 p-3 rounded-xl border border-white/[0.06] bg-white/[0.02]"
       >
         <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600" />
           <input
             type="text"
-            placeholder="Search posts..."
+            placeholder="Search posts…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={cn(
-              'w-full pl-10 pr-4 py-2.5 rounded-xl text-sm',
-              'bg-gray-50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
-              'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-              'placeholder-gray-500 dark:placeholder-gray-400',
-              'transition-all duration-200'
+              'w-full pl-9 pr-3 py-1.5 rounded-lg text-xs text-gray-300',
+              'bg-white/[0.04] border border-white/[0.08]',
+              'focus:outline-none focus:ring-1 focus:ring-white/20 focus:border-white/20',
+              'placeholder-gray-600 transition-all'
             )}
           />
         </div>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className={cn(
-            'px-4 py-2.5 rounded-xl text-sm font-medium',
-            'bg-gray-50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
-            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'transition-all duration-200'
-          )}
-        >
-          <option value="all">All Status</option>
+        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className={selectClass}>
+          <option value="all">All status</option>
           <option value="published">Published</option>
           <option value="draft">Draft</option>
         </select>
-        <select
-          value={contentTypeFilter}
-          onChange={(e) => setContentTypeFilter(e.target.value as 'all' | 'regular' | 'argus')}
-          className={cn(
-            'px-4 py-2.5 rounded-xl text-sm font-medium',
-            'bg-gray-50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
-            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'transition-all duration-200'
-          )}
-        >
-          <option value="all">All Types</option>
+        <select value={contentTypeFilter} onChange={(e) => setContentTypeFilter(e.target.value as 'all' | 'regular' | 'argus')} className={selectClass}>
+          <option value="all">All types</option>
           <option value="regular">Regular</option>
           <option value="argus">Argus</option>
         </select>
-        <select
-          value={authorFilter}
-          onChange={(e) => setAuthorFilter(e.target.value)}
-          className={cn(
-            'px-4 py-2.5 rounded-xl text-sm font-medium',
-            'bg-gray-50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50',
-            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'transition-all duration-200'
-          )}
-        >
-          <option value="all">All Authors</option>
+        <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className={selectClass}>
+          <option value="all">All authors</option>
           {authors.map((author) => (
             <option key={author.id} value={author.id}>
               {author.first_name} {author.last_name}
             </option>
           ))}
         </select>
-        <div className="flex gap-2">
+        <div className="flex gap-1">
           <button
             onClick={() => setViewMode('list')}
-            className={cn(
-              'p-2 rounded-xl border transition-colors',
-              viewMode === 'list'
-                ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700 text-blue-600 dark:text-blue-300'
-                : 'border-gray-200/50 dark:border-gray-700/50 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
-            )}
+            className={cn('p-2 rounded-lg border transition-colors', viewMode === 'list' ? 'bg-white/10 border-white/20 text-gray-200' : 'border-white/[0.06] text-gray-600 hover:text-gray-400')}
             aria-label="List view"
           >
-            <List className="h-4 w-4" />
+            <List className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={() => setViewMode('grid')}
-            className={cn(
-              'p-2 rounded-xl border transition-colors',
-              viewMode === 'grid'
-                ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700 text-blue-600 dark:text-blue-300'
-                : 'border-gray-200/50 dark:border-gray-700/50 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
-            )}
+            className={cn('p-2 rounded-lg border transition-colors', viewMode === 'grid' ? 'bg-white/10 border-white/20 text-gray-200' : 'border-white/[0.06] text-gray-600 hover:text-gray-400')}
             aria-label="Grid view"
           >
-            <LayoutGrid className="h-4 w-4" />
+            <LayoutGrid className="h-3.5 w-3.5" />
           </button>
         </div>
       </motion.div>
@@ -262,22 +226,22 @@ export default function AdminPostsPage() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
+        transition={{ delay: 0.1 }}
       >
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
-              <p className="text-sm text-gray-500 dark:text-gray-400">Loading posts...</p>
+          <div className="flex items-center justify-center py-10">
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-6 h-6 border-2 border-white/10 border-t-white/40 rounded-full animate-spin" />
+              <p className="text-xs text-gray-600">Loading posts…</p>
             </div>
           </div>
         ) : filteredPosts.length === 0 ? (
-          <div className="text-center py-12">
-            <FileText className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          <div className="text-center py-10">
+            <FileText className="w-10 h-10 text-gray-700 mx-auto mb-3" />
+            <h3 className="text-sm font-medium text-gray-400 mb-1">
               {searchQuery || statusFilter !== 'all' || contentTypeFilter !== 'all' || authorFilter !== 'all' ? 'No posts match your filters' : 'No posts yet'}
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
+            <p className="text-xs text-gray-600 mb-4">
               {searchQuery || statusFilter !== 'all' || contentTypeFilter !== 'all' || authorFilter !== 'all'
                 ? 'Try adjusting your search or filters'
                 : 'Get started by creating your first post'
@@ -285,240 +249,160 @@ export default function AdminPostsPage() {
             </p>
             {!searchQuery && statusFilter === 'all' && contentTypeFilter === 'all' && authorFilter === 'all' && (
               <Link href="/admin/posts/new">
-                <Button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-xl font-medium">
-                  Create Your First Post
+                <Button className="bg-white/10 hover:bg-white/15 border border-white/[0.08] text-gray-200 text-xs px-4 py-2 rounded-lg font-medium transition-all">
+                  Create your first post
                 </Button>
               </Link>
             )}
           </div>
         ) : viewMode === 'list' ? (
-          <div className="space-y-3">
-              {filteredPosts.map((post, index) => (
-                <motion.div
-                  key={post.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 + index * 0.05 }}
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                  className={cn(
-                    'group p-5 rounded-2xl border transition-all duration-200',
-                    'bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm',
-                    'border-gray-200/50 dark:border-gray-700/50',
-                    'hover:bg-white/80 dark:hover:bg-gray-800/80',
-                    'hover:shadow-lg hover:shadow-gray-900/5 dark:hover:shadow-gray-900/20',
-                    'hover:border-blue-300/50 dark:hover:border-blue-600/50'
-                  )}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                  <Link
-                    href={`/admin/posts/${post.slug || post.id}`}
-                    className="flex-1 min-w-0"
-                  >
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="p-2 bg-blue-500/10 rounded-lg group-hover:scale-110 transition-transform">
-                          <FileText className="h-4 w-4 text-blue-600" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
-                          {post.title}
-                        </h3>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-3 text-sm">
-                        {post.published_at && (
-                          <span className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
-                            <Calendar className="h-4 w-4" />
-                            {formatDistanceToNow(new Date(post.published_at), { addSuffix: true })}
-                          </span>
-                        )}
-                        {post.is_argus_content && (
-                          <span className="px-2.5 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium border border-blue-200 dark:border-blue-800">
-                            🛡️ Argus
-                          </span>
-                        )}
-                        {post.document_type && (
-                          <span className="px-2.5 py-1 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full text-xs font-medium border border-gray-200 dark:border-gray-700">
-                            {typeof post.document_type === 'object' ? post.document_type.name : post.document_type}
-                          </span>
-                        )}
-                        {post.category && !post.is_argus_content && (
-                          <span className="px-2.5 py-1 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 rounded-full text-xs font-medium border border-purple-200 dark:border-purple-800">
-                            {post.category.name}
-                          </span>
-                        )}
-                        {post.featured && !post.is_argus_content && (
-                          <span className="px-2.5 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 rounded-full text-xs font-medium border border-amber-200 dark:border-amber-800">
-                            ⭐ Featured
-                          </span>
-                        )}
-                        {post.view_count !== undefined && (
-                          <span className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
-                            <Eye className="h-4 w-4" />
-                            {post.view_count} views
-                          </span>
-                        )}
-                      </div>
-                    </Link>
-                    <div className="flex flex-col items-end gap-3">
-                      <StatusBadge status={post.status} />
-                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setEditingId(post.id);
-                            const identifier = post.slug || post.id;
-                            router.push(`/admin/posts/${identifier}`);
-                          }}
-                          disabled={editingId === post.id}
-                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors disabled:opacity-50"
-                          aria-label="Edit post"
-                        >
-                          {editingId === post.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Edit className="h-4 w-4" />
-                          )}
-                        </button>
-                        <button 
-                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                          aria-label="Delete post"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleDelete(post.id, post.title);
-                          }}
-                          disabled={deletingId === post.id}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {filteredPosts.map((post, index) => (
-                <motion.div
-                  key={post.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 + index * 0.05 }}
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                  className={cn(
-                    'group relative overflow-hidden rounded-2xl border',
-                    'bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm',
-                    'border-gray-200/60 dark:border-gray-800',
-                    'shadow-sm hover:shadow-xl transition-all duration-200'
-                  )}
-                >
-                  <Link
-                    href={`/admin/posts/${post.slug || post.id}`}
-                    className="block"
-                  >
-                    <div className="relative aspect-[16/9] w-full bg-gradient-to-br from-slate-800 to-slate-900 text-white">
-                      {post.cover_image && (
-                        <div className="absolute inset-0">
-                          <img
-                            src={post.cover_image}
-                            alt={post.title}
-                            className="h-full w-full object-cover"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
-                        </div>
-                      )}
-                      <div className="absolute top-3 right-3">
-                        <StatusBadge status={post.status} />
-                      </div>
-                      <div className="absolute bottom-3 left-3 right-3 flex items-center gap-2 text-xs text-white/80">
-                        {post.is_argus_content && (
-                          <span className="px-2 py-1 rounded-full bg-blue-500/30 border border-blue-400/50">🛡️ Argus</span>
-                        )}
-                        {post.document_type && (
-                          <span className="px-2 py-1 rounded-full bg-white/15 border border-white/20">
-                            {typeof post.document_type === 'object' ? post.document_type.name : post.document_type}
-                          </span>
-                        )}
-                        {post.category && !post.is_argus_content && (
-                          <span className="px-2 py-1 rounded-full bg-white/15 border border-white/20">{post.category.name}</span>
-                        )}
-                        {post.published_at && (
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3.5 w-3.5" />
-                            {formatDistanceToNow(new Date(post.published_at), { addSuffix: true })}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="p-4 space-y-2">
-                      <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                        {post.title}
-                      </h3>
-                      {post.excerpt && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{post.excerpt}</p>
-                      )}
-                    </div>
-                  </Link>
-                  <div className="px-4 pb-4 flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                      {post.view_count !== undefined && (
-                        <span className="flex items-center gap-1">
-                          <Eye className="h-3.5 w-3.5" />
-                          {post.view_count}
+          <div className="divide-y divide-white/[0.04] rounded-xl border border-white/[0.06] overflow-hidden">
+            {filteredPosts.map((post, index) => (
+              <motion.div
+                key={post.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: index * 0.03 }}
+                className="group flex items-center gap-4 px-4 py-2 bg-white/[0.02] hover:bg-white/[0.05] transition-colors"
+              >
+                <Link href={`/admin/posts/${post.slug || post.id}`} className="flex-1 min-w-0 flex items-center gap-4">
+                  <FileText className="h-4 w-4 text-gray-600 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-200 truncate group-hover:text-white transition-colors">
+                      {post.title}
+                    </p>
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                      {post.published_at && (
+                        <span className="text-[11px] text-gray-600 flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {formatDistanceToNow(new Date(post.published_at), { addSuffix: true })}
                         </span>
                       )}
+                      {post.category && !post.is_argus_content && (
+                        <span className="text-[11px] text-gray-600">{post.category.name}</span>
+                      )}
+                      {post.is_argus_content && (
+                        <span className="text-[11px] text-blue-400/80">Argus</span>
+                      )}
                       {post.featured && !post.is_argus_content && (
-                        <span className="px-2 py-1 rounded-full bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">Featured</span>
+                        <span className="text-[11px] text-amber-400/80">Featured</span>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setEditingId(post.id);
-                          const identifier = post.slug || post.id;
-                          router.push(`/admin/posts/${identifier}`);
-                        }}
-                        disabled={editingId === post.id}
-                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors disabled:opacity-50"
-                        aria-label="Edit post"
-                      >
-                        {editingId === post.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Edit className="h-4 w-4" />
-                        )}
-                      </button>
-                      <button 
-                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                        aria-label="Delete post"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleDelete(post.id, post.title);
-                        }}
-                        disabled={deletingId === post.id}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
                   </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
-        
-        {!loading && (
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Showing {filteredPosts.length} of {posts.length} posts
-            </p>
+                </Link>
+                <div className="flex items-center gap-3 shrink-0">
+                  {post.view_count !== undefined && (
+                    <span className="hidden sm:flex items-center gap-1 text-[11px] text-gray-600">
+                      <Eye className="h-3 w-3" />{post.view_count}
+                    </span>
+                  )}
+                  <StatusBadge status={post.status} />
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={(e) => { e.preventDefault(); setEditingId(post.id); router.push(`/admin/posts/${post.slug || post.id}`); }}
+                      disabled={editingId === post.id}
+                      className="p-1.5 text-gray-600 hover:text-gray-300 hover:bg-white/[0.06] rounded-lg transition-colors"
+                      aria-label="Edit post"
+                    >
+                      {editingId === post.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Edit className="h-3.5 w-3.5" />}
+                    </button>
+                    <button
+                      onClick={(e) => { e.preventDefault(); setConfirmDelete({ id: post.id, title: post.title }); }}
+                      disabled={deletingId === post.id}
+                      className="p-1.5 text-gray-600 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
+                      aria-label="Delete post"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {filteredPosts.map((post, index) => (
+              <motion.div
+                key={post.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.04 }}
+                className="group relative overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.04] hover:bg-white/[0.06] transition-all"
+              >
+                <Link href={`/admin/posts/${post.slug || post.id}`} className="block">
+                  <div className="relative aspect-[16/9] w-full bg-[#161920]">
+                    {post.cover_image && (
+                      <div className="absolute inset-0">
+                        <img src={post.cover_image} alt={post.title} className="h-full w-full object-cover opacity-70" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                      </div>
+                    )}
+                    <div className="absolute top-2 right-2">
+                      <StatusBadge status={post.status} />
+                    </div>
+                    {post.published_at && (
+                      <div className="absolute bottom-2 left-2 text-[11px] text-white/60 flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {formatDistanceToNow(new Date(post.published_at), { addSuffix: true })}
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-3">
+                    <h3 className="text-sm font-medium text-gray-200 line-clamp-2 group-hover:text-white transition-colors">
+                      {post.title}
+                    </h3>
+                    {post.excerpt && (
+                      <p className="text-xs text-gray-600 line-clamp-2 mt-1">{post.excerpt}</p>
+                    )}
+                  </div>
+                </Link>
+                <div className="px-3 pb-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {post.view_count !== undefined && (
+                      <span className="flex items-center gap-1 text-[11px] text-gray-600">
+                        <Eye className="h-3 w-3" />{post.view_count}
+                      </span>
+                    )}
+                    {post.is_argus_content && <span className="text-[11px] text-blue-400/80">Argus</span>}
+                    {post.featured && !post.is_argus_content && <span className="text-[11px] text-amber-400/80">Featured</span>}
+                  </div>
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={(e) => { e.preventDefault(); setEditingId(post.id); router.push(`/admin/posts/${post.slug || post.id}`); }}
+                      disabled={editingId === post.id}
+                      className="p-1.5 text-gray-600 hover:text-gray-300 hover:bg-white/[0.06] rounded-lg transition-colors"
+                    >
+                      {editingId === post.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Edit className="h-3.5 w-3.5" />}
+                    </button>
+                    <button
+                      onClick={(e) => { e.preventDefault(); setConfirmDelete({ id: post.id, title: post.title }); }}
+                      disabled={deletingId === post.id}
+                      className="p-1.5 text-gray-600 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
         )}
+
+        {!loading && (
+          <p className="text-[11px] text-gray-600 text-center pt-2">
+            {filteredPosts.length} of {posts.length} posts
+          </p>
+        )}
       </motion.div>
+
+      <ConfirmDialog
+        isOpen={confirmDelete !== null}
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={handleDeleteConfirmed}
+        title="Delete post"
+        description={`Delete "${confirmDelete?.title || 'this post'}"? This cannot be undone.`}
+        confirmLabel="Delete"
+      />
     </div>
   );
 }

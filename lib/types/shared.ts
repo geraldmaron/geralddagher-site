@@ -137,34 +137,6 @@ export interface PersonalInfo {
     order?: number;
   }>;
 }
-export interface AuthState {
-  user: {
-    id: string;
-    email: string;
-    name: string;
-  } | null;
-  loading: boolean;
-  error: ErrorMessage | null;
-}
-export type AuthOperation = {
-  type: 'signIn' | 'signOut' | 'resetPassword';
-  email?: string;
-  password?: string;
-};
-export interface TransformedUser {
-  id: string;
-  email: string;
-  name: string;
-  labels: string[];
-}
-export interface AuthContextType {
-  user: TransformedUser | null;
-  loading: boolean;
-  error: Error | null;
-  signIn: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
-  signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
-}
 export interface BlogPostClientProps {
   slug: string;
   previewPost?: SerializedPost;

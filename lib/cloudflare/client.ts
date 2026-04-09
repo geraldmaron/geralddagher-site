@@ -481,7 +481,7 @@ class CloudFlareAnalyticsClient {
                   date
                 }
                 sum {
-                  requests
+                  pageViews
                 }
                 uniq {
                   uniques
@@ -497,7 +497,7 @@ class CloudFlareAnalyticsClient {
           zones?: Array<{
             httpRequests1dGroups?: Array<{
               dimensions?: { date?: string };
-              sum?: { requests?: number };
+              sum?: { pageViews?: number };
               uniq?: { uniques?: number };
             }>;
           }>;
@@ -513,7 +513,7 @@ class CloudFlareAnalyticsClient {
       const timeSeries: CloudFlareTimeSeriesPoint[] = groups.map((group) => ({
         date: group.dimensions?.date || '',
         visitors: group.uniq?.uniques || 0,
-        pageviews: group.sum?.requests || 0,
+        pageviews: group.sum?.pageViews || 0,
         bandwidth: 0,
       }));
 
@@ -521,34 +521,72 @@ class CloudFlareAnalyticsClient {
     });
   }
 
+  private async getPreviousPeriodAggregates(days: number): Promise<{ visitors: number; pageviews: number }> {
+    const end = new Date();
+    end.setDate(end.getDate() - days);
+    const start = new Date(end);
+    start.setDate(start.getDate() - days);
+
+    const startDate = start.toISOString().split('T')[0];
+    const endDate = end.toISOString().split('T')[0];
+
+    const query = `
+      query PreviousPeriod($zoneTag: String!, $start: String!, $end: String!) {
+        viewer {
+          zones(filter: { zoneTag: $zoneTag }) {
+            httpRequests1dGroups(
+              filter: { date_geq: $start, date_leq: $end },
+              limit: 10000
+            ) {
+              sum { pageViews }
+              uniq { uniques }
+            }
+          }
+        }
+      }
+    `;
+
+    const result = await this.graphqlRequest<{
+      viewer?: {
+        zones?: Array<{
+          httpRequests1dGroups?: Array<{
+            sum?: { pageViews?: number };
+            uniq?: { uniques?: number };
+          }>;
+        }>;
+      };
+    }>(query, { zoneTag: this.zoneId, start: startDate, end: endDate });
+
+    const groups = result.viewer?.zones?.[0]?.httpRequests1dGroups || [];
+    return {
+      visitors: groups.reduce((s, g) => s + (g.uniq?.uniques || 0), 0),
+      pageviews: groups.reduce((s, g) => s + (g.sum?.pageViews || 0), 0),
+    };
+  }
+
   /**
    * Get all analytics data in one call
    */
   async getAllAnalyticsData(days: number = 30): Promise<CloudFlareAnalyticsData> {
     try {
-      const [visitors, pageviews, bandwidth, topPages, requestsByCountry, timeSeries] = await Promise.all([
-        this.getVisitorStats(days).catch(() => ({
-          total: 0,
-          unique: 0,
-          trend: 0,
-        })),
-        this.getPageviews(days).catch(() => ({
-          total: 0,
-          trend: 0,
-        })),
-        this.getBandwidthStats(days).catch(() => ({
-          total: 0,
-          unit: 'B',
-          formatted: '0 B',
-        })),
+      const [visitors, pageviews, bandwidth, topPages, requestsByCountry, timeSeries, prevPeriod] = await Promise.all([
+        this.getVisitorStats(days).catch(() => ({ total: 0, unique: 0, trend: 0 })),
+        this.getPageviews(days).catch(() => ({ total: 0, trend: 0 })),
+        this.getBandwidthStats(days).catch(() => ({ total: 0, unit: 'B', formatted: '0 B' })),
         this.getTopPages(10, days).catch(() => []),
         this.getRequestsByCountry(10, days).catch(() => []),
         this.getTimeSeriesData(days).catch(() => []),
+        this.getPreviousPeriodAggregates(days).catch(() => ({ visitors: 0, pageviews: 0 })),
       ]);
 
+      const calcTrend = (current: number, previous: number): number => {
+        if (previous === 0) return 0;
+        return parseFloat((((current - previous) / previous) * 100).toFixed(1));
+      };
+
       return {
-        visitors,
-        pageviews,
+        visitors: { ...visitors, trend: calcTrend(visitors.total, prevPeriod.visitors) },
+        pageviews: { ...pageviews, trend: calcTrend(pageviews.total, prevPeriod.pageviews) },
         bandwidth,
         topPages,
         requestsByCountry,

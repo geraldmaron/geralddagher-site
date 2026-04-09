@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
 import {
   FileText,
   Tag as TagIcon,
@@ -12,14 +11,16 @@ import {
   ChevronDown,
   ChevronUp,
   Loader2,
-  Sparkles,
+  Settings2,
   User,
   Shield,
-  FileType
+  FileType,
+  ImageIcon,
 } from 'lucide-react';
 import { Button } from '@/components/core/Button';
 import { CoverImagePicker } from './CoverImagePicker';
 import { cn } from '@/lib/utils';
+import { generateSlug } from '@/lib/utils/slug';
 import toast from 'react-hot-toast';
 
 interface Category {
@@ -80,6 +81,39 @@ interface PostMetadataFormProps {
   tags?: Tag[];
 }
 
+const inputCls = 'w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-gray-200 placeholder:text-gray-600 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10 transition-colors';
+const selectCls = `${inputCls} cursor-pointer`;
+const labelCls = 'block text-xs font-medium text-gray-400 mb-1.5';
+
+function SectionHeader({ icon: Icon, label }: { icon: React.ElementType; label: string }) {
+  return (
+    <div className="flex items-center gap-2 px-4 py-2.5 bg-white/[0.02] border-b border-white/[0.06] rounded-t-xl">
+      <Icon className="h-3.5 w-3.5 text-gray-500" />
+      <span className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">{label}</span>
+    </div>
+  );
+}
+
+function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onChange}
+      className={cn(
+        'relative w-10 h-5 rounded-full transition-colors shrink-0',
+        checked ? 'bg-blue-500' : 'bg-white/[0.08]'
+      )}
+    >
+      <span
+        className={cn(
+          'absolute top-0.5 h-4 w-4 bg-white rounded-full shadow transition-transform',
+          checked ? 'translate-x-5' : 'translate-x-0.5'
+        )}
+      />
+    </button>
+  );
+}
+
 export function PostMetadataForm({ data, onChange, onSave, isSaving, categories: providedCategories, tags: providedTags }: PostMetadataFormProps) {
   const [categories, setCategories] = useState<Category[]>(providedCategories || []);
   const [tags, setTags] = useState<Tag[]>(providedTags || []);
@@ -93,7 +127,7 @@ export function PostMetadataForm({ data, onChange, onSave, isSaving, categories:
     if (providedCategories && providedTags) {
       setCategories(providedCategories);
       setTags(providedTags);
-      loadMetadata(true); // Still need to load authors, argus users, and document types
+      loadMetadata(true);
       return;
     }
     loadMetadata(false);
@@ -114,11 +148,11 @@ export function PostMetadataForm({ data, onChange, onSave, isSaving, categories:
 
       const responses = await Promise.all(requests);
 
-      let categoriesData, tagsData, authorsData, argusUsersData, documentTypesData;
+      let authorsData, argusUsersData, documentTypesData;
 
       if (!skipCategoriesAndTags) {
-        categoriesData = await responses[0].json();
-        tagsData = await responses[1].json();
+        const categoriesData = await responses[0].json();
+        const tagsData = await responses[1].json();
         authorsData = await responses[2].json();
         argusUsersData = await responses[3].json();
         documentTypesData = await responses[4].json();
@@ -134,7 +168,7 @@ export function PostMetadataForm({ data, onChange, onSave, isSaving, categories:
       setAuthors(authorsData.data || []);
       setArgusUsers(argusUsersData.data || []);
       setDocumentTypes(documentTypesData.data || []);
-    } catch (error) {
+    } catch {
       toast.error('Failed to load metadata');
     } finally {
       setLoading(false);
@@ -142,25 +176,15 @@ export function PostMetadataForm({ data, onChange, onSave, isSaving, categories:
   };
 
   useEffect(() => {
-    if (!data.is_argus_content) {
-      if (data.document_type !== null) {
-        onChange({ document_type: null });
-      }
+    if (!data.is_argus_content && data.document_type !== null) {
+      onChange({ document_type: null });
     }
   }, [data.is_argus_content, data.document_type, onChange]);
-
-  const generateSlug = useCallback((title: string) => {
-    return title
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '') || 'untitled';
-  }, []);
 
   const handleTitleChange = (title: string) => {
     onChange({ title });
     if (!data.slug || data.slug === generateSlug(data.title)) {
-      onChange({ slug: generateSlug(title) });
+      onChange({ slug: generateSlug(title) || 'untitled' });
     }
   };
 
@@ -181,334 +205,261 @@ export function PostMetadataForm({ data, onChange, onSave, isSaving, categories:
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-6 w-6 animate-spin text-blue-400" />
       </div>
     );
   }
 
+  const selectedTagCount = data.tags.length;
+
   return (
     <div className="flex flex-col w-full xl:h-full">
-      {/* Mobile: Collapsible Metadata Header */}
-      <div className="xl:hidden mb-4">
+      {/* Mobile collapse toggle */}
+      <div className="xl:hidden mb-3">
         <button
           onClick={() => setMetadataExpanded(!metadataExpanded)}
-          className="w-full bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow duration-200"
+          className="w-full flex items-center justify-between px-4 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl hover:bg-white/[0.06] transition-all"
         >
           <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-blue-600" />
-            <span className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-              Post Metadata
-            </span>
+            <Settings2 className="h-4 w-4 text-gray-400" />
+            <span className="text-sm font-medium text-gray-300">Post Settings</span>
+            {selectedTagCount > 0 && (
+              <span className="rounded-full bg-blue-500/20 border border-blue-500/20 px-1.5 py-0.5 text-[10px] font-medium text-blue-400">
+                {selectedTagCount} tag{selectedTagCount !== 1 ? 's' : ''}
+              </span>
+            )}
           </div>
-          {metadataExpanded ? (
-            <ChevronUp className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
-          ) : (
-            <ChevronDown className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
-          )}
+          {metadataExpanded
+            ? <ChevronUp className="h-4 w-4 text-gray-500" />
+            : <ChevronDown className="h-4 w-4 text-gray-500" />
+          }
         </button>
       </div>
 
-      <div className={cn("space-y-4 transition-all duration-300 xl:flex-1 xl:overflow-y-auto xl:pr-2", !metadataExpanded && "hidden xl:block")}>
+      <div className={cn('space-y-3 xl:flex-1 xl:overflow-y-auto xl:pr-0.5', !metadataExpanded && 'hidden xl:block')}>
+
         {/* Cover Image */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-5 shadow-sm hover:shadow-md transition-shadow duration-200"
-        >
-          <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-3">
-            <Sparkles className="h-4 w-4 text-blue-600" />
-            Cover Image
-          </label>
-          <CoverImagePicker
-            value={data.cover_image}
-            onChange={(url) => onChange({ cover_image: url })}
-            onError={(error) => toast.error(error)}
-          />
-        </motion.div>
+        <div className="rounded-xl border border-white/[0.06] overflow-hidden">
+          <SectionHeader icon={ImageIcon} label="Cover" />
+          <div className="p-4">
+            <CoverImagePicker
+              value={data.cover_image}
+              onChange={(url) => onChange({ cover_image: url })}
+              onError={(error) => toast.error(error)}
+            />
+          </div>
+        </div>
 
-        {/* Argus Content Toggle */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.025 }}
-          className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-5 shadow-sm hover:shadow-md transition-shadow duration-200"
-        >
-          <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-              <Shield className="h-4 w-4 text-blue-600" />
-              Argus Content
-            </label>
-            <button
-              onClick={() => onChange({ is_argus_content: !data.is_argus_content })}
-              className={cn(
-                'relative w-12 h-6 rounded-full transition-colors',
-                data.is_argus_content ? 'bg-blue-600' : 'bg-neutral-300 dark:bg-neutral-700'
-              )}
-            >
-              <span
-                className={cn(
-                  'absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform',
-                  data.is_argus_content ? 'left-6' : 'left-0.5'
-                )}
+        {/* Content Info */}
+        <div className="rounded-xl border border-white/[0.06] overflow-hidden">
+          <SectionHeader icon={FileText} label="Content" />
+          <div className="p-4 space-y-3">
+            {/* Argus toggle */}
+            <div className="flex items-center justify-between py-1">
+              <div className="flex items-center gap-2">
+                <Shield className="h-3.5 w-3.5 text-gray-500" />
+                <span className="text-xs font-medium text-gray-400">Argus Content</span>
+              </div>
+              <Toggle checked={data.is_argus_content} onChange={() => onChange({ is_argus_content: !data.is_argus_content })} />
+            </div>
+
+            <div className="h-px bg-white/[0.05]" />
+
+            <div>
+              <label className={labelCls}>Title</label>
+              <input
+                type="text"
+                value={data.title}
+                onChange={(e) => handleTitleChange(e.target.value)}
+                placeholder="Post title…"
+                className={inputCls}
               />
-            </button>
-          </div>
-        </motion.div>
+            </div>
 
-        {/* Basic Info */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
-          className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-4 shadow-sm hover:shadow-md transition-shadow duration-200"
-        >
-          <div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
-              <FileText className="h-4 w-4 text-blue-600" />
-              Title
-            </label>
-            <input
-              type="text"
-              value={data.title}
-              onChange={(e) => handleTitleChange(e.target.value)}
-              placeholder="Enter post title..."
-              className="w-full px-4 py-2.5 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
-            />
-          </div>
+            <div>
+              <label className={labelCls}>Slug</label>
+              <input
+                type="text"
+                value={data.slug}
+                onChange={(e) => onChange({ slug: e.target.value })}
+                placeholder="post-slug"
+                className={cn(inputCls, 'font-mono text-xs')}
+              />
+            </div>
 
-          <div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
-              Slug
-            </label>
-            <input
-              type="text"
-              value={data.slug}
-              onChange={(e) => onChange({ slug: e.target.value })}
-              placeholder="post-slug"
-              className="w-full px-4 py-2.5 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-mono text-sm"
-            />
-          </div>
+            <div>
+              <label className={labelCls}>Excerpt</label>
+              <textarea
+                value={data.excerpt}
+                onChange={(e) => onChange({ excerpt: e.target.value })}
+                placeholder="Brief description…"
+                rows={3}
+                className={cn(inputCls, 'resize-none')}
+              />
+            </div>
 
-          <div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
-              Excerpt
-            </label>
-            <textarea
-              value={data.excerpt}
-              onChange={(e) => onChange({ excerpt: e.target.value })}
-              placeholder="Brief description of the post..."
-              rows={3}
-              className="w-full px-4 py-2.5 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none text-sm"
-            />
-          </div>
-        </motion.div>
-
-        {/* Author */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-5 shadow-sm hover:shadow-md transition-shadow duration-200"
-        >
-          <div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
-              <User className="h-4 w-4 text-blue-600" />
-              Author
-            </label>
-            <select
-              value={data.author || ''}
-              onChange={(e) => {
-                onChange({ author: e.target.value || null });
-              }}
-              className="w-full px-4 py-2.5 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm cursor-pointer"
-              disabled={data.is_argus_content}
-            >
-              <option value="">No author</option>
-              {authors.length === 0 && <option disabled>Loading authors...</option>}
-              {authors.map((author) => {
-                return (
+            <div>
+              <label className={labelCls}>Author</label>
+              <select
+                value={data.author || ''}
+                onChange={(e) => onChange({ author: e.target.value || null })}
+                className={selectCls}
+                disabled={data.is_argus_content}
+              >
+                <option value="">No author</option>
+                {authors.map((author) => (
                   <option key={author.id} value={author.id}>
                     {author.first_name} {author.last_name}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-        </motion.div>
-
-        {/* Argus Settings */}
-        {data.is_argus_content && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.125 }}
-            className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-4 shadow-sm hover:shadow-md transition-shadow duration-200"
-          >
-            <div>
-              <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
-                <FileType className="h-4 w-4 text-blue-600" />
-                Document Type
-              </label>
-              <select
-                value={data.document_type || ''}
-                onChange={(e) => onChange({ document_type: Number(e.target.value) })}
-                className="w-full px-4 py-2.5 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm cursor-pointer"
-              >
-                {documentTypes.map((type) => (
-                  <option key={type.id} value={type.id}>
-                    {type.name}
                   </option>
                 ))}
               </select>
             </div>
+          </div>
+        </div>
+
+        {/* Argus Settings */}
+        {data.is_argus_content && (
+          <div className="rounded-xl border border-blue-500/20 overflow-hidden">
+            <div className="flex items-center gap-2 px-4 py-2.5 bg-blue-500/[0.06] border-b border-blue-500/20 rounded-t-xl">
+              <Shield className="h-3.5 w-3.5 text-blue-400" />
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-blue-400">Argus Settings</span>
+            </div>
+            <div className="p-4 space-y-3">
+              <div>
+                <label className={labelCls}>Document Type</label>
+                <select
+                  value={data.document_type || ''}
+                  onChange={(e) => onChange({ document_type: Number(e.target.value) })}
+                  className={selectCls}
+                >
+                  <option value="">Select type…</option>
+                  {documentTypes.map((type) => (
+                    <option key={type.id} value={type.id}>{type.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className={cn(labelCls, 'flex items-center justify-between')}>
+                  <span>Argus Users</span>
+                  <span className="text-gray-600 font-normal normal-case tracking-normal">empty = all</span>
+                </label>
+                <div className="flex flex-wrap gap-1.5 mt-1">
+                  {argusUsers.map((user) => {
+                    const isSelected = data.argus_users.includes(user.id);
+                    return (
+                      <button
+                        key={user.id}
+                        onClick={() => toggleArgusUser(user.id)}
+                        className={cn(
+                          'rounded-full px-2.5 py-1 text-xs font-medium transition-all',
+                          isSelected
+                            ? 'bg-blue-500 text-white border border-blue-400'
+                            : 'bg-white/[0.04] text-gray-400 border border-white/[0.08] hover:bg-white/[0.07]'
+                        )}
+                      >
+                        {user.first_name} {user.last_name}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Taxonomy */}
+        <div className="rounded-xl border border-white/[0.06] overflow-hidden">
+          <SectionHeader icon={TagIcon} label="Taxonomy" />
+          <div className="p-4 space-y-3">
+            {!data.is_argus_content && (
+              <div>
+                <label className={labelCls}>Category</label>
+                <select
+                  value={data.category || ''}
+                  onChange={(e) => onChange({ category: e.target.value ? Number(e.target.value) : null })}
+                  className={selectCls}
+                >
+                  <option value="">No category</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div>
-              <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-3">
-                <User className="h-4 w-4 text-blue-600" />
-                Argus Users
-                <span className="text-xs font-normal text-neutral-500 dark:text-neutral-400">
-                  (Leave empty for all Argus users)
-                </span>
+              <label className={cn(labelCls, 'flex items-center justify-between')}>
+                <span>Tags</span>
+                {selectedTagCount > 0 && (
+                  <span className="rounded-full bg-blue-500/10 border border-blue-500/20 px-1.5 py-0.5 text-[10px] font-medium text-blue-400">
+                    {selectedTagCount} selected
+                  </span>
+                )}
               </label>
-              <div className="flex flex-wrap gap-2">
-                {argusUsers.map((user) => {
-                  const isSelected = data.argus_users.includes(user.id);
+              <div className="flex flex-wrap gap-1.5 mt-1">
+                {tags.map((tag) => {
+                  const isSelected = data.tags.includes(tag.id);
                   return (
                     <button
-                      key={user.id}
-                      onClick={() => toggleArgusUser(user.id)}
+                      key={tag.id}
+                      onClick={() => toggleTag(tag.id)}
                       className={cn(
-                        'px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200',
+                        'rounded-full px-2.5 py-1 text-xs font-medium transition-all',
                         isSelected
-                          ? 'bg-blue-600 text-white shadow-md hover:bg-blue-700'
-                          : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 hover:shadow-sm'
+                          ? 'bg-blue-500 text-white border border-blue-400'
+                          : 'bg-white/[0.04] text-gray-400 border border-white/[0.08] hover:bg-white/[0.07]'
                       )}
                     >
-                      {user.first_name} {user.last_name}
+                      {tag.name}
                     </button>
                   );
                 })}
               </div>
             </div>
-          </motion.div>
-        )}
+          </div>
+        </div>
 
-        {/* Category & Tags */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-4 shadow-sm hover:shadow-md transition-shadow duration-200"
-        >
-          {!data.is_argus_content && (
+        {/* Publishing */}
+        <div className="rounded-xl border border-white/[0.06] overflow-hidden">
+          <SectionHeader icon={Eye} label="Publishing" />
+          <div className="p-4 space-y-3">
+            {!data.is_argus_content && (
+              <div className="flex items-center justify-between py-0.5">
+                <div className="flex items-center gap-2">
+                  <Star className="h-3.5 w-3.5 text-gray-500" />
+                  <span className="text-xs font-medium text-gray-400">Featured Post</span>
+                </div>
+                <Toggle checked={data.featured} onChange={() => onChange({ featured: !data.featured })} />
+              </div>
+            )}
+
             <div>
-              <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
-                <FolderOpen className="h-4 w-4 text-blue-600" />
-                Category
-              </label>
+              <label className={labelCls}>Status</label>
               <select
-                value={data.category || ''}
-                onChange={(e) => onChange({ category: e.target.value ? Number(e.target.value) : null })}
-                className="w-full px-4 py-2.5 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm cursor-pointer"
+                value={data.status}
+                onChange={(e) => onChange({ status: e.target.value as PostFormData['status'] })}
+                className={selectCls}
               >
-                <option value="">No category</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+                <option value="archived">Archived</option>
               </select>
             </div>
-          )}
 
-          <div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-3">
-              <TagIcon className="h-4 w-4 text-blue-600" />
-              Tags
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {tags.map((tag) => {
-                const isSelected = data.tags.includes(tag.id);
-                return (
-                  <button
-                    key={tag.id}
-                    onClick={() => toggleTag(tag.id)}
-                    className={cn(
-                      'px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200',
-                      isSelected
-                        ? 'bg-blue-600 text-white shadow-md hover:bg-blue-700'
-                        : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 hover:shadow-sm'
-                    )}
-                  >
-                    {tag.name}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Publishing Options */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-4 shadow-sm hover:shadow-md transition-shadow duration-200"
-        >
-          {!data.is_argus_content && (
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-                <Star className="h-4 w-4 text-blue-600" />
-                Featured Post
-              </label>
-              <button
-                onClick={() => onChange({ featured: !data.featured })}
-                className={cn(
-                  'relative w-12 h-6 rounded-full transition-colors',
-                  data.featured ? 'bg-blue-600' : 'bg-neutral-300 dark:bg-neutral-700'
-                )}
-              >
-                <span
-                  className={cn(
-                    'absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform',
-                    data.featured ? 'left-6' : 'left-0.5'
-                  )}
+            {data.status === 'published' && (
+              <div>
+                <label className={labelCls}>Publish Date</label>
+                <input
+                  type="datetime-local"
+                  value={data.published_at ? new Date(data.published_at).toISOString().slice(0, 16) : ''}
+                  onChange={(e) => onChange({ published_at: e.target.value ? new Date(e.target.value).toISOString() : null })}
+                  className={inputCls}
                 />
-              </button>
-            </div>
-          )}
-
-          <div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
-              <Eye className="h-4 w-4 text-blue-600" />
-              Status
-            </label>
-            <select
-              value={data.status}
-              onChange={(e) => onChange({ status: e.target.value as 'draft' | 'published' | 'archived' })}
-              className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-600"
-            >
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-              <option value="archived">Archived</option>
-            </select>
+              </div>
+            )}
           </div>
-
-          {data.status === 'published' && (
-            <div>
-              <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
-                <Calendar className="h-4 w-4 text-blue-600" />
-                Publish Date
-              </label>
-              <input
-                type="datetime-local"
-                value={data.published_at ? new Date(data.published_at).toISOString().slice(0, 16) : ''}
-                onChange={(e) => onChange({ published_at: e.target.value ? new Date(e.target.value).toISOString() : null })}
-                className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-600"
-              />
-            </div>
-          )}
-        </motion.div>
+        </div>
 
         <Button
           onClick={onSave}
@@ -518,8 +469,8 @@ export function PostMetadataForm({ data, onChange, onSave, isSaving, categories:
         >
           {isSaving ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              Saving...
+              <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+              Saving…
             </>
           ) : (
             'Save Post'

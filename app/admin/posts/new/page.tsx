@@ -1,23 +1,38 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Descendant } from 'slate';
 import { Editor } from '@/components/editor/Editor';
 import { PostMetadataForm } from '@/components/admin/PostMetadataForm';
 import { Button } from '@/components/core/Button';
 import { toast } from 'react-hot-toast';
-import { ArrowLeft, Loader2, Save } from 'lucide-react';
+import { ArrowLeft, Loader2, Save, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
 import { useAutosave } from '@/components/editor/hooks/useAutosave';
 import { formatDistanceToNow } from 'date-fns';
 import { useAuth } from '@/lib/auth/provider';
+import { cn } from '@/lib/utils';
 
 const EMPTY_CONTENT: Descendant[] = [
-  {
-    type: 'paragraph',
-    children: [{ text: '' }]
-  }
+  { type: 'paragraph', children: [{ text: '' }] }
 ];
+
+function extractText(nodes: Descendant[]): string {
+  return nodes.map((n: any) => {
+    if (n.text !== undefined) return n.text;
+    if (n.children) return extractText(n.children);
+    return '';
+  }).join(' ');
+}
+
+function wordCount(nodes: Descendant[]): number {
+  const text = extractText(nodes).trim();
+  return text ? text.split(/\s+/).length : 0;
+}
+
+function readingMinutes(words: number): number {
+  return Math.max(1, Math.round(words / 200));
+}
 
 export default function NewPostPage() {
   const router = useRouter();
@@ -44,6 +59,9 @@ export default function NewPostPage() {
     document_type: null as number | null
   });
 
+  const words = useMemo(() => wordCount(content), [content]);
+  const readTime = useMemo(() => readingMinutes(words), [words]);
+
   useEffect(() => {
     if (user?.id && !metadata.author) {
       setMetadata(prev => ({ ...prev, author: user.id }));
@@ -57,33 +75,25 @@ export default function NewPostPage() {
         const parsed = JSON.parse(savedDraft);
         if (parsed.content) setContent(parsed.content);
         if (parsed.metadata) {
-          setMetadata(prev => ({ 
-            ...prev, 
+          setMetadata(prev => ({
+            ...prev,
             ...parsed.metadata,
-            author: parsed.metadata.author || prev.author 
+            author: parsed.metadata.author || prev.author
           }));
         }
-      } catch (e) {
-      }
+      } catch { /* ignore */ }
     }
   }, []);
 
   useEffect(() => {
     if (!postId && (content !== EMPTY_CONTENT || metadata.title !== '')) {
-      const draft = { content, metadata };
-      localStorage.setItem('new_post_draft', JSON.stringify(draft));
+      localStorage.setItem('new_post_draft', JSON.stringify({ content, metadata }));
     }
   }, [content, metadata, postId]);
 
   const handleSave = async () => {
-    if (!metadata.title.trim()) {
-      toast.error('Title is required');
-      return;
-    }
-    if (!metadata.slug.trim()) {
-      toast.error('Slug is required');
-      return;
-    }
+    if (!metadata.title.trim()) { toast.error('Title is required'); return; }
+    if (!metadata.slug.trim()) { toast.error('Slug is required'); return; }
 
     setSaving(true);
     try {
@@ -91,17 +101,9 @@ export default function NewPostPage() {
         const res = await fetch(`/api/admin/posts/${postId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ...metadata,
-            content: JSON.stringify(content)
-          })
+          body: JSON.stringify({ ...metadata, content: JSON.stringify(content) })
         });
-
-        if (!res.ok) {
-          const error = await res.json();
-          throw new Error(error.error || 'Failed to save');
-        }
-
+        if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Failed to save'); }
         const { data } = await res.json();
         toast.success('Post updated successfully!');
         window.history.replaceState(null, '', `/admin/posts/${data.slug}`);
@@ -109,17 +111,9 @@ export default function NewPostPage() {
         const res = await fetch('/api/admin/posts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ...metadata,
-            content: JSON.stringify(content)
-          })
+          body: JSON.stringify({ ...metadata, content: JSON.stringify(content) })
         });
-
-        if (!res.ok) {
-          const error = await res.json();
-          throw new Error(error.error || 'Failed to save');
-        }
-
+        if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Failed to save'); }
         const { data } = await res.json();
         setPostId(data.id);
         toast.success('Post created successfully!');
@@ -134,39 +128,22 @@ export default function NewPostPage() {
   };
 
   const handleAutosave = async (autosaveContent: Descendant[], autosaveMetadata: any) => {
-    if (!autosaveMetadata.title.trim() || !autosaveMetadata.slug.trim()) {
-      return;
-    }
+    if (!autosaveMetadata.title.trim() || !autosaveMetadata.slug.trim()) return;
 
     if (postId) {
       const res = await fetch(`/api/admin/posts/${postId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...autosaveMetadata,
-          content: autosaveContent
-        })
+        body: JSON.stringify({ ...autosaveMetadata, content: autosaveContent })
       });
-
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.error || 'Autosave failed');
-      }
+      if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Autosave failed'); }
     } else {
       const res = await fetch('/api/admin/posts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...autosaveMetadata,
-          content: autosaveContent
-        })
+        body: JSON.stringify({ ...autosaveMetadata, content: autosaveContent })
       });
-
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.error || 'Autosave failed');
-      }
-
+      if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Autosave failed'); }
       const { data } = await res.json();
       setPostId(data.id);
       localStorage.removeItem('new_post_draft');
@@ -184,45 +161,57 @@ export default function NewPostPage() {
   });
 
   return (
-    <div className="fixed inset-0 bg-neutral-50 dark:bg-neutral-950 flex flex-col">
-      <div className="flex-shrink-0 z-20 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 shadow-sm">
-        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
+    <div className="fixed inset-0 bg-[#0a0b0f] flex flex-col">
+      {/* Header */}
+      <div className="flex-shrink-0 z-20 bg-[#111318] border-b border-white/[0.06]">
+        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <button
                 onClick={() => router.back()}
-                className="flex-shrink-0"
+                className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-gray-400 hover:bg-white/[0.05] hover:text-gray-200 transition-all shrink-0"
               >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
-              </Button>
-              <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-neutral-100">
-                Post Editor
-              </h1>
+                <ArrowLeft className="h-4 w-4" />
+                <span className="hidden sm:inline">Back</span>
+              </button>
+              <div className="h-4 w-px bg-white/[0.08] shrink-0" />
+              <h1 className="text-sm font-semibold text-gray-200 truncate">New Post</h1>
+              {words > 0 && (
+                <div className="hidden sm:flex items-center gap-3 text-[11px] text-gray-600">
+                  <span>{words.toLocaleString()} words</span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {readTime} min read
+                  </span>
+                </div>
+              )}
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Autosave pill */}
               {autosave.isSaving && (
-                <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Saving...</span>
-                </div>
+                <span className="flex items-center gap-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 px-2.5 py-1 text-[11px] text-blue-400">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Saving…
+                </span>
               )}
-
-              {!autosave.isSaving && autosave.lastSaved && (
-                <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-                  <Save className="h-4 w-4" />
-                  <span>Saved {formatDistanceToNow(autosave.lastSaved, { addSuffix: true })}</span>
-                </div>
+              {!autosave.isSaving && autosave.lastSaved && !autosave.error && (
+                <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 text-[11px] text-emerald-400">
+                  <CheckCircle2 className="h-3 w-3" />
+                  {formatDistanceToNow(autosave.lastSaved, { addSuffix: true })}
+                </span>
               )}
-
               {autosave.error && (
-                <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
-                  <span>Autosave failed - will retry</span>
-                </div>
+                <span className="flex items-center gap-1.5 rounded-full bg-red-500/10 border border-red-500/20 px-2.5 py-1 text-[11px] text-red-400">
+                  <AlertCircle className="h-3 w-3" />
+                  Autosave failed
+                </span>
               )}
+
+              <Button onClick={handleSave} loading={saving} size="sm">
+                <Save className="h-3.5 w-3.5 mr-1.5" />
+                Save
+              </Button>
             </div>
           </div>
         </div>
@@ -246,10 +235,7 @@ export default function NewPostPage() {
                 onChange={setContent}
                 metadata={metadata as any}
                 onMetadataChange={(meta) =>
-                  setMetadata((prev) => ({
-                    ...prev,
-                    ...meta
-                  } as typeof metadata))
+                  setMetadata((prev) => ({ ...prev, ...meta } as typeof metadata))
                 }
                 className="flex-1"
               />

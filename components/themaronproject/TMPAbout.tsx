@@ -66,7 +66,7 @@ const TMPAbout = () => {
     <section
       role="banner"
       aria-label="About The Maron Project"
-      className="relative flex items-start bg-gray-950"
+      className="relative flex items-start bg-background"
     >
       <div className="pointer-events-none absolute inset-0">
         <Image
@@ -87,36 +87,36 @@ const TMPAbout = () => {
         variants={containerVariants}
         className="relative mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 pt-10 pb-14 sm:px-6 sm:pt-14 sm:pb-16 lg:px-8"
       >
-        <motion.div variants={titleVariants} className="section-panel max-w-3xl space-y-5 border-white/10 bg-slate-950/30 px-6 py-7 shadow-[0_20px_80px_-32px_rgba(15,23,42,0.9)] sm:px-8 sm:py-8">
-          <p className="text-xs font-mono uppercase tracking-widest text-rose-400/80">The Maron Project</p>
-          <h1 className="text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl">
+        <motion.div variants={titleVariants} className="section-panel max-w-3xl space-y-5 px-6 py-7 sm:px-8 sm:py-8">
+          <p className="text-xs font-mono uppercase tracking-widest text-rose-500/80 dark:text-rose-400/80">The Maron Project</p>
+          <h1 className="text-3xl font-bold leading-tight text-foreground sm:text-4xl lg:text-5xl">
             Real people.{' '}
-            <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-300 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-emerald-400 dark:from-blue-400 dark:via-purple-400 dark:to-emerald-300 bg-clip-text text-transparent">
               Real stories.
             </span>
           </h1>
-          <p className="max-w-2xl text-base leading-relaxed text-white/70">
+          <p className="max-w-2xl text-base leading-relaxed text-foreground/75">
             Crafted with care and shared with intention. We hold the mic with you, not for you, so your lived experience lands with honesty, nuance, and respect.
           </p>
         </motion.div>
 
         {tmpContent && (
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }} className="section-panel max-w-2xl space-y-4 border-white/10 bg-slate-950/26 px-6 py-6 sm:px-7">
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }} className="section-panel max-w-2xl space-y-4 px-6 py-6 sm:px-7">
             <div className="w-8 h-px bg-rose-500/60" />
             {tmpContent.split('\n').filter(p => p.trim()).slice(0, 2).map((paragraph: string, index: number) => (
-              <p key={index} className="text-base leading-relaxed text-white/75">
+              <p key={index} className="text-base leading-relaxed text-foreground/80">
                 {paragraph}
               </p>
             ))}
           </motion.div>
         )}
 
-        <motion.div variants={itemVariants} className="section-panel border-white/10 bg-slate-950/24 px-5 py-6 sm:px-6 sm:py-7">
+        <motion.div variants={itemVariants} className="section-panel px-5 py-6 sm:px-6 sm:py-7">
           <div className="grid gap-6 sm:grid-cols-3">
             {highlights.map((h) => (
               <div key={h.label} className="flex flex-col gap-2 border-l border-white/20 pl-4">
-                <p className="text-sm font-semibold text-white">{h.label}</p>
-                <p className="text-sm text-white/60">{h.description}</p>
+                <p className="text-sm font-semibold text-foreground">{h.label}</p>
+                <p className="text-sm text-muted-foreground">{h.description}</p>
               </div>
             ))}
           </div>

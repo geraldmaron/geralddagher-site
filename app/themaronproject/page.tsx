@@ -77,7 +77,7 @@ const TMPPage: FC = () => {
 
       <motion.div
         key="content"
-        className="relative z-10 flex flex-col gap-10 pb-12 pt-8 sm:gap-16 sm:pb-16 sm:pt-10 md:gap-20 md:pt-14 lg:gap-24 lg:pt-16"
+        className="relative z-10 flex flex-col gap-12 pb-12 pt-8 sm:gap-16 sm:pb-16 sm:pt-10 lg:gap-20 lg:pt-16"
         variants={fadeVariants}
         initial="initial"
         animate="animate"
@@ -88,7 +88,7 @@ const TMPPage: FC = () => {
         {submissions.length > 0 && (
           <section className="relative px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-7xl">
-              <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card shadow-xl shadow-blue-500/5">
+              <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card" style={{boxShadow: 'var(--shadow-xl)'}}>
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-blue-500/8 via-purple-500/8 to-emerald-400/6" />
                 <div className="relative">
                   <TMPYouTube submissions={submissions} />

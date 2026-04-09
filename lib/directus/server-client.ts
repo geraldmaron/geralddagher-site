@@ -22,18 +22,15 @@ export async function createDirectusServerClient(options?: { requireAuth?: boole
   const base = createDirectus(directusUrl).with(rest());
 
   if (options?.requireAuth === false) {
-    if (apiToken) {
-      return base.with(staticToken(apiToken));
-    }
+    // Use whatever auth is available; don't throw if neither exists
+    if (apiToken) return base.with(staticToken(apiToken));
+    if (sessionToken) return base.with(staticToken(sessionToken));
     return base;
   }
 
+  // requireAuth: true / undefined — only use session token (don't bleed API token into user-specific readMe calls)
   if (sessionToken) {
     return base.with(staticToken(sessionToken));
-  }
-
-  if (apiToken) {
-    return base.with(staticToken(apiToken));
   }
 
   return base;

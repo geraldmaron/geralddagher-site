@@ -6,9 +6,7 @@ export async function GET(request: NextRequest) {
     const user = await getServerUser();
 
     if (!user) {
-      return NextResponse.json({
-        user: null
-      }, { status: 401 });
+      return NextResponse.json({ user: null }, { status: 200 });
     }
 
     return NextResponse.json({
@@ -16,12 +14,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    return NextResponse.json(
-      {
-        user: null,
-        error: 'Authentication failed'
-      },
-      { status: 401 }
-    );
+    return NextResponse.json({ user: null }, { status: 200 });
   }
 }

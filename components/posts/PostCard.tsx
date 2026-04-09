@@ -282,13 +282,13 @@ export default function PostCard({
           role="article"
           aria-labelledby={`post-title-${post.id}`}
         >
-          <article className="bg-card rounded-xl overflow-hidden border border-border/60 hover:border-primary/30 transition-all duration-200 h-full flex shadow-sm hover:shadow-lg">
-            <div className="relative w-24 sm:w-40 md:w-48 flex-shrink-0 bg-muted">
+          <article className="bg-card rounded-xl overflow-hidden border border-border/60 hover:border-primary/30 transition-all duration-200 h-full flex shadow-sm hover:shadow-md">
+            <div className="relative w-20 sm:w-28 flex-shrink-0 bg-muted">
               <Image
                 src={imageUrl}
                 alt={post.title}
                 fill
-                sizes="(max-width: 640px) 96px, (max-width: 768px) 160px, 192px"
+                sizes="(max-width: 640px) 80px, 112px"
                 className={cn(
                   'object-cover transition-opacity duration-300',
                   imageLoaded ? 'opacity-100' : 'opacity-0'
@@ -310,8 +310,8 @@ export default function PostCard({
               )}
             </div>
 
-            <div className="p-5 flex-1 flex flex-col min-w-0">
-              <div className="flex items-start justify-between mb-3">
+            <div className="px-4 py-3 flex-1 flex flex-col min-w-0">
+              <div className="flex items-start justify-between mb-1.5">
                 <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
                   <time dateTime={displayDate.toISOString()}>{formattedDate}</time>
                   <span>•</span>
@@ -371,31 +371,24 @@ export default function PostCard({
 
               <h2
                 id={`post-title-${post.id}`}
-                className="text-base font-semibold text-foreground leading-tight line-clamp-1 mb-2 group-hover:text-primary transition-colors"
+                className="text-sm font-semibold text-foreground leading-tight line-clamp-1 mb-1 group-hover:text-primary transition-colors"
               >
                 {searchQuery ? highlightText(post.title, searchQuery) : post.title}
               </h2>
 
-              <div className="relative mb-3">
+              <div className="relative mb-2">
                 {searchQuery.trim() ? (
-                  <div className="prose prose-sm prose-gray dark:prose-invert max-w-none text-sm text-muted-foreground leading-relaxed line-clamp-2">
+                  <div className="text-xs text-muted-foreground leading-relaxed line-clamp-1">
                     {displayText}
                   </div>
                 ) : (
-                  <div className="prose prose-sm prose-gray dark:prose-invert max-w-none text-sm text-muted-foreground leading-relaxed">
-                    {post.excerpt ? (
-                      <p className="line-clamp-2">{post.excerpt}</p>
-                    ) : (
-                      <div className="max-h-20 overflow-hidden">
-                        <SlateRenderer content={previewContent as any} compact className="[&_p]:mb-2 [&_p]:text-sm [&_ul]:my-1 [&_ol]:my-1" />
-                        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-background to-transparent" />
-                      </div>
-                    )}
-                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed line-clamp-1">
+                    {post.excerpt || getPlainTextFromSlate(normalizedContent, 120)}
+                  </p>
                 )}
               </div>
 
-              <div className="flex items-center justify-between gap-3 pt-4 border-t border-border/60 mt-auto">
+              <div className="flex items-center justify-between gap-3 pt-2 border-t border-border/40 mt-auto">
                 <div className="flex min-w-0 items-center gap-2 overflow-hidden flex-nowrap h-8">
                   {authorName && (
                     <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary shrink-0">
@@ -417,9 +410,8 @@ export default function PostCard({
                   )}
                 </div>
 
-                <div className="flex items-center gap-1.5 text-sm font-medium text-foreground group-hover:gap-2 transition-all">
-                  <span>Read</span>
-                  <ArrowRight className="w-4 h-4" />
+                <div className="flex items-center text-muted-foreground group-hover:text-primary transition-colors">
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </div>
               </div>
             </div>

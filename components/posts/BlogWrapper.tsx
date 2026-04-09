@@ -189,8 +189,8 @@ export default function BlogWrapper({
 
   return (
     <div className="space-y-8">
-      <div className="section-panel p-5 sm:p-6 lg:p-8">
-        <div className="mb-6">
+      <div className="section-panel p-4 sm:p-5 lg:p-6">
+        <div className="mb-4">
           <div className="mb-5 flex flex-col gap-2 sm:mb-6">
             <p className="section-kicker">Editorial archive</p>
             <p className="section-lead max-w-2xl">
@@ -223,7 +223,7 @@ export default function BlogWrapper({
             )}
           </div>
 
-          <div className="flex flex-col items-start justify-between gap-4 border-b border-border/40 pb-4 mb-8 sm:flex-row sm:items-center">
+          <div className="flex flex-col items-start justify-between gap-4 border-b border-border/40 pb-4 mb-5 sm:flex-row sm:items-center">
             <div className="flex items-center gap-4 flex-wrap">
               <div className="rounded-full border border-border/60 bg-background/80 px-3 py-1.5 text-sm font-medium text-muted-foreground shadow-sm">
                 {isLoading ? 'Loading...' : `${totalPosts} post${totalPosts !== 1 ? 's' : ''}`}
@@ -316,7 +316,7 @@ export default function BlogWrapper({
                     ) : (
                       <div className="relative aspect-[4/3] md:aspect-auto bg-muted/40" />
                     )}
-                      <div className="flex flex-col justify-between bg-card/82 p-5 sm:p-8">
+                      <div className="flex flex-col justify-between bg-card/82 p-4 sm:p-6">
                       <div>
                         {featuredPost.category && (
                           <span className="text-xs font-mono font-semibold text-primary uppercase tracking-widest">

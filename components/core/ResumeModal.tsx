@@ -54,11 +54,11 @@ const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => {
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
 
       <div
-        className="relative z-10 flex h-full w-full md:max-w-4xl lg:max-w-6xl bg-white dark:bg-gray-900 rounded-none sm:rounded-xl shadow-2xl flex-col overflow-hidden"
+        className="relative z-10 flex h-full w-full md:max-w-4xl lg:max-w-6xl bg-card rounded-none sm:rounded-xl shadow-[var(--shadow-xl)] flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-800">
-          <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 dark:text-white">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-border">
+          <h2 className="text-base sm:text-lg md:text-xl font-semibold text-foreground">
             Resume
           </h2>
           <div className="flex items-center gap-2">
@@ -73,10 +73,10 @@ const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => {
             </Button>
             <button
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               aria-label="Close resume viewer"
             >
-              <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+              <X className="h-5 w-5" />
             </button>
           </div>
         </div>
@@ -84,9 +84,9 @@ const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => {
         {isDesktop ? (
           <div className="relative flex-1 min-h-0">
             {iframeLoading && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white dark:bg-gray-900">
-                <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-                <p className="text-sm text-gray-500 dark:text-gray-400">Loading résumé…</p>
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-card">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">Loading résumé…</p>
               </div>
             )}
             <iframe
@@ -98,7 +98,7 @@ const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => {
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 space-y-4">
-            <p className="text-sm text-gray-700 dark:text-gray-200">
+            <p className="text-sm text-foreground">
               For the best experience on mobile, open the résumé in a new tab or download it.
             </p>
             <div className="flex flex-col gap-3">

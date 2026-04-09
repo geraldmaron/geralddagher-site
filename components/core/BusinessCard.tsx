@@ -159,12 +159,12 @@ const BusinessCard: React.FC<BusinessCardProps> = ({
   return (
     <div className="relative w-full max-w-3xl mx-auto">
       <div className="absolute inset-0 -z-10 bg-gradient-to-br from-blue-500/10 via-emerald-500/10 to-amber-500/10 blur-3xl" />
-      <div className="relative overflow-hidden rounded-2xl border border-neutral-200/60 dark:border-neutral-800/80 bg-white/80 dark:bg-neutral-900/80 backdrop-blur shadow-[0_20px_80px_-24px_rgba(0,0,0,0.35)]">
-        <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
+      <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-card/90 backdrop-blur shadow-[var(--shadow-xl)]">
+        <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
         {onClose && (
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 z-10 p-2 rounded-lg text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100/60 dark:hover:bg-neutral-800/70 transition-colors"
+            className="absolute top-4 right-4 z-10 p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="Close"
           >
             <X className="w-4 h-4" />
@@ -175,7 +175,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({
           <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
             <div className="relative shrink-0">
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-500/30 via-indigo-500/20 to-emerald-400/30 blur-md opacity-60" />
-              <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden border border-white/60 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-800 shadow-[0_10px_40px_-18px_rgba(0,0,0,0.5)]">
+              <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden border border-border/50 bg-muted shadow-[var(--shadow-lg)]">
                 <Image
                   src="/Dagher_Headshot_3.png"
                   alt={`${profile.name} headshot`}
@@ -194,19 +194,19 @@ const BusinessCard: React.FC<BusinessCardProps> = ({
             <div className="flex-1 space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                 <div className="space-y-1">
-                  <p className="text-xs uppercase tracking-[0.18em] text-blue-600 dark:text-blue-400 font-semibold">
+                  <p className="text-xs uppercase tracking-[0.18em] text-primary font-semibold">
                     Product Leadership | AI/Platform Strategy
                   </p>
-                  <h1 className="text-2xl md:text-3xl font-semibold text-neutral-900 dark:text-white leading-tight">
+                  <h1 className="text-2xl md:text-3xl font-semibold text-foreground leading-tight">
                     {profile.name}
                   </h1>
-                  <div className="flex flex-wrap items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300">
+                  <div className="flex flex-wrap items-center gap-2 text-sm text-foreground/80">
                     <Building2 className="w-4 h-4" />
                     <span className="font-medium">{profile.title}</span>
-                    <span className="text-neutral-300 dark:text-neutral-700">&middot;</span>
-                    <span className="text-neutral-700 dark:text-neutral-300">{profile.company}</span>
+                    <span className="text-border">&middot;</span>
+                    <span>{profile.company}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <MapPin className="w-4 h-4" />
                     <span>{profile.location}</span>
                   </div>
@@ -218,7 +218,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({
                       size="xs"
                       variant="subtle"
                       color="neutral"
-                      className="border border-neutral-200/70 dark:border-neutral-700 bg-neutral-100/80 dark:bg-neutral-800/80 text-neutral-700 dark:text-neutral-200 tracking-wide"
+                      className="border border-border/60 bg-muted text-muted-foreground tracking-wide"
                     >
                       {keyword}
                     </Chip>
@@ -233,12 +233,12 @@ const BusinessCard: React.FC<BusinessCardProps> = ({
                     href={href || "#"}
                     target={href?.startsWith("http") ? "_blank" : undefined}
                     rel={href?.startsWith("http") ? "noopener noreferrer" : undefined}
-                    className="group flex items-center gap-3 rounded-xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/60 dark:bg-neutral-900/60 px-3 py-2.5 shadow-sm hover:border-blue-500/60 dark:hover:border-blue-400/60 hover:-translate-y-0.5 transition-all"
+                    className="group flex items-center gap-3 rounded-xl border border-border/60 bg-background/60 px-3 py-2.5 shadow-sm hover:border-primary/40 hover:-translate-y-0.5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-950/40 transition-colors">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-foreground group-hover:text-primary group-hover:bg-primary/10 transition-colors">
                       <Icon className="w-4 h-4" />
                     </span>
-                    <span className="text-sm text-neutral-700 dark:text-neutral-200">
+                    <span className="text-sm text-foreground">
                       {label}
                     </span>
                   </Link>
@@ -248,26 +248,26 @@ const BusinessCard: React.FC<BusinessCardProps> = ({
           </div>
 
           <div className="space-y-4">
-            <p className="text-sm leading-relaxed text-neutral-700 dark:text-neutral-200">
+            <p className="text-sm leading-relaxed text-foreground">
               {profile.about.businessCard}
             </p>
             {profile.about.professional && !hasDuplicateText && (
-              <p className="text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
+              <p className="text-sm leading-relaxed text-muted-foreground">
                 {profile.about.professional}
               </p>
             )}
           </div>
 
           {profile.descriptions?.length ? (
-            <div className="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-neutral-50/70 dark:bg-neutral-900/60 p-4 space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500 dark:text-neutral-400">
+            <div className="rounded-2xl border border-border/60 bg-muted/40 p-4 space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                 Focus areas
               </p>
               <div className="grid sm:grid-cols-2 gap-3">
                 {profile.descriptions.slice(0, 4).map((description) => (
                   <div
                     key={description}
-                    className="flex items-start gap-2 text-sm text-neutral-700 dark:text-neutral-200"
+                    className="flex items-start gap-2 text-sm text-foreground"
                   >
                     <span className="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500" />
                     <span>{description}</span>
@@ -278,18 +278,18 @@ const BusinessCard: React.FC<BusinessCardProps> = ({
           ) : null}
 
           {personalDetails.length ? (
-            <div className="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/70 dark:bg-neutral-900/60 p-4 space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500 dark:text-neutral-400">
+            <div className="rounded-2xl border border-border/60 bg-muted/40 p-4 space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                 Personal
               </p>
               <div className="grid grid-cols-2 gap-2">
                 {personalDetails.map(({ label, value }) => (
                   <div
                     key={label}
-                    className="px-3 py-2 rounded-lg bg-white/80 dark:bg-gray-900/80 border border-gray-100 dark:border-gray-700"
+                    className="px-3 py-2 rounded-lg bg-card/80 border border-border/50"
                   >
-                    <div className="text-xs font-medium text-gray-500 dark:text-gray-500">{label}</div>
-                    <div className="text-xs text-gray-900 dark:text-white mt-0.5">{value}</div>
+                    <div className="text-xs font-medium text-muted-foreground">{label}</div>
+                    <div className="text-xs text-foreground mt-0.5">{value}</div>
                   </div>
                 ))}
               </div>
@@ -297,14 +297,14 @@ const BusinessCard: React.FC<BusinessCardProps> = ({
           ) : null}
 
           {socialLinks.length > 0 && (
-            <div className="flex flex-wrap gap-2 border border-dashed border-neutral-200/80 dark:border-neutral-800/80 rounded-xl p-3 bg-white/50 dark:bg-neutral-900/60">
+            <div className="flex flex-wrap gap-2 border border-dashed border-border/60 rounded-xl p-3 bg-muted/30">
               {socialLinks.map(({ key, icon: Icon, label, href }) => (
                 <Link
                   key={key}
                   href={href!}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-neutral-600 dark:text-neutral-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/70 dark:hover:bg-blue-950/40 border border-transparent hover:border-blue-200/80 dark:hover:border-blue-800/80 transition-all"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/8 border border-transparent hover:border-primary/20 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   title={label}
                 >
                   <Icon className="w-4 h-4" />
@@ -317,21 +317,21 @@ const BusinessCard: React.FC<BusinessCardProps> = ({
           <div className="flex flex-col md:flex-row gap-3 pt-2">
             <button
               onClick={handleVCard}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 px-4 py-3 text-sm font-semibold shadow-sm hover:shadow-md transition-all"
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-foreground text-background px-4 py-3 text-sm font-semibold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {saving ? <Download className="w-4 h-4 animate-pulse" /> : <Download className="w-4 h-4" />}
               Save contact
             </button>
             <button
               onClick={() => setIsResumeModalOpen(true)}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/70 dark:bg-neutral-900/70 px-4 py-3 text-sm font-semibold text-neutral-800 dark:text-neutral-200 hover:border-blue-400/60 hover:-translate-y-0.5 transition-all"
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-border/60 bg-card/70 px-4 py-3 text-sm font-semibold text-foreground hover:border-primary/40 hover:-translate-y-0.5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <FileText className="w-4 h-4" />
               Resume
             </button>
             <button
               onClick={handleCopy}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/70 dark:bg-neutral-900/70 px-4 py-3 text-sm font-semibold text-neutral-700 dark:text-neutral-200 hover:border-blue-400/60 hover:-translate-y-0.5 transition-all"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-border/60 bg-card/70 px-4 py-3 text-sm font-semibold text-foreground hover:border-primary/40 hover:-translate-y-0.5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               aria-label="Copy contact information"
             >
               {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
